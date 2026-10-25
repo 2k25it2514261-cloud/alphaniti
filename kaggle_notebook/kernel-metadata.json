@@ -1,0 +1,20 @@
+{
+  "id": "ayushdixit1/alphaniti-v25-pipeline",
+  "title": "AlphaNiti v25 Pipeline",
+  "code_file": "alphaniti_v25_pipeline.ipynb",
+  "language": "python",
+  "kernel_type": "notebook",
+  "is_private": "true",
+  "enable_gpu": "false",
+  "enable_tpu": "false",
+  "enable_internet": "true",
+  "dataset_sources": [
+    "timontunes/nse-india-adjusted-equity-panel",
+    "sameerprogrammer/detailed-financial-data-of-4456-nse-and-bse-company",
+    "debashis74017/stock-market-index-data-india-1990-2022",
+    "debashis74017/algo-trading-data-nifty-100-data-with-indicators"
+  ],
+  "competition_sources": [],
+  "kernel_sources": [],
+  "model_sources": []
+}
