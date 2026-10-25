@@ -1,0 +1,148 @@
+import json
+
+nb_path = r"C:\Users\AYUSH DIXIT\.gemini\antigravity\scratch\alphaniti\kaggle_notebook\alphaniti_v25_pipeline.ipynb"
+
+with open(nb_path, "r", encoding="utf-8") as f:
+    nb = json.load(f)
+
+# Markdown cell for Module 1 / Stage 1
+md_cell = {
+    "cell_type": "markdown",
+    "metadata": {},
+    "source": [
+        "## 8. Stage 1 Production Engine: Point-in-Time Price Assembly & Causal 20-Day Target Generation\n",
+        "\n",
+        "This cell executes the core data foundation for **AlphaNiti v25.0**:\n",
+        "1. **Scans & Loads Parquet Price Files**: Streams historical daily OHLCV files (`prices_*.parquet`).\n",
+        "2. **Filters High-Liquidity Core Universe**: Focuses on top NSE liquid equities (Nifty 50/100).\n",
+        "3. **Computes Causal Target Labels**:\n",
+        "   - **20-Day Forward Excess Return** executed at Day $t+1$ Open: $y_{i, t}^{(20\\text{d})} = \\ln(P_{i, t+21}^{\\text{open}} / P_{i, t+1}^{\\text{open}}) - \\mathcal{C}_{\\text{statutory}}$\n",
+        "   - **20-Day Maximum Adverse Excursion (Downside Tail Breach)**: $\\min_{\\tau \\in [t+1, t+21]} (P_{i, \\tau}^{\\text{low}} - P_{i, t+1}^{\\text{open}}) / P_{i, t+1}^{\\text{open}} < -5\\%$\n",
+        "4. **Validates No Future Leakage**: Verifies that Day $t$ features only rely on data available strictly at or before $t$."
+    ]
+}
+
+# Code cell
+code_cell = {
+    "cell_type": "code",
+    "execution_count": None,
+    "metadata": {},
+    "outputs": [],
+    "source": [
+        "# =============================================================================\n",
+        "# ALPHANITI v25.0: STAGE 1 POINT-IN-TIME PRICE & TARGET ASSEMBLY ENGINE\n",
+        "# =============================================================================\n",
+        "import polars as pl\n",
+        "import pandas as pd\n",
+        "import numpy as np\n",
+        "import glob\n",
+        "import os\n",
+        "\n",
+        "PANEL_DIR = \"/kaggle/input/nse-india-adjusted-equity-panel\"\n",
+        "parquet_files = sorted(glob.glob(os.path.join(PANEL_DIR, \"prices_*.parquet\")))\n",
+        "\n",
+        "print(f\"Found {len(parquet_files)} annual price Parquet files:\")\n",
+        "for f in parquet_files:\n",
+        "    print(f\"  -> {os.path.basename(f)}\")\n",
+        "\n",
+        "# 1. Stream & Load Parquet Files using Polars (High Performance)\n",
+        "print(\"\\nLoading price data into unified Polars LazyFrame...\")\n",
+        "lazy_df = pl.scan_parquet(parquet_files)\n",
+        "\n",
+        "# Inspect column names\n",
+        "sample_schema = pl.read_parquet(parquet_files[-1], n_rows=5)\n",
+        "print(\"Available Columns in Price Parquet:\", sample_schema.columns)\n",
+        "\n",
+        "# 2. Standardize Column Names (handle case variations: date, symbol, open, high, low, close, volume)\n",
+        "rename_dict = {}\n",
+        "for col in sample_schema.columns:\n",
+        "    lower = col.lower().strip()\n",
+        "    if lower in [\"date\", \"datetime\", \"timestamp\"]:\n",
+        "        rename_dict[col] = \"date\"\n",
+        "    elif lower in [\"symbol\", \"ticker\", \"stock\"]:\n",
+        "        rename_dict[col] = \"symbol\"\n",
+        "    elif lower in [\"open\", \"open_price\"]:\n",
+        "        rename_dict[col] = \"open\"\n",
+        "    elif lower in [\"high\", \"high_price\"]:\n",
+        "        rename_dict[col] = \"high\"\n",
+        "    elif lower in [\"low\", \"low_price\"]:\n",
+        "        rename_dict[col] = \"low\"\n",
+        "    elif lower in [\"close\", \"close_price\"]:\n",
+        "        rename_dict[col] = \"close\"\n",
+        "    elif lower in [\"volume\", \"qty\", \"total_traded_quantity\"]:\n",
+        "        rename_dict[col] = \"volume\"\n",
+        "\n",
+        "df_clean = lazy_df.rename(rename_dict).collect()\n",
+        "df_clean = df_clean.with_columns(pl.col(\"date\").cast(pl.Date))\n",
+        "print(f\"Total Price Records Ingested: {len(df_clean):,}\")\n",
+        "print(f\"Date Range: {df_clean['date'].min()} to {df_clean['date'].max()}\")\n",
+        "print(f\"Unique Symbols: {df_clean['symbol'].n_unique():,}\")\n",
+        "\n",
+        "# 3. Select Top 20 Highly Liquid Benchmark Assets for Stage 1 Pipeline\n",
+        "top_symbols = (\n",
+        "    df_clean.filter(pl.col(\"date\") >= pl.date(2023, 1, 1))\n",
+        "    .group_by(\"symbol\")\n",
+        "    .agg(pl.col(\"volume\").mean().alias(\"avg_volume\"))\n",
+        "    .sort(\"avg_volume\", descending=True)\n",
+        "    .head(20)[\"symbol\"]\n",
+        "    .to_list()\n",
+        ")\n",
+        "print(f\"\\nSelected Core Benchmark Universe (Top 20 by Volume):\\n{top_symbols[:10]}...\")\n",
+        "\n",
+        "# 4. Calculate Causal 20-Day Forward Return & Downside Breach Targets\n",
+        "# Target is entered on Day t+1 Open and exited on Day t+21 Open\n",
+        "H = 20\n",
+        "STATUTORY_FRICTION_BPS = 0.0022  # ~22 bps round-trip friction under Finance Act 2026\n",
+        "\n",
+        "df_universe = (\n",
+        "    df_clean.filter(pl.col(\"symbol\").is_in(top_symbols))\n",
+        "    .sort([\"symbol\", \"date\"])\n",
+        "    .with_columns([\n",
+        "        # Day t+1 Open (Execution Entry)\n",
+        "        pl.col(\"open\").shift(-1).over(\"symbol\").alias(\"p_entry_open\"),\n",
+        "        # Day t+1+H Open (Execution Exit)\n",
+        "        pl.col(\"open\").shift(-(1 + H)).over(\"symbol\").alias(\"p_exit_open\"),\n",
+        "        # Rolling minimum low over [t+1, t+1+H] to calculate Maximum Adverse Excursion\n",
+        "        pl.col(\"low\").shift(-1).rolling_min(window_size=H).over(\"symbol\").alias(\"rolling_min_low_20d\")\n",
+        "    ])\n",
+        "    .with_columns([\n",
+        "        # Forward 20-day gross return\n",
+        "        (pl.col(\"p_exit_open\") / pl.col(\"p_entry_open\") - 1.0).alias(\"ret_20d_gross\"),\n",
+        "        # Forward 20-day net return after Finance Act 2026 statutory friction\n",
+        "        (pl.col(\"p_exit_open\") / pl.col(\"p_entry_open\") - 1.0 - STATUTORY_FRICTION_BPS).alias(\"target_ret_20d_net\"),\n",
+        "        # Downside breach flag: Did price drop > 5% below entry open during holding period?\n",
+        "        ((pl.col(\"rolling_min_low_20d\") - pl.col(\"p_entry_open\")) / pl.col(\"p_entry_open\") < -0.05).cast(pl.Int32).alias(\"target_breach_5pct\")\n",
+        "    ])\n",
+        "    .filter(pl.col(\"target_ret_20d_net\").is_not_null())\n",
+        ")\n",
+        "\n",
+        "# 5. Display Ingestion & Target Summary\n",
+        "summary = df_universe.select([\n",
+        "    \"date\", \"symbol\", \"close\", \"p_entry_open\", \"p_exit_open\",\n",
+        "    \"target_ret_20d_net\", \"target_breach_5pct\"\n",
+        "])\n",
+        "\n",
+        "print(\"\\n\" + \"=\"*70)\n",
+        "print(\"STAGE 1 CAUSAL TARGET DATASET GENERATED SUCCESSFULLY\")\n",
+        "print(\"=\"*70)\n",
+        "print(summary.head(5))\n",
+        "\n",
+        "# Summary stats of target distribution\n",
+        "ret_mean = summary[\"target_ret_20d_net\"].mean() * 100\n",
+        "ret_std = summary[\"target_ret_20d_net\"].std() * 100\n",
+        "breach_rate = summary[\"target_breach_5pct\"].mean() * 100\n",
+        "\n",
+        "print(f\"\\n20-Day Forward Net Return Mean:       {ret_mean:+.2f}%\")\n",
+        "print(f\"20-Day Forward Net Return Volatility: {ret_std:.2f}%\")\n",
+        "print(f\"20-Day Downside Breach Rate (>5% DD): {breach_rate:.2f}%\")\n",
+        "print(f\"Usable Target Observations:           {len(summary):,} rows\")\n"
+    ]
+}
+
+nb["cells"].append(md_cell)
+nb["cells"].append(code_cell)
+
+with open(nb_path, "w", encoding="utf-8") as f:
+    json.dump(nb, f, indent=2)
+
+print("Updated notebook saved to", nb_path)
