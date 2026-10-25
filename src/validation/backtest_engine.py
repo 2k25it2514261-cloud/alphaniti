@@ -36,12 +36,14 @@ class AlphaNitiBacktestEngine:
         n_factors: int = 3,
         confidence_alpha: float = 0.95,
         max_asset_weight: float = 0.20,
+        adaptive_cash_regime: bool = True,
     ):
         self.initial_capital = initial_capital_inr
         self.rebalance_interval = rebalance_interval_days
         self.n_factors = n_factors
         self.alpha = confidence_alpha
         self.max_weight = max_asset_weight
+        self.adaptive_cash_regime = adaptive_cash_regime
 
         self.cost_model = IndianStatutoryCostModel()
         self.ledger = FiveBucketBalanceSheet(initial_capital_inr=initial_capital_inr)
@@ -121,30 +123,35 @@ class AlphaNitiBacktestEngine:
                             total_statutory_charges += cost
                             self.ledger.fill_sell_order(sym, current_qty, p, cost)
 
-                    # Solve discrete integer portfolio with Branch-and-Bound
-                    budget_for_alloc = self.ledger.get_buying_power()
-                    if budget_for_alloc > 10_000:
-                        cert = self.sizer.solve(
-                            prices=price_vec,
-                            expected_returns=mu_horizon,
-                            scenarios=scenarios,
-                            cash_budget=budget_for_alloc * 0.98,  # Leave 2% buffer for fees
-                            nav=current_nav,
-                            asset_names=valid_symbols,
-                        )
+                    # Adaptive Regime Switch Gate:
+                    # If expected market drift is negative, preserve 100% in settled cash W_settled
+                    is_bearish_regime = self.adaptive_cash_regime and (np.mean(mu_horizon) < 0.0 or np.median(mu_horizon) < 0.0)
 
-                        # Dispatch and fill approved integer orders
-                        for sym, target_shares in cert["solution_vector"].items():
-                            if target_shares > 0:
-                                p = current_prices[sym]
-                                est_fees = self.cost_model.compute_cost(shares=target_shares, price=p, is_buy=True)
-                                ord_id = f"ORD_{t_idx}_{sym}"
-                                try:
-                                    self.ledger.dispatch_buy_order(ord_id, sym, target_shares, p, est_fees)
-                                    self.ledger.fill_buy_order(ord_id, p, est_fees)
-                                    total_statutory_charges += est_fees
-                                except Exception:
-                                    pass  # Handled safely by ledger solvency gates
+                    if not is_bearish_regime:
+                        # Solve discrete integer portfolio with Branch-and-Bound
+                        budget_for_alloc = self.ledger.get_buying_power()
+                        if budget_for_alloc > 10_000:
+                            cert = self.sizer.solve(
+                                prices=price_vec,
+                                expected_returns=mu_horizon,
+                                scenarios=scenarios,
+                                cash_budget=budget_for_alloc * 0.98,  # Leave 2% buffer for fees
+                                nav=current_nav,
+                                asset_names=valid_symbols,
+                            )
+
+                            # Dispatch and fill approved integer orders
+                            for sym, target_shares in cert["solution_vector"].items():
+                                if target_shares > 0:
+                                    p = current_prices[sym]
+                                    est_fees = self.cost_model.compute_cost(shares=target_shares, price=p, is_buy=True)
+                                    ord_id = f"ORD_{t_idx}_{sym}"
+                                    try:
+                                        self.ledger.dispatch_buy_order(ord_id, sym, target_shares, p, est_fees)
+                                        self.ledger.fill_buy_order(ord_id, p, est_fees)
+                                        total_statutory_charges += est_fees
+                                    except Exception:
+                                        pass  # Handled safely by ledger solvency gates
 
             # Compute end-of-day NAV
             nav_t = self.ledger.get_nav(current_prices)
