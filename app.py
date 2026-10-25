@@ -1013,7 +1013,7 @@ def ask_ml_brain(req: AskBrainRequest):
             )
 
         reply_md = (
-            f"### 🧠 AlphaNiti v25.0 Live ML Brain — Multi-Stock Comparison\n"
+            f"### AlphaNiti v25.0 — Multi-Stock Comparison\n"
             f"**Data Feed:** `{STATE['data_source']}` (Updated `{STATE['last_updated']}`)\n\n"
             f"#### 1. Live Evidential Ensemble Telemetry ({', '.join(s['symbol'] for s in resolved_signals)})\n"
             + "\n".join(comp_lines) + "\n\n"
@@ -1025,7 +1025,7 @@ def ask_ml_brain(req: AskBrainRequest):
                 if is_cash_gate and not req.force_risk_on
                 else f"Equity deployment is active."
             )
-            + f"\n\n#### 3. ML Brain Winner Verdict\n"
+            + f"\n\n#### 3. Risk-Adjusted Selection\n"
             f"**{best_sig['symbol']}.NS** ranks highest on our risk-adjusted Evidential Sharpe metric (`{best_sig['sharpe_score']:+.3f}`) with predicted 20D return **{_fmt_sign(best_sig['predicted_return_pct'])}%** and crash risk **{best_sig['drawdown_crash_prob']*100:.1f}%**."
         )
 
@@ -1067,7 +1067,7 @@ def ask_ml_brain(req: AskBrainRequest):
             )
 
         reply_md = (
-            f"### 🧠 AlphaNiti v25.0 Live ML Brain — Macro Regime & Portfolio Synthesis\n"
+            f"### AlphaNiti v25.0 — Macro Regime & Portfolio Synthesis\n"
             f"**Live Feed:** `{STATE['data_source']}` | **Capital Analyzed:** `₹{cap_inr:,.2f}`\n\n"
             f"#### 1. Live Cross-Sectional Market Regime (`12 NSE Large-Caps`)\n"
             f"• **Market Expected 20D Drift ($\\gamma_{{\\text{{market}}}}$):** `{mkt_drift_pct:+.2f}%`\n"
@@ -1078,7 +1078,7 @@ def ask_ml_brain(req: AskBrainRequest):
                 if is_cash_gate
                 else "Bullish/Neutral risk regime confirmed; full Branch-and-Bound equity allocation enabled."
             )
-            + f"\n\n#### 2. Top 3 Stocks Ranked by Live Evidential Neural Ensemble\n"
+            + f"\n\n#### 2. Top 3 Equities Ranked by Evidential Ensemble\n"
             + "\n".join(top_lines)
             + f"\n\n#### 3. Branch-and-Bound Integer Portfolio Allocation (`₹{cap_inr:,.0f}`)\n"
             + ("\n".join(alloc_lines) if alloc_lines else "• `0 shares allocated` (100% Settled Cash Preservation active).")
@@ -1137,12 +1137,12 @@ def ask_ml_brain(req: AskBrainRequest):
     )
 
     verdict_banner = (
-        f"🟢 **ML BRAIN VERDICT: BUY / ACCUMULATE {focus_sym}.NS** (Positive Evidential Drift `{sig['predicted_return_pct']:+.2f}%` & Controlled Tail Risk `{sig['drawdown_crash_prob']*100:.1f}%`)"
+        f"**RECOMMENDATION: BUY / ACCUMULATE {focus_sym}.NS** — Positive Evidential Drift (`{sig['predicted_return_pct']:+.2f}%`) & Controlled Tail Risk (`{sig['drawdown_crash_prob']*100:.1f}%`)."
         if sig["predicted_return_pct"] > 0 and sig["drawdown_crash_prob"] < 0.38 and not is_cash_gate
         else (
-            f"🛡️ **ML BRAIN VERDICT: HOLD SETTLED CASH ON {focus_sym}.NS** — Stock signal is `{sig['predicted_return_pct']:+.2f}%` (Crash prob `{sig['drawdown_crash_prob']*100:.1f}%`), and Macro Regime Gate is in **CASH_PRESERVATION** (`p_breach = {mkt_crash_pct:.1f}% > {req.crash_threshold*100:.1f}%`)."
+            f"**RECOMMENDATION: HOLD SETTLED CASH ON {focus_sym}.NS** — Stock 20D drift is `{sig['predicted_return_pct']:+.2f}%` (Crash prob `{sig['drawdown_crash_prob']*100:.1f}%`), while the Macro Regime Gate is in **CASH_PRESERVATION** (`p_breach = {mkt_crash_pct:.1f}% > {req.crash_threshold*100:.1f}%`)."
             if is_cash_gate
-            else f"🔴 **ML BRAIN VERDICT: AVOID / HOLD CASH ON {focus_sym}.NS** — Evidential 20D Drift is `{sig['predicted_return_pct']:+.2f}%` with `{sig['drawdown_crash_prob']*100:.1f}%` tail crash risk."
+            else f"**RECOMMENDATION: AVOID / HOLD CASH ON {focus_sym}.NS** — Evidential 20D Drift is `{sig['predicted_return_pct']:+.2f}%` with `{sig['drawdown_crash_prob']*100:.1f}%` tail crash risk."
         )
     )
 
@@ -1150,7 +1150,7 @@ def ask_ml_brain(req: AskBrainRequest):
     fees = ord_info["fee_breakdown"]
 
     reply_md = (
-        f"### 🧠 AlphaNiti v25.0 ML Brain Analysis — **{focus_sym}.NS** ({sig['sector']})\n"
+        f"### AlphaNiti v25.0 — **{focus_sym}.NS** ({sig['sector']})\n"
         f"{verdict_banner}\n\n"
         f"#### 1. Live NSE Market & 20-Feature Causal Tensor (`as of {sig['date']}`)\n"
         f"• **Live Spot Price:** `₹{sig['close_price']:,.2f}` (`{sig['change_1d_pct']:+.2f}%` 1D | `{sig['change_20d_pct']:+.2f}%` 20D) | **Volume:** `{sig['volume']:,}`\n"

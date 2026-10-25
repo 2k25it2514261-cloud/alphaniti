@@ -3,64 +3,55 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>AlphaNiti v25.0 — Claude-Style Institutional Trading AI & Live ML Brain</title>
-  <!-- TradingView Lightweight Charts v4.2.0 for the Claude Artifact Panel -->
+  <title>AlphaNiti — Quantitative Research & Execution</title>
   <script src="https://unpkg.com/lightweight-charts@4.2.0/dist/lightweight-charts.standalone.production.js"></script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
   <style>
     :root[data-theme="dark"] {
-      --bg-main: #191918;
-      --bg-sidebar: #121211;
-      --bg-elevated: #232220;
-      --bg-composer: #262522;
-      --bg-hover: #2E2D29;
-      --bg-artifact: #1E1E1C;
-      --bg-user-msg: #2C2B28;
-      --border-subtle: #32312D;
-      --border-strong: #45433E;
-      --text-primary: #ECEAE4;
-      --text-secondary: #A6A39B;
-      --text-muted: #78756E;
-      --claude-accent: #D97757;
-      --claude-accent-hover: #C66445;
-      --claude-accent-soft: rgba(217, 119, 87, 0.14);
-      --green: #2E9B78;
-      --green-soft: rgba(46, 155, 120, 0.15);
-      --red: #E05252;
-      --red-soft: rgba(224, 82, 82, 0.15);
-      --amber: #D99B26;
-      --amber-soft: rgba(217, 155, 38, 0.15);
-      --purple: #B07CE8;
-      --blue: #5B9BD5;
-      --shadow-card: 0 8px 28px rgba(0, 0, 0, 0.38);
+      --bg-main: #141413;
+      --bg-sidebar: #0F0F0E;
+      --bg-elevated: #1C1C1A;
+      --bg-composer: #1E1E1C;
+      --bg-hover: #252522;
+      --bg-artifact: #171716;
+      --bg-user-msg: #232320;
+      --border-subtle: #292826;
+      --border-strong: #3A3935;
+      --text-primary: #EDEDEB;
+      --text-secondary: #A19F99;
+      --text-muted: #6E6C66;
+      --accent: #C96A4B;
+      --accent-hover: #B55B3D;
+      --positive: #2E9B78;
+      --positive-bg: rgba(46, 155, 120, 0.11);
+      --negative: #D65252;
+      --negative-bg: rgba(214, 82, 82, 0.11);
+      --warning: #C89128;
+      --warning-bg: rgba(200, 145, 40, 0.11);
     }
 
-    :root[data-theme="cream"] {
-      --bg-main: #FAF9F5;
-      --bg-sidebar: #F0EEE6;
+    :root[data-theme="light"] {
+      --bg-main: #FAF9F6;
+      --bg-sidebar: #F2F0EA;
       --bg-elevated: #FFFFFF;
       --bg-composer: #FFFFFF;
-      --bg-hover: #E8E5DC;
-      --bg-artifact: #F5F3EC;
-      --bg-user-msg: #EFECE4;
-      --border-subtle: #E2DFD5;
-      --border-strong: #C9C5B8;
-      --text-primary: #1F1E1D;
-      --text-secondary: #5C5A54;
-      --text-muted: #8C887F;
-      --claude-accent: #D97757;
-      --claude-accent-hover: #C06040;
-      --claude-accent-soft: rgba(217, 119, 87, 0.12);
-      --green: #18794E;
-      --green-soft: rgba(24, 121, 78, 0.12);
-      --red: #C93B3B;
-      --red-soft: rgba(201, 59, 59, 0.12);
-      --amber: #B47814;
-      --amber-soft: rgba(180, 120, 20, 0.12);
-      --purple: #7C3AED;
-      --blue: #2563EB;
-      --shadow-card: 0 6px 24px rgba(20, 20, 19, 0.08);
+      --bg-hover: #EAE7DF;
+      --bg-artifact: #F5F3EE;
+      --bg-user-msg: #EFECE5;
+      --border-subtle: #E3E0D8;
+      --border-strong: #C9C5B9;
+      --text-primary: #1A1918;
+      --text-secondary: #5A5852;
+      --text-muted: #8C8881;
+      --accent: #B85C3E;
+      --accent-hover: #A04D31;
+      --positive: #18794E;
+      --positive-bg: rgba(24, 121, 78, 0.09);
+      --negative: #C43B3B;
+      --negative-bg: rgba(196, 59, 59, 0.09);
+      --warning: #9F6B12;
+      --warning-bg: rgba(159, 107, 18, 0.09);
     }
 
     * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -72,7 +63,7 @@
       width: 100vw;
       overflow: hidden;
       display: flex;
-      font-size: 14px;
+      font-size: 13.5px;
       line-height: 1.6;
       -webkit-font-smoothing: antialiased;
     }
@@ -80,24 +71,24 @@
     .serif { font-family: 'Instrument Serif', Georgia, serif; font-weight: 400; }
     .mono { font-family: 'JetBrains Mono', monospace; font-variant-numeric: tabular-nums; }
 
-    /* ================= LEFT CLAUDE SIDEBAR ================= */
-    .claude-sidebar {
-      width: 272px;
+    /* ================= LEFT SIDEBAR ================= */
+    .sidebar {
+      width: 264px;
       background: var(--bg-sidebar);
       border-right: 1px solid var(--border-subtle);
       display: flex;
       flex-direction: column;
       flex-shrink: 0;
-      transition: margin-left 0.22s ease;
+      transition: margin-left 0.2s ease;
       z-index: 30;
     }
-    .claude-sidebar.collapsed { margin-left: -272px; }
+    .sidebar.collapsed { margin-left: -264px; }
 
     .sidebar-top {
-      padding: 16px 14px 10px 14px;
+      padding: 18px 16px 12px 16px;
       display: flex;
       flex-direction: column;
-      gap: 12px;
+      gap: 14px;
     }
     .brand-row {
       display: flex;
@@ -105,57 +96,46 @@
       justify-content: space-between;
     }
     .brand-title {
-      display: flex;
-      align-items: center;
-      gap: 9px;
-      font-size: 21px;
+      font-size: 20px;
       color: var(--text-primary);
       letter-spacing: -0.01em;
+      display: flex;
+      align-items: baseline;
+      gap: 8px;
     }
-    .claude-star {
-      color: var(--claude-accent);
-      font-size: 22px;
-      line-height: 1;
-      display: inline-block;
+    .brand-version {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 10.5px;
+      color: var(--text-muted);
+      letter-spacing: 0.02em;
     }
-    .new-chat-btn {
+
+    .new-session-btn {
       display: flex;
       align-items: center;
-      gap: 8px;
+      justify-content: space-between;
       width: 100%;
-      padding: 9px 12px;
-      border-radius: 10px;
+      padding: 8px 12px;
+      border-radius: 6px;
       border: 1px solid var(--border-subtle);
       background: var(--bg-elevated);
       color: var(--text-primary);
       font-weight: 500;
-      font-size: 13px;
+      font-size: 12.5px;
       cursor: pointer;
-      transition: 0.15s;
+      transition: background 0.12s, border-color 0.12s;
     }
-    .new-chat-btn:hover {
-      border-color: var(--claude-accent);
+    .new-session-btn:hover {
+      border-color: var(--border-strong);
       background: var(--bg-hover);
     }
-    .new-chat-icon {
-      width: 20px;
-      height: 20px;
-      border-radius: 50%;
-      background: var(--claude-accent);
-      color: #fff;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-weight: 700;
-      font-size: 13px;
-    }
 
-    .sidebar-section-label {
-      padding: 10px 16px 4px 16px;
-      font-size: 11px;
+    .section-label {
+      padding: 12px 16px 6px 16px;
+      font-size: 10.5px;
       font-weight: 600;
       text-transform: uppercase;
-      letter-spacing: 0.05em;
+      letter-spacing: 0.06em;
       color: var(--text-muted);
     }
     .sidebar-scroll {
@@ -164,11 +144,11 @@
       padding: 0 8px 12px 8px;
       display: flex;
       flex-direction: column;
-      gap: 2px;
+      gap: 1px;
     }
     .nav-item {
-      padding: 7px 10px;
-      border-radius: 8px;
+      padding: 6.5px 10px;
+      border-radius: 5px;
       font-size: 12.5px;
       color: var(--text-secondary);
       cursor: pointer;
@@ -179,7 +159,7 @@
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
-      transition: 0.12s;
+      transition: background 0.1s, color 0.1s;
     }
     .nav-item:hover, .nav-item.active {
       background: var(--bg-hover);
@@ -189,389 +169,340 @@
     .sidebar-footer {
       padding: 12px 14px;
       border-top: 1px solid var(--border-subtle);
-      display: flex;
-      flex-direction: column;
-      gap: 8px;
-      font-size: 12px;
+      font-size: 11.5px;
     }
-    .api-status-box {
+    .status-row {
       display: flex;
       align-items: center;
       justify-content: space-between;
       padding: 7px 10px;
-      border-radius: 8px;
+      border-radius: 6px;
       background: var(--bg-elevated);
       border: 1px solid var(--border-subtle);
       cursor: pointer;
     }
-    .dot {
-      width: 8px;
-      height: 8px;
+    .status-indicator {
+      width: 6px;
+      height: 6px;
       border-radius: 50%;
-      background: var(--green);
-      box-shadow: 0 0 6px var(--green);
+      background: var(--positive);
     }
-    .dot.sync { background: var(--amber); box-shadow: 0 0 6px var(--amber); }
+    .status-indicator.sync { background: var(--warning); }
 
-    /* ================= CENTER CLAUDE CONVERSATION STAGE ================= */
-    .claude-main {
+    /* ================= CENTER WORKSPACE ================= */
+    .main-stage {
       flex: 1;
       display: flex;
       flex-direction: column;
       height: 100vh;
       overflow: hidden;
-      position: relative;
       min-width: 0;
     }
 
-    /* Top Minimal Header */
-    .claude-header {
-      height: 52px;
-      padding: 0 18px;
+    .topbar {
+      height: 48px;
+      padding: 0 20px;
       display: flex;
       align-items: center;
       justify-content: space-between;
       border-bottom: 1px solid var(--border-subtle);
       flex-shrink: 0;
     }
-    .header-left {
+    .topbar-left {
       display: flex;
       align-items: center;
-      gap: 10px;
+      gap: 12px;
     }
-    .icon-btn {
+    .text-btn {
       background: transparent;
-      border: 1px solid transparent;
+      border: 1px solid var(--border-subtle);
       color: var(--text-secondary);
-      padding: 6px 9px;
-      border-radius: 8px;
+      padding: 5px 10px;
+      border-radius: 5px;
       cursor: pointer;
-      font-size: 13px;
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      transition: 0.12s;
+      font-size: 12px;
+      font-weight: 500;
+      transition: background 0.12s, color 0.12s;
     }
-    .icon-btn:hover {
+    .text-btn:hover {
       background: var(--bg-hover);
       color: var(--text-primary);
     }
-    .regime-pill {
-      padding: 4px 10px;
-      border-radius: 999px;
-      font-size: 11.5px;
-      font-weight: 600;
+
+    .regime-tag {
+      padding: 3px 9px;
+      border-radius: 4px;
+      font-size: 11px;
+      font-weight: 500;
       display: inline-flex;
       align-items: center;
       gap: 6px;
     }
-    .regime-pill.cash { background: var(--amber-soft); color: var(--amber); border: 1px solid rgba(217,155,38,0.3); }
-    .regime-pill.riskon { background: var(--green-soft); color: var(--green); border: 1px solid rgba(46,155,120,0.3); }
+    .regime-tag.cash {
+      background: var(--warning-bg);
+      color: var(--warning);
+      border: 1px solid rgba(200, 145, 40, 0.25);
+    }
+    .regime-tag.riskon {
+      background: var(--positive-bg);
+      color: var(--positive);
+      border: 1px solid rgba(46, 155, 120, 0.25);
+    }
 
-    /* Chat Scroll Area */
+    /* Conversation Feed */
     .chat-scroll {
       flex: 1;
       overflow-y: auto;
-      padding: 28px 20px 24px 20px;
+      padding: 36px 24px 24px 24px;
       display: flex;
       flex-direction: column;
       align-items: center;
     }
     .chat-container {
       width: 100%;
-      max-width: 760px;
+      max-width: 720px;
       display: flex;
       flex-direction: column;
-      gap: 22px;
+      gap: 24px;
     }
 
-    /* Welcome Hero (Shown before first message or at top) */
-    .claude-hero {
-      text-align: center;
-      margin: 24px 0 12px 0;
+    .hero-block {
+      margin: 28px 0 8px 0;
       display: flex;
       flex-direction: column;
-      align-items: center;
       gap: 8px;
     }
-    .claude-hero h1 {
-      font-size: 38px;
-      line-height: 1.15;
+    .hero-block h1 {
+      font-size: 34px;
+      line-height: 1.18;
       color: var(--text-primary);
       font-weight: 400;
+      letter-spacing: -0.01em;
     }
-    .claude-hero p {
+    .hero-block p {
       color: var(--text-secondary);
       font-size: 13.5px;
-      max-width: 580px;
+      max-width: 620px;
     }
 
-    /* Quick Prompt Grid */
-    .starter-grid {
+    .prompt-grid {
       display: grid;
       grid-template-columns: repeat(2, 1fr);
       gap: 10px;
-      margin-top: 8px;
+      margin-top: 4px;
     }
-    .starter-card {
+    .prompt-card {
       background: var(--bg-elevated);
       border: 1px solid var(--border-subtle);
-      border-radius: 12px;
-      padding: 12px 14px;
+      border-radius: 8px;
+      padding: 13px 15px;
       cursor: pointer;
-      transition: all 0.15s ease;
+      transition: border-color 0.12s, background 0.12s;
       display: flex;
       flex-direction: column;
       gap: 4px;
       text-align: left;
     }
-    .starter-card:hover {
-      border-color: var(--claude-accent);
+    .prompt-card:hover {
+      border-color: var(--border-strong);
       background: var(--bg-hover);
-      transform: translateY(-1px);
     }
-    .starter-title {
+    .prompt-card-title {
       font-weight: 600;
-      font-size: 13px;
+      font-size: 12.5px;
       color: var(--text-primary);
-      display: flex;
-      align-items: center;
-      gap: 6px;
     }
-    .starter-desc {
+    .prompt-card-desc {
       font-size: 12px;
       color: var(--text-secondary);
     }
 
-    /* Message Bubbles */
-    .msg-row-user {
+    /* Messages */
+    .msg-user-row {
       display: flex;
       justify-content: flex-end;
     }
-    .user-bubble {
+    .msg-user-box {
       background: var(--bg-user-msg);
       border: 1px solid var(--border-subtle);
       color: var(--text-primary);
-      padding: 12px 16px;
-      border-radius: 18px 18px 4px 18px;
+      padding: 10px 15px;
+      border-radius: 8px;
       max-width: 85%;
-      font-size: 14.5px;
+      font-size: 13.5px;
       line-height: 1.55;
     }
 
-    .msg-row-assistant {
-      display: flex;
-      gap: 14px;
-      align-items: flex-start;
-    }
-    .assistant-avatar {
-      width: 30px;
-      height: 30px;
-      border-radius: 8px;
-      background: var(--claude-accent-soft);
-      border: 1px solid rgba(217, 119, 87, 0.35);
-      color: var(--claude-accent);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 17px;
-      flex-shrink: 0;
-      margin-top: 2px;
-    }
-    .assistant-body {
-      flex: 1;
-      min-width: 0;
+    .msg-response-row {
       display: flex;
       flex-direction: column;
       gap: 10px;
+      padding-bottom: 18px;
+      border-bottom: 1px solid var(--border-subtle);
     }
 
-    /* Claude Extended Thinking Accordion */
-    .thinking-box {
-      background: var(--bg-elevated);
-      border: 1px solid var(--border-subtle);
-      border-radius: 10px;
-      overflow: hidden;
-      font-size: 12px;
-    }
-    .thinking-header {
-      padding: 7px 12px;
+    .trace-bar {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 11px;
+      color: var(--text-muted);
       display: flex;
       align-items: center;
       justify-content: space-between;
-      cursor: pointer;
-      color: var(--text-secondary);
-      font-weight: 500;
-      user-select: none;
+      padding: 5px 10px;
+      background: var(--bg-elevated);
+      border: 1px solid var(--border-subtle);
+      border-radius: 5px;
     }
-    .thinking-header:hover { background: var(--bg-hover); color: var(--text-primary); }
-    .thinking-steps {
-      padding: 8px 14px 10px 14px;
-      border-top: 1px solid var(--border-subtle);
-      color: var(--text-muted);
-      display: none;
-      flex-direction: column;
-      gap: 4px;
-      font-family: 'JetBrains Mono', monospace;
-      font-size: 11px;
-    }
-    .thinking-box.open .thinking-steps { display: flex; }
 
-    /* Assistant Markdown Styling */
-    .assistant-prose {
-      font-size: 14.5px;
+    .response-prose {
+      font-size: 14px;
       line-height: 1.68;
       color: var(--text-primary);
     }
-    .assistant-prose h3 {
+    .response-prose h3 {
       font-family: 'Instrument Serif', Georgia, serif;
-      font-size: 23px;
+      font-size: 22px;
       font-weight: 400;
-      margin: 6px 0 6px 0;
+      margin: 4px 0 6px 0;
       color: var(--text-primary);
     }
-    .assistant-prose h4 {
-      font-size: 13px;
+    .response-prose h4 {
+      font-size: 11.5px;
       font-weight: 600;
       text-transform: uppercase;
-      letter-spacing: 0.04em;
-      color: var(--claude-accent);
+      letter-spacing: 0.05em;
+      color: var(--text-secondary);
       margin: 14px 0 6px 0;
     }
-    .assistant-prose code {
+    .response-prose code {
       font-family: 'JetBrains Mono', monospace;
-      font-size: 12.5px;
+      font-size: 12px;
       background: var(--bg-elevated);
       border: 1px solid var(--border-subtle);
-      padding: 1px 6px;
-      border-radius: 5px;
-      color: var(--claude-accent);
+      padding: 1px 5px;
+      border-radius: 4px;
+      color: var(--text-primary);
     }
 
-    /* Claude Inline Artifact Trigger Pill */
-    .artifact-trigger-card {
-      margin-top: 6px;
+    .sheet-link-card {
+      margin-top: 8px;
       background: var(--bg-elevated);
-      border: 1px solid var(--border-strong);
-      border-radius: 12px;
-      padding: 11px 14px;
+      border: 1px solid var(--border-subtle);
+      border-radius: 6px;
+      padding: 10px 14px;
       display: flex;
       align-items: center;
       justify-content: space-between;
       cursor: pointer;
-      transition: 0.15s;
+      transition: border-color 0.12s, background 0.12s;
     }
-    .artifact-trigger-card:hover {
-      border-color: var(--claude-accent);
+    .sheet-link-card:hover {
+      border-color: var(--border-strong);
       background: var(--bg-hover);
     }
 
-    /* ================= BOTTOM CLAUDE COMPOSER ================= */
-    .composer-outer {
-      padding: 10px 20px 18px 20px;
+    /* ================= COMPOSER ================= */
+    .composer-wrap {
+      padding: 10px 24px 18px 24px;
       display: flex;
       flex-direction: column;
       align-items: center;
-      background: linear-gradient(180deg, transparent 0%, var(--bg-main) 25%);
+      background: var(--bg-main);
       flex-shrink: 0;
     }
-    .composer-card {
+    .composer-box {
       width: 100%;
-      max-width: 760px;
+      max-width: 720px;
       background: var(--bg-composer);
       border: 1px solid var(--border-strong);
-      border-radius: 18px;
-      padding: 12px 14px 10px 16px;
-      box-shadow: var(--shadow-card);
+      border-radius: 10px;
+      padding: 12px 14px 10px 14px;
       display: flex;
       flex-direction: column;
       gap: 10px;
-      transition: border-color 0.15s;
+      transition: border-color 0.12s;
     }
-    .composer-card:focus-within {
-      border-color: var(--claude-accent);
+    .composer-box:focus-within {
+      border-color: var(--text-secondary);
     }
-    .composer-textarea {
+    .composer-input {
       width: 100%;
       background: transparent;
       border: none;
       color: var(--text-primary);
       font-family: inherit;
-      font-size: 14.5px;
+      font-size: 14px;
       line-height: 1.5;
       resize: none;
       outline: none;
-      min-height: 46px;
-      max-height: 140px;
+      min-height: 42px;
+      max-height: 130px;
     }
-    .composer-textarea::placeholder { color: var(--text-muted); }
+    .composer-input::placeholder { color: var(--text-muted); }
 
-    .composer-toolbar {
+    .composer-bar {
       display: flex;
       align-items: center;
       justify-content: space-between;
       gap: 8px;
       flex-wrap: wrap;
+      padding-top: 6px;
+      border-top: 1px solid var(--border-subtle);
     }
-    .composer-controls {
+    .composer-meta {
       display: flex;
       align-items: center;
       gap: 8px;
       flex-wrap: wrap;
     }
-    .claude-chip-select {
+    .meta-field {
       display: inline-flex;
       align-items: center;
       gap: 6px;
       background: var(--bg-elevated);
       border: 1px solid var(--border-subtle);
       color: var(--text-secondary);
-      padding: 4px 10px;
-      border-radius: 8px;
-      font-size: 12px;
-      font-weight: 500;
+      padding: 3px 9px;
+      border-radius: 5px;
+      font-size: 11.5px;
     }
-    .claude-chip-select input[type="number"] {
+    .meta-field input[type="number"] {
       background: transparent;
       border: none;
       color: var(--text-primary);
       font-family: 'JetBrains Mono', monospace;
-      font-size: 12px;
-      font-weight: 600;
-      width: 86px;
+      font-size: 11.5px;
+      font-weight: 500;
+      width: 82px;
       outline: none;
     }
-    .send-btn {
-      width: 34px;
-      height: 34px;
-      border-radius: 10px;
-      border: none;
-      background: var(--claude-accent);
-      color: #fff;
-      font-size: 16px;
-      font-weight: 700;
+    .submit-btn {
+      padding: 6px 14px;
+      border-radius: 5px;
+      border: 1px solid transparent;
+      background: var(--text-primary);
+      color: var(--bg-main);
+      font-size: 12px;
+      font-weight: 600;
       cursor: pointer;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      transition: 0.15s;
+      transition: opacity 0.12s;
     }
-    .send-btn:hover { background: var(--claude-accent-hover); transform: scale(1.03); }
+    .submit-btn:hover { opacity: 0.88; }
 
-    /* ================= RIGHT CLAUDE ARTIFACT PANEL ================= */
-    .claude-artifact-panel {
-      width: 520px;
+    /* ================= RIGHT DATA PANEL ================= */
+    .data-panel {
+      width: 500px;
       background: var(--bg-artifact);
       border-left: 1px solid var(--border-subtle);
       display: flex;
       flex-direction: column;
       flex-shrink: 0;
-      transition: margin-right 0.22s ease;
+      transition: margin-right 0.2s ease;
     }
-    .claude-artifact-panel.closed { margin-right: -520px; }
+    .data-panel.closed { margin-right: -500px; }
 
-    .artifact-header {
-      height: 52px;
+    .panel-header {
+      height: 48px;
       padding: 0 16px;
       border-bottom: 1px solid var(--border-subtle);
       display: flex;
@@ -579,33 +510,32 @@
       justify-content: space-between;
       background: var(--bg-elevated);
     }
-    .artifact-tabs {
+    .panel-tabs {
       display: flex;
       gap: 4px;
-      padding: 8px 12px;
+      padding: 6px 12px;
       background: var(--bg-sidebar);
       border-bottom: 1px solid var(--border-subtle);
       overflow-x: auto;
     }
-    .art-tab {
+    .ptab {
       padding: 5px 10px;
-      border-radius: 7px;
-      font-size: 12px;
+      border-radius: 4px;
+      font-size: 11.5px;
       font-weight: 500;
       color: var(--text-secondary);
       cursor: pointer;
       white-space: nowrap;
       border: 1px solid transparent;
     }
-    .art-tab:hover { color: var(--text-primary); }
-    .art-tab.active {
+    .ptab:hover { color: var(--text-primary); }
+    .ptab.active {
       background: var(--bg-elevated);
-      color: var(--claude-accent);
+      color: var(--text-primary);
       border-color: var(--border-subtle);
-      font-weight: 600;
     }
 
-    .artifact-body {
+    .panel-body {
       flex: 1;
       overflow-y: auto;
       padding: 14px;
@@ -614,21 +544,20 @@
       gap: 12px;
     }
 
-    .chart-box {
-      height: 295px;
+    .chart-frame {
+      height: 290px;
       width: 100%;
       background: #131722;
       border: 1px solid var(--border-subtle);
-      border-radius: 10px;
+      border-radius: 6px;
       overflow: hidden;
-      position: relative;
     }
-    .rsi-box {
-      height: 85px;
+    .rsi-frame {
+      height: 82px;
       width: 100%;
       background: #131722;
       border: 1px solid var(--border-subtle);
-      border-radius: 10px;
+      border-radius: 6px;
       overflow: hidden;
     }
 
@@ -640,353 +569,338 @@
     .kpi-card {
       background: var(--bg-elevated);
       border: 1px solid var(--border-subtle);
-      border-radius: 10px;
-      padding: 10px 12px;
+      border-radius: 6px;
+      padding: 9px 12px;
     }
-    .kpi-lbl { font-size: 11px; color: var(--text-muted); text-transform: uppercase; font-weight: 600; }
-    .kpi-val { font-size: 15px; font-weight: 700; color: var(--text-primary); margin-top: 2px; }
+    .kpi-lbl { font-size: 10.5px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.04em; font-weight: 600; }
+    .kpi-val { font-size: 14.5px; font-weight: 600; color: var(--text-primary); margin-top: 2px; }
 
-    table.claude-table {
+    table.data-table {
       width: 100%;
       border-collapse: collapse;
-      font-size: 12px;
+      font-size: 11.5px;
       background: var(--bg-elevated);
-      border-radius: 10px;
+      border-radius: 6px;
       overflow: hidden;
       border: 1px solid var(--border-subtle);
     }
-    table.claude-table th {
+    table.data-table th {
       background: var(--bg-sidebar);
       color: var(--text-muted);
       font-weight: 600;
       text-align: right;
-      padding: 8px 10px;
-      font-size: 11px;
+      padding: 7px 10px;
+      font-size: 10.5px;
+      text-transform: uppercase;
+      letter-spacing: 0.03em;
       border-bottom: 1px solid var(--border-subtle);
     }
-    table.claude-table th:first-child, table.claude-table td:first-child { text-align: left; }
-    table.claude-table td {
-      padding: 8px 10px;
+    table.data-table th:first-child, table.data-table td:first-child { text-align: left; }
+    table.data-table td {
+      padding: 7px 10px;
       text-align: right;
       border-bottom: 1px solid var(--border-subtle);
     }
-    table.claude-table tr:last-child td { border-bottom: none; }
+    table.data-table tr:last-child td { border-bottom: none; }
 
-    .badge {
-      padding: 2px 7px;
-      border-radius: 5px;
-      font-size: 10.5px;
+    .status-pill {
+      padding: 2px 6px;
+      border-radius: 3px;
+      font-size: 10px;
       font-weight: 600;
+      text-transform: uppercase;
     }
-    .badge.green { background: var(--green-soft); color: var(--green); }
-    .badge.amber { background: var(--amber-soft); color: var(--amber); }
-    .badge.red { background: var(--red-soft); color: var(--red); }
+    .status-pill.pos { background: var(--positive-bg); color: var(--positive); }
+    .status-pill.warn { background: var(--warning-bg); color: var(--warning); }
+    .status-pill.neg { background: var(--negative-bg); color: var(--negative); }
 
     @media (max-width: 1100px) {
-      .claude-artifact-panel { position: fixed; right: 0; top: 0; bottom: 0; z-index: 50; box-shadow: -10px 0 30px rgba(0,0,0,0.5); }
+      .data-panel { position: fixed; right: 0; top: 0; bottom: 0; z-index: 50; }
     }
-    ::-webkit-scrollbar { width: 6px; height: 6px; }
+    ::-webkit-scrollbar { width: 5px; height: 5px; }
     ::-webkit-scrollbar-track { background: transparent; }
-    ::-webkit-scrollbar-thumb { background: var(--border-strong); border-radius: 3px; }
+    ::-webkit-scrollbar-thumb { background: var(--border-strong); border-radius: 2px; }
   </style>
 </head>
 <body>
 
-  <!-- ================= LEFT CLAUDE SIDEBAR ================= -->
-  <aside class="claude-sidebar" id="sidebar">
+  <!-- ================= LEFT SIDEBAR ================= -->
+  <aside class="sidebar" id="sidebar">
     <div class="sidebar-top">
       <div class="brand-row">
         <div class="brand-title serif">
-          <span class="claude-star">✶</span>
-          <span>AlphaNiti <span style="font-size:13px; color:var(--claude-accent); font-family:'Inter',sans-serif; font-weight:600;">v25.0</span></span>
+          <span>AlphaNiti</span>
+          <span class="brand-version">v25.0</span>
         </div>
-        <button class="icon-btn" onclick="toggleTheme()" title="Switch Claude Dark / Warm Cream Theme" id="theme-btn">☀️</button>
+        <button class="text-btn" onclick="toggleTheme()" id="theme-btn">Light</button>
       </div>
 
-      <button class="new-chat-btn" onclick="resetConversation()">
-        <span class="new-chat-icon">+</span>
-        <span>New Quant Research Chat</span>
+      <button class="new-session-btn" onclick="resetConversation()">
+        <span>New Research Session</span>
+        <span class="mono" style="color:var(--text-muted);">+</span>
       </button>
     </div>
 
-    <div class="sidebar-section-label">Quant Research Prompts</div>
+    <div class="section-label">Queries</div>
     <div class="sidebar-scroll">
       <div class="nav-item" onclick="askBrain('Should I buy RELIANCE right now with ₹1,00,000?')">
-        <span>💬 Buy RELIANCE with ₹1,00,000?</span>
+        <span>RELIANCE — ₹1,00,000 Evaluation</span>
       </div>
       <div class="nav-item" onclick="askBrain('Compare TCS and INFY using live NSE data')">
-        <span>💬 Compare TCS vs INFY (Live)</span>
+        <span>TCS vs INFY — Relative Comparison</span>
       </div>
       <div class="nav-item" onclick="askBrain('Where should I invest ₹2,50,000 today?')">
-        <span>💬 Build ₹2.5L Portfolio (B&amp;B)</span>
+        <span>Portfolio Allocation — ₹2,50,000</span>
       </div>
       <div class="nav-item" onclick="askBrain('Analyze SUNPHARMA.NS live with my ML brain')">
-        <span>💬 Live Fetch SUNPHARMA.NS</span>
+        <span>SUNPHARMA.NS — Live Inference</span>
       </div>
       <div class="nav-item" onclick="askBrain('Analyze TATAMOTORS.NS with ₹1,50,000')">
-        <span>💬 Live Fetch TATAMOTORS.NS</span>
+        <span>TATAMOTORS.NS — Live Inference</span>
       </div>
       <div class="nav-item" onclick="askBrain('Analyze ZOMATO.NS live with my ML brain')">
-        <span>💬 Live Fetch ZOMATO.NS</span>
+        <span>ZOMATO.NS — Live Inference</span>
       </div>
       <div class="nav-item" onclick="askBrain('What is the market regime and crash probability today?')">
-        <span>💬 Macro Regime &amp; Cash Gate</span>
+        <span>Macro Regime &amp; Cash Gate</span>
       </div>
 
-      <div class="sidebar-section-label" style="padding-left:8px; margin-top:8px;">Live NSE Universe (<span id="sidebar-eq-count">12</span>)</div>
+      <div class="section-label" style="padding-left:8px; margin-top:8px;">NSE Universe (<span id="sidebar-eq-count">12</span>)</div>
       <div id="sidebar-watchlist"></div>
     </div>
 
     <div class="sidebar-footer">
-      <div class="api-status-box" onclick="pingRenderBackend()" title="Click to test live Render Cloud Backend">
+      <div class="status-row" onclick="syncWithRender()" title="Refresh connection to Render backend">
         <div style="display:flex; align-items:center; gap:8px;">
-          <div id="api-dot" class="dot"></div>
+          <div id="api-dot" class="status-indicator"></div>
           <div>
-            <div style="font-weight:600; font-size:11.5px;" id="api-label">Render ML Brain: Live</div>
+            <div style="font-weight:500;" id="api-label">Render Engine Connected</div>
             <div class="mono" style="font-size:10px; color:var(--text-muted);">alphaniti-v25-api.onrender.com</div>
           </div>
         </div>
-        <span style="color:var(--text-muted);">↻</span>
+        <span class="mono" style="color:var(--text-muted); font-size:11px;">Sync</span>
       </div>
     </div>
   </aside>
 
-  <!-- ================= CENTER CLAUDE CONVERSATION STAGE ================= -->
-  <main class="claude-main">
-    <header class="claude-header">
-      <div class="header-left">
-        <button class="icon-btn" onclick="document.getElementById('sidebar').classList.toggle('collapsed')">☰ Sidebar</button>
-        <span style="font-weight:600; font-size:13px;">AlphaNiti v25.0 Evidential Ensemble</span>
-        <span class="mono" style="font-size:11px; color:var(--text-muted);">3-Head Dual-State GRU · 20 Causal Features</span>
+  <!-- ================= CENTER CONVERSATION STAGE ================= -->
+  <main class="main-stage">
+    <header class="topbar">
+      <div class="topbar-left">
+        <button class="text-btn" onclick="document.getElementById('sidebar').classList.toggle('collapsed')">Menu</button>
+        <span style="font-weight:500; font-size:12.5px; color:var(--text-primary);">Evidential Deep Ensemble</span>
+        <span class="mono" style="font-size:11px; color:var(--text-muted);">3-Member GRU · 20 Causal Features · NSE</span>
       </div>
 
       <div style="display:flex; align-items:center; gap:10px;">
-        <div id="header-regime-pill" class="regime-pill cash">
-          <span id="regime-emoji">🛡️</span>
-          <span id="regime-title">CASH PRESERVATION GATE</span>
+        <div id="header-regime-pill" class="regime-tag cash">
+          <span id="regime-title">REGIME: CASH PRESERVATION</span>
           <span class="mono" id="regime-sub">| P_breach: 38.3%</span>
         </div>
-        <button class="icon-btn" style="border-color:var(--border-subtle);" onclick="toggleArtifactPanel()">
-          📊 <span id="art-toggle-lbl">Artifact Panel</span>
-        </button>
+        <button class="text-btn" onclick="toggleArtifactPanel()">Inspector</button>
       </div>
     </header>
 
-    <!-- Conversation Stream -->
     <div class="chat-scroll" id="chat-scroll">
       <div class="chat-container" id="chat-container">
-        <!-- Claude Hero Greeting -->
-        <div class="claude-hero" id="hero-welcome">
-          <h1 class="serif"><span class="claude-star">✶</span> What shall we analyze on NSE today?</h1>
-          <p>Every message you send queries live Yahoo Finance NSE data and runs through your trained <b>AlphaNiti v25.0 ML Brain</b> (3-Member Evidential Deep Ensemble, Conformal 90% Bounds, Regime Switch Gate, Finance Act 2026 Taxes &amp; Ed25519 Safety Kernel).</p>
+        <div class="hero-block" id="hero-welcome">
+          <h1 class="serif">Institutional Equity Research &amp; Execution</h1>
+          <p>Enter a query below to evaluate any NSE security or construct an integer-sized portfolio against live market data, our 3-member Evidential Deep Ensemble, Split-Conformal bounds (q̂ = 1.3644), and the Finance Act 2026 safety kernel.</p>
         </div>
 
-        <!-- Claude Starter Prompt Cards -->
-        <div class="starter-grid" id="starter-grid">
-          <div class="starter-card" onclick="askBrain('Should I buy RELIANCE right now with ₹1,00,000?')">
-            <div class="starter-title"><span>📈</span> <span>Single-Stock ML Brain Verdict</span></div>
-            <div class="starter-desc">"Should I buy RELIANCE right now with ₹1,00,000?" — runs all 3 neural heads, 20 causal features &amp; Safety Kernel.</div>
+        <div class="prompt-grid" id="starter-grid">
+          <div class="prompt-card" onclick="askBrain('Should I buy RELIANCE right now with ₹1,00,000?')">
+            <div class="prompt-card-title">Single-Security Evaluation</div>
+            <div class="prompt-card-desc">Evaluate RELIANCE.NS for ₹1,00,000 with 20-day evidential return, tail risk, and statutory tax breakdown.</div>
           </div>
-          <div class="starter-card" onclick="askBrain('Compare TCS and INFY using live NSE data')">
-            <div class="starter-title"><span>⚖️</span> <span>Head-to-Head Stock Comparison</span></div>
-            <div class="starter-desc">"Compare TCS and INFY using live NSE data" — compares 20D Evidential drift, crash risk &amp; 90% conformal floor.</div>
+          <div class="prompt-card" onclick="askBrain('Compare TCS and INFY using live NSE data')">
+            <div class="prompt-card-title">Cross-Sectional Comparison</div>
+            <div class="prompt-card-desc">Compare TCS.NS and INFY.NS across 20-day expected drift, aleatoric volatility, and 90% conformal floor.</div>
           </div>
-          <div class="starter-card" onclick="askBrain('Where should I invest ₹2,50,000 today?')">
-            <div class="starter-title"><span>🧮</span> <span>Branch &amp; Bound Portfolio Sizer</span></div>
-            <div class="starter-desc">"Where should I invest ₹2,50,000 today?" — computes exact integer shares &amp; Finance Act 2026 statutory taxes.</div>
+          <div class="prompt-card" onclick="askBrain('Where should I invest ₹2,50,000 today?')">
+            <div class="prompt-card-title">Discrete Portfolio Allocation</div>
+            <div class="prompt-card-desc">Run the Branch-and-Bound lattice solver for ₹2,50,000 across qualified NSE equities.</div>
           </div>
-          <div class="starter-card" onclick="askBrain('Analyze SUNPHARMA.NS live with my ML brain')">
-            <div class="starter-title"><span>🌐</span> <span>Live Fetch Any Custom NSE Ticker</span></div>
-            <div class="starter-desc">"Analyze SUNPHARMA.NS live with my ML brain" — pulls live 6M history from Yahoo Finance on the fly.</div>
+          <div class="prompt-card" onclick="askBrain('Analyze SUNPHARMA.NS live with my ML brain')">
+            <div class="prompt-card-title">Dynamic Ticker Inference</div>
+            <div class="prompt-card-desc">Fetch live 6-month NSE history for SUNPHARMA.NS (or any custom .NS symbol) and run ensemble inference.</div>
           </div>
         </div>
       </div>
     </div>
 
-    <!-- Claude Floating Composer -->
-    <div class="composer-outer">
-      <div class="composer-card">
+    <div class="composer-wrap">
+      <div class="composer-box">
         <textarea
           id="composer-input"
-          class="composer-textarea"
+          class="composer-input"
           rows="2"
-          placeholder="Ask AlphaNiti ML Brain anything... e.g. 'Should I buy SBIN with ₹2,00,000?', 'Compare HDFCBANK and ICICIBANK', or 'Analyze TATAMOTORS.NS'"
+          placeholder="Query any NSE security, comparison, or portfolio allocation (e.g., 'Should I buy SBIN with ₹2,00,000?' or 'Analyze TATAMOTORS.NS')..."
           onkeydown="if(event.key==='Enter' && !event.shiftKey){ event.preventDefault(); submitComposer(); }"
         ></textarea>
 
-        <div class="composer-toolbar">
-          <div class="composer-controls">
-            <div class="claude-chip-select" title="Active ML Brain Architecture">
-              <span style="color:var(--claude-accent);">✶</span>
-              <span>Evidential Ensemble v25.0</span>
-            </div>
-
-            <div class="claude-chip-select" title="Capital Budget in INR used for Order & Portfolio Sizing">
-              <span>Capital ₹</span>
+        <div class="composer-bar">
+          <div class="composer-meta">
+            <div class="meta-field">
+              <span>Capital (INR)</span>
               <input type="number" id="inp-capital" value="100000" step="25000" />
             </div>
 
-            <label class="claude-chip-select" style="cursor:pointer;" title="Override Cash-Preservation Gate to force Branch-and-Bound equity allocation">
-              <input type="checkbox" id="inp-force-riskon" style="accent-color:var(--claude-accent);" />
-              <span>Force Risk-On Override</span>
+            <label class="meta-field" style="cursor:pointer;">
+              <input type="checkbox" id="inp-force-riskon" />
+              <span>Override Cash-Preservation Gate</span>
             </label>
           </div>
 
-          <button class="send-btn" onclick="submitComposer()" title="Send to Render ML Brain (Enter)">↑</button>
+          <button class="submit-btn" onclick="submitComposer()">Run Query</button>
         </div>
-      </div>
-      <div style="font-size:11px; color:var(--text-muted); margin-top:7px;">
-        Connected to Render Backend (<span class="mono">https://alphaniti-v25-api.onrender.com</span>) · Finance Act 2026 Statutory Taxes · Ed25519 Safety Kernel
       </div>
     </div>
   </main>
 
-  <!-- ================= RIGHT CLAUDE ARTIFACT PANEL ================= -->
-  <aside class="claude-artifact-panel" id="artifact-panel">
-    <div class="artifact-header">
-      <div style="display:flex; align-items:center; gap:8px;">
-        <span style="color:var(--claude-accent); font-size:16px;">❖</span>
-        <div>
-          <div style="font-weight:600; font-size:13px;" id="art-title">NSE:SBIN · Live ML Brain Artifact</div>
-          <div class="mono" style="font-size:10.5px; color:var(--text-muted);" id="art-subtitle">120D Candles + 20D Evidential Cone (q̂=1.3644)</div>
-        </div>
+  <!-- ================= RIGHT INSPECTOR PANEL ================= -->
+  <aside class="data-panel" id="artifact-panel">
+    <div class="panel-header">
+      <div>
+        <div style="font-weight:600; font-size:12.5px;" id="art-title">NSE:SBIN</div>
+        <div class="mono" style="font-size:10.5px; color:var(--text-muted);" id="art-subtitle">120D OHLCV &amp; 20D Conformal Forecast (q̂=1.3644)</div>
       </div>
-      <button class="icon-btn" onclick="toggleArtifactPanel()">✕</button>
+      <button class="text-btn" onclick="toggleArtifactPanel()">Close</button>
     </div>
 
-    <div class="artifact-tabs">
-      <div class="art-tab active" id="atab-btn-chart" onclick="switchArtifactTab('chart')">📈 Live Chart &amp; 20D Cone</div>
-      <div class="art-tab" id="atab-btn-brain" onclick="switchArtifactTab('brain')">🧠 3-Head Brain &amp; 20 Features</div>
-      <div class="art-tab" id="atab-btn-ledger" onclick="switchArtifactTab('ledger')">🏦 Ledger &amp; B&amp;B Allocator</div>
-      <div class="art-tab" id="atab-btn-audit" onclick="switchArtifactTab('audit')">📊 2-Year Regime Audit</div>
+    <div class="panel-tabs">
+      <div class="ptab active" id="atab-btn-chart" onclick="switchArtifactTab('chart')">Chart &amp; Forecast</div>
+      <div class="ptab" id="atab-btn-brain" onclick="switchArtifactTab('brain')">Ensemble &amp; Features</div>
+      <div class="ptab" id="atab-btn-ledger" onclick="switchArtifactTab('ledger')">Ledger &amp; Allocation</div>
+      <div class="ptab" id="atab-btn-audit" onclick="switchArtifactTab('audit')">2-Year Audit</div>
     </div>
 
-    <!-- ARTIFACT TAB 1: LIVE TRADINGVIEW CHART + EVIDENTIAL CONE -->
-    <div class="artifact-body" id="atab-chart">
+    <!-- TAB 1: CHART -->
+    <div class="panel-body" id="atab-chart">
       <div class="kpi-grid">
         <div class="kpi-card">
-          <div class="kpi-lbl">Spot Price &amp; 1D Change</div>
-          <div class="kpi-val mono" id="art-px">₹812.40 <span style="font-size:12px; color:var(--green);">+0.42%</span></div>
+          <div class="kpi-lbl">Spot Price (1D)</div>
+          <div class="kpi-val mono" id="art-px">₹812.40 <span style="font-size:11.5px; color:var(--positive);">+0.42%</span></div>
         </div>
         <div class="kpi-card">
-          <div class="kpi-lbl">20D Evidential Return (γ)</div>
-          <div class="kpi-val mono" id="art-gamma" style="color:var(--purple);">+3.38%</div>
+          <div class="kpi-lbl">20D Expected Drift (γ)</div>
+          <div class="kpi-val mono" id="art-gamma">+3.38%</div>
         </div>
         <div class="kpi-card">
-          <div class="kpi-lbl">Aleatoric / Epistemic</div>
-          <div class="kpi-val mono" id="art-unc" style="font-size:13px;">σ_a: 7.12% | σ²_e: 0.0005</div>
+          <div class="kpi-lbl">Uncertainty (σ_a / σ²_e)</div>
+          <div class="kpi-val mono" id="art-unc" style="font-size:12.5px;">7.12% / 0.0005</div>
         </div>
         <div class="kpi-card">
-          <div class="kpi-lbl">Tail Crash Risk (P_breach)</div>
-          <div class="kpi-val mono" id="art-pb" style="color:var(--amber);">31.2%</div>
+          <div class="kpi-lbl">Tail Breach Prob (P_b)</div>
+          <div class="kpi-val mono" id="art-pb">31.2%</div>
         </div>
       </div>
 
-      <div class="chart-box" id="tv-main-chart"></div>
-      <div class="rsi-box" id="tv-rsi-chart"></div>
+      <div class="chart-frame" id="tv-main-chart"></div>
+      <div class="rsi-frame" id="tv-rsi-chart"></div>
 
-      <div style="font-size:11.5px; color:var(--text-secondary); background:var(--bg-elevated); padding:10px 12px; border-radius:10px; border:1px solid var(--border-subtle);">
-        <b style="color:var(--claude-accent);">How to read this Artifact:</b> The purple dashed trajectory plots the <b>20-day forward Evidential expected price (γ)</b> bounded by cyan <b>90% Split-Conformal intervals (q̂ = 1.3644)</b>.
+      <div style="font-size:11.5px; color:var(--text-secondary); background:var(--bg-elevated); padding:9px 12px; border-radius:6px; border:1px solid var(--border-subtle);">
+        Dashed projection indicates the 20-trading-day forward evidential drift (γ) bounded by 90% split-conformal intervals (q̂ = 1.3644).
       </div>
     </div>
 
-    <!-- ARTIFACT TAB 2: 3-HEAD NEURAL ENSEMBLE & 20 CAUSAL FEATURES -->
-    <div class="artifact-body" id="atab-brain" style="display:none;">
-      <div style="font-weight:600; font-size:12.5px; color:var(--text-primary);">
-        🧠 3-Member Evidential GRU-Attention Ensemble (<span id="brain-sym-lbl" style="color:var(--claude-accent);">SBIN</span>)
+    <!-- TAB 2: ENSEMBLE & 20 CAUSAL FEATURES -->
+    <div class="panel-body" id="atab-brain" style="display:none;">
+      <div style="font-weight:600; font-size:12px; color:var(--text-primary);">
+        3-Member Evidential Ensemble (<span id="brain-sym-lbl" class="mono">SBIN</span>)
       </div>
-      <table class="claude-table mono">
+      <table class="data-table mono">
         <thead>
           <tr>
-            <th>Neural Head</th>
-            <th>20D Drift (γ)</th>
+            <th>Member</th>
+            <th>20D Drift</th>
             <th>Aleatoric σ</th>
             <th>Epistemic σ²</th>
             <th>Breach P_b</th>
           </tr>
         </thead>
         <tbody id="ensemble-heads-tbody">
-          <tr><td>GRU-Attention Head #1</td><td style="color:var(--green);">+3.45%</td><td>7.08%</td><td>0.00050</td><td>30.8%</td></tr>
-          <tr><td>GRU-Attention Head #2</td><td style="color:var(--green);">+3.29%</td><td>7.19%</td><td>0.00060</td><td>31.5%</td></tr>
-          <tr><td>GRU-Attention Head #3</td><td style="color:var(--green);">+3.40%</td><td>7.09%</td><td>0.00050</td><td>31.3%</td></tr>
+          <tr><td>GRU-Attention Head #1</td><td style="color:var(--positive);">+3.45%</td><td>7.08%</td><td>0.00050</td><td>30.8%</td></tr>
+          <tr><td>GRU-Attention Head #2</td><td style="color:var(--positive);">+3.29%</td><td>7.19%</td><td>0.00060</td><td>31.5%</td></tr>
+          <tr><td>GRU-Attention Head #3</td><td style="color:var(--positive);">+3.40%</td><td>7.09%</td><td>0.00050</td><td>31.3%</td></tr>
         </tbody>
       </table>
 
-      <div style="font-weight:600; font-size:12.5px; color:var(--text-primary); margin-top:6px;">
-        📡 20-Feature Causal Tensor (60-Day Lookback Window)
+      <div style="font-weight:600; font-size:12px; color:var(--text-primary); margin-top:4px;">
+        20-Feature Causal Tensor (60D Lookback)
       </div>
-      <table class="claude-table mono">
+      <table class="data-table mono">
         <thead>
-          <tr><th>Causal Feature</th><th>Live Value</th></tr>
+          <tr><th>Feature</th><th>Value</th></tr>
         </thead>
         <tbody id="features-tbody">
-          <tr><td>ret_1d_clean (Winsorized 1D Return)</td><td>+0.42%</td></tr>
-          <tr><td>ret_20d (20D Momentum)</td><td>+4.18%</td></tr>
-          <tr><td>rsi_14d (Normalized Wilder RSI)</td><td>58.4</td></tr>
-          <tr><td>trend_ema_ratio (EMA-12 / EMA-26)</td><td>+0.0142</td></tr>
-          <tr><td>vol_squeeze_ratio (Short/Long Vol)</td><td>0.912</td></tr>
-          <tr><td>volume_momentum_ratio (5D/20D Vol)</td><td>1.14x</td></tr>
-          <tr><td>market_rel_mom_20d (vs NSE Universe)</td><td>+0.0215</td></tr>
-          <tr><td>parkinson_vol_20d (High-Low Range Vol)</td><td>1.48%</td></tr>
+          <tr><td>ret_1d_clean</td><td>+0.0042</td></tr>
+          <tr><td>ret_20d</td><td>+0.0418</td></tr>
+          <tr><td>rsi_14d</td><td>+0.1680</td></tr>
+          <tr><td>trend_ema_ratio</td><td>+0.0142</td></tr>
+          <tr><td>vol_squeeze_ratio</td><td>0.9120</td></tr>
+          <tr><td>volume_momentum_ratio</td><td>1.1400</td></tr>
+          <tr><td>market_rel_mom_20d</td><td>+0.0215</td></tr>
+          <tr><td>parkinson_vol_20d</td><td>0.0148</td></tr>
         </tbody>
       </table>
     </div>
 
-    <!-- ARTIFACT TAB 3: 5-BUCKET LEDGER & INTEGER B&B ALLOCATOR -->
-    <div class="artifact-body" id="atab-ledger" style="display:none;">
+    <!-- TAB 3: LEDGER & ALLOCATION -->
+    <div class="panel-body" id="atab-ledger" style="display:none;">
       <div class="kpi-grid">
         <div class="kpi-card">
           <div class="kpi-lbl">W_settled (Cleared Cash)</div>
-          <div class="kpi-val mono" id="led-settled" style="color:var(--green);">₹1,00,000.00</div>
+          <div class="kpi-val mono" id="led-settled" style="color:var(--positive);">₹1,00,000.00</div>
         </div>
         <div class="kpi-card">
-          <div class="kpi-lbl">Finance Act 2026 Taxes</div>
-          <div class="kpi-val mono" id="led-taxes" style="color:var(--red);">₹0.00</div>
+          <div class="kpi-lbl">Statutory Charges (FA 2026)</div>
+          <div class="kpi-val mono" id="led-taxes" style="color:var(--negative);">₹0.00</div>
         </div>
       </div>
 
-      <div id="led-receipt" style="background:var(--bg-elevated); border:1px solid var(--border-subtle); border-radius:10px; padding:11px 13px; font-size:12px;">
-        Ask the ML Brain e.g. <i>"Where should I invest ₹2,50,000 today?"</i> or <i>"Should I buy RELIANCE with ₹1,00,000?"</i> to populate the signed order receipt &amp; integer share table.
+      <div id="led-receipt" style="background:var(--bg-elevated); border:1px solid var(--border-subtle); border-radius:6px; padding:10px 12px; font-size:12px;">
+        Submit an order or portfolio query to inspect the 3-Gate Safety Kernel receipt and Ed25519 signature.
       </div>
 
-      <table class="claude-table mono">
+      <table class="data-table mono">
         <thead>
           <tr>
             <th>Symbol</th>
             <th>Shares</th>
             <th>Price</th>
             <th>Notional</th>
-            <th>Tax</th>
+            <th>Charges</th>
           </tr>
         </thead>
         <tbody id="alloc-tbody">
-          <tr><td colspan="5" style="text-align:center; color:var(--text-muted); padding:14px;">No active positions — 100% W_settled Cash</td></tr>
+          <tr><td colspan="5" style="text-align:center; color:var(--text-muted); padding:14px;">100% W_settled Cash</td></tr>
         </tbody>
       </table>
     </div>
 
-    <!-- ARTIFACT TAB 4: 2-YEAR REGIME BACKTEST -->
-    <div class="artifact-body" id="atab-audit" style="display:none;">
-      <div style="font-size:12.5px; color:var(--text-secondary);">
-        <b>2-Year Walk-Forward Regime Switch Audit (500 Trading Days)</b><br/>
-        Max Drawdown reduced from <span style="color:var(--red); font-weight:600;">-21.93%</span> to <span style="color:var(--green); font-weight:600;">-2.98%</span>.
+    <!-- TAB 4: 2-YEAR AUDIT -->
+    <div class="panel-body" id="atab-audit" style="display:none;">
+      <div style="font-size:12px; color:var(--text-secondary);">
+        <b>2-Year Out-of-Sample Walk-Forward Audit (500 Trading Days)</b><br/>
+        Max drawdown reduced from <span class="mono" style="color:var(--negative);">-21.93%</span> to <span class="mono" style="color:var(--positive);">-2.98%</span>.
       </div>
-      <table class="claude-table mono">
+      <table class="data-table mono">
         <thead>
           <tr>
             <th>Period</th>
-            <th>Gate</th>
-            <th>Naive</th>
+            <th>Regime</th>
+            <th>Always-In</th>
             <th>Regime Gate</th>
-            <th>Saved</th>
+            <th>Spread</th>
           </tr>
         </thead>
         <tbody>
-          <tr><td>2024-10..11</td><td><span class="badge amber">CASH</span></td><td style="color:var(--red);">-2.91%</td><td>0.00%</td><td style="color:var(--green);">+2.91%</td></tr>
-          <tr><td>2025-07..08</td><td><span class="badge amber">CASH</span></td><td style="color:var(--red);">-7.96%</td><td>0.00%</td><td style="color:var(--green);">+7.96%</td></tr>
-          <tr><td>2025-10</td><td><span class="badge green">RISK-ON</span></td><td style="color:var(--green);">+2.36%</td><td style="color:var(--green);">+2.96%</td><td style="color:var(--green);">+0.61%</td></tr>
-          <tr><td>2026-03</td><td><span class="badge amber">CASH</span></td><td style="color:var(--red);">-5.43%</td><td>0.00%</td><td style="color:var(--green);">+5.43%</td></tr>
-          <tr><td>2026-08..10</td><td><span class="badge amber">CASH</span></td><td style="color:var(--red);">-5.62%</td><td style="color:var(--red);">-3.38%</td><td style="color:var(--green);">+2.24%</td></tr>
+          <tr><td>2024-10..11</td><td><span class="status-pill warn">Cash</span></td><td style="color:var(--negative);">-2.91%</td><td>0.00%</td><td style="color:var(--positive);">+2.91%</td></tr>
+          <tr><td>2025-07..08</td><td><span class="status-pill warn">Cash</span></td><td style="color:var(--negative);">-7.96%</td><td>0.00%</td><td style="color:var(--positive);">+7.96%</td></tr>
+          <tr><td>2025-10</td><td><span class="status-pill pos">Invested</span></td><td style="color:var(--positive);">+2.36%</td><td style="color:var(--positive);">+2.96%</td><td style="color:var(--positive);">+0.61%</td></tr>
+          <tr><td>2026-03</td><td><span class="status-pill warn">Cash</span></td><td style="color:var(--negative);">-5.43%</td><td>0.00%</td><td style="color:var(--positive);">+5.43%</td></tr>
+          <tr><td>2026-08..10</td><td><span class="status-pill warn">Cash</span></td><td style="color:var(--negative);">-5.62%</td><td style="color:var(--negative);">-3.38%</td><td style="color:var(--positive);">+2.24%</td></tr>
         </tbody>
       </table>
     </div>
@@ -1005,15 +919,15 @@
 
     function toggleTheme() {
       const root = document.documentElement;
-      const next = root.getAttribute('data-theme') === 'dark' ? 'cream' : 'dark';
+      const next = root.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
       root.setAttribute('data-theme', next);
-      document.getElementById('theme-btn').innerText = next === 'dark' ? '☀️' : '🌙';
+      document.getElementById('theme-btn').innerText = next === 'dark' ? 'Light' : 'Dark';
     }
 
     function toggleArtifactPanel() {
       const panel = document.getElementById('artifact-panel');
       panel.classList.toggle('closed');
-      setTimeout(resizeCharts, 250);
+      setTimeout(resizeCharts, 220);
     }
 
     function switchArtifactTab(tab) {
@@ -1021,7 +935,7 @@
         document.getElementById('atab-' + t).style.display = (t === tab) ? 'flex' : 'none';
         document.getElementById('atab-btn-' + t).classList.toggle('active', t === tab);
       });
-      if (tab === 'chart') setTimeout(resizeCharts, 50);
+      if (tab === 'chart') setTimeout(resizeCharts, 40);
     }
 
     function initCharts() {
@@ -1036,20 +950,20 @@
       });
 
       candleSeries = mainChart.addCandlestickSeries({
-        upColor: '#089981', downColor: '#f23645',
-        borderUpColor: '#089981', borderDownColor: '#f23645',
-        wickUpColor: '#089981', wickDownColor: '#f23645',
+        upColor: '#2E9B78', downColor: '#D65252',
+        borderUpColor: '#2E9B78', borderDownColor: '#D65252',
+        wickUpColor: '#2E9B78', wickDownColor: '#D65252',
       });
 
       volumeSeries = mainChart.addHistogramSeries({ priceFormat: { type: 'volume' }, priceScaleId: '' });
       volumeSeries.priceScale().applyOptions({ scaleMargins: { top: 0.82, bottom: 0 } });
 
-      ema12Series = mainChart.addLineSeries({ color: '#2962ff', lineWidth: 1.5 });
-      ema26Series = mainChart.addLineSeries({ color: '#ff9800', lineWidth: 1.5 });
+      ema12Series = mainChart.addLineSeries({ color: '#4A89DC', lineWidth: 1.25 });
+      ema26Series = mainChart.addLineSeries({ color: '#C89128', lineWidth: 1.25 });
 
-      fanUpSeries = mainChart.addLineSeries({ color: 'rgba(56, 189, 248, 0.75)', lineWidth: 1, lineStyle: 2 });
-      fanExpSeries = mainChart.addLineSeries({ color: '#d97757', lineWidth: 2, lineStyle: 2 });
-      fanLowSeries = mainChart.addLineSeries({ color: 'rgba(56, 189, 248, 0.75)', lineWidth: 1, lineStyle: 2 });
+      fanUpSeries = mainChart.addLineSeries({ color: 'rgba(161, 159, 153, 0.55)', lineWidth: 1, lineStyle: 2 });
+      fanExpSeries = mainChart.addLineSeries({ color: '#C96A4B', lineWidth: 1.75, lineStyle: 2 });
+      fanLowSeries = mainChart.addLineSeries({ color: 'rgba(161, 159, 153, 0.55)', lineWidth: 1, lineStyle: 2 });
 
       rsiChart = LightweightCharts.createChart(rsiEl, {
         layout: { background: { type: 'solid', color: '#131722' }, textColor: '#787b86', fontSize: 10 },
@@ -1057,7 +971,7 @@
         rightPriceScale: { borderColor: '#2a2e39', scaleMargins: { top: 0.1, bottom: 0.1 } },
         timeScale: { borderColor: '#2a2e39', visible: false },
       });
-      rsiSeries = rsiChart.addLineSeries({ color: '#d97757', lineWidth: 1.5 });
+      rsiSeries = rsiChart.addLineSeries({ color: '#A19F99', lineWidth: 1.25 });
 
       mainChart.timeScale().subscribeVisibleLogicalRangeChange(r => {
         if (r) rsiChart.timeScale().setVisibleLogicalRange(r);
@@ -1077,7 +991,7 @@
       }
     }
 
-    async function bootClaudeApp() {
+    async function bootApp() {
       initCharts();
       try {
         const snapRes = await fetch('./snapshot.json');
@@ -1096,25 +1010,21 @@
     async function syncWithRender() {
       const dot = document.getElementById('api-dot');
       const lbl = document.getElementById('api-label');
-      dot.className = 'dot sync';
-      lbl.innerText = 'Syncing Render ML Brain...';
+      dot.className = 'status-indicator sync';
+      lbl.innerText = 'Syncing Render Backend...';
 
       try {
         const res = await fetch(`${API_BASE}/api/signals`, { mode: 'cors' });
-        if (!res.ok) throw new Error('Render waking');
+        if (!res.ok) throw new Error('Waking');
         const data = await res.json();
         applySignals(data);
         await loadChartForSymbol(CURRENT_SYMBOL);
-        dot.className = 'dot';
-        lbl.innerText = 'Render ML Brain: Connected';
+        dot.className = 'status-indicator';
+        lbl.innerText = 'Render Engine Connected';
       } catch (e) {
-        dot.className = 'dot sync';
-        lbl.innerText = 'Render Ready (Snapshot Active)';
+        dot.className = 'status-indicator sync';
+        lbl.innerText = 'Local Snapshot Active';
       }
-    }
-
-    async function pingRenderBackend() {
-      await syncWithRender();
     }
 
     function applySignals(payload) {
@@ -1124,10 +1034,9 @@
 
       const isCash = payload.regime === 'CASH_PRESERVATION';
       const pill = document.getElementById('header-regime-pill');
-      pill.className = 'regime-pill ' + (isCash ? 'cash' : 'riskon');
-      document.getElementById('regime-emoji').innerText = isCash ? '🛡️' : '🟢';
-      document.getElementById('regime-title').innerText = isCash ? 'CASH PRESERVATION (100% W_settled)' : 'RISK-ON DEPLOYMENT';
-      document.getElementById('regime-sub').innerText = `| Drift: ${payload.market_expected_drift_pct >= 0 ? '+' : ''}${payload.market_expected_drift_pct}% | Crash: ${(payload.market_average_crash_probability * 100).toFixed(1)}%`;
+      pill.className = 'regime-tag ' + (isCash ? 'cash' : 'riskon');
+      document.getElementById('regime-title').innerText = isCash ? 'REGIME: CASH PRESERVATION' : 'REGIME: RISK-ON';
+      document.getElementById('regime-sub').innerText = `| Drift: ${payload.market_expected_drift_pct >= 0 ? '+' : ''}${payload.market_expected_drift_pct}% | P_breach: ${(payload.market_average_crash_probability * 100).toFixed(1)}%`;
 
       renderSidebarWatchlist();
     }
@@ -1138,13 +1047,13 @@
       SIGNALS.forEach(s => {
         const div = document.createElement('div');
         div.className = 'nav-item' + (s.symbol === CURRENT_SYMBOL ? ' active' : '');
-        const col = s.predicted_return_pct >= 0 ? 'var(--green)' : 'var(--red)';
+        const col = s.predicted_return_pct >= 0 ? 'var(--positive)' : 'var(--negative)';
         div.onclick = () => askBrain(`Analyze ${s.symbol}.NS live with my ML brain`);
         div.innerHTML = `
-          <span style="font-weight:600; color:var(--text-primary);">${s.symbol}</span>
-          <span class="mono" style="font-size:11.5px;">
+          <span style="font-weight:500; color:var(--text-primary);">${s.symbol}</span>
+          <span class="mono" style="font-size:11px;">
             ₹${s.close_price.toFixed(1)}
-            <b style="color:${col}; margin-left:4px;">${s.predicted_return_pct >= 0 ? '+' : ''}${s.predicted_return_pct.toFixed(1)}%</b>
+            <span style="color:${col}; margin-left:4px;">${s.predicted_return_pct >= 0 ? '+' : ''}${s.predicted_return_pct.toFixed(1)}%</span>
           </span>
         `;
         box.appendChild(div);
@@ -1173,7 +1082,7 @@
       candleSeries.setData(candles.map(c => ({ time: c.time, open: c.open, high: c.high, low: c.low, close: c.close })));
       volumeSeries.setData(candles.map(c => ({
         time: c.time, value: c.volume,
-        color: c.close >= c.open ? 'rgba(8, 153, 129, 0.35)' : 'rgba(242, 54, 69, 0.35)'
+        color: c.close >= c.open ? 'rgba(46, 155, 120, 0.3)' : 'rgba(214, 82, 82, 0.3)'
       })));
       ema12Series.setData(candles.map(c => ({ time: c.time, value: c.ema12 })));
       ema26Series.setData(candles.map(c => ({ time: c.time, value: c.ema26 })));
@@ -1189,32 +1098,32 @@
 
       const last = candles[candles.length - 1];
       const sig = chartPayload.signal || SIGNALS.find(s => s.symbol === sym) || {};
-      document.getElementById('art-title').innerText = `NSE:${sym} · Live ML Brain Artifact`;
-      document.getElementById('art-subtitle').innerText = `${chartPayload.sector || 'NSE Equity'} · 120D Candles + 20D Evidential Cone`;
+      document.getElementById('art-title').innerText = `NSE:${sym} — ${chartPayload.sector || 'Equity'}`;
+      document.getElementById('art-subtitle').innerText = `120D OHLCV & 20D Conformal Forecast (q̂=1.3644)`;
 
       const chg = sig.change_1d_pct !== undefined ? sig.change_1d_pct : 0;
-      const chgCol = chg >= 0 ? 'var(--green)' : 'var(--red)';
-      document.getElementById('art-px').innerHTML = `₹${last.close.toFixed(2)} <span style="font-size:12px; color:${chgCol};">${chg >= 0 ? '+' : ''}${chg.toFixed(2)}%</span>`;
+      const chgCol = chg >= 0 ? 'var(--positive)' : 'var(--negative)';
+      document.getElementById('art-px').innerHTML = `₹${last.close.toFixed(2)} <span style="font-size:11.5px; color:${chgCol};">${chg >= 0 ? '+' : ''}${chg.toFixed(2)}%</span>`;
 
       if (sig.predicted_return_pct !== undefined) {
         document.getElementById('art-gamma').innerText = `${sig.predicted_return_pct >= 0 ? '+' : ''}${sig.predicted_return_pct.toFixed(2)}%`;
-        document.getElementById('art-gamma').style.color = sig.predicted_return_pct >= 0 ? 'var(--green)' : 'var(--red)';
-        document.getElementById('art-unc').innerText = `σ_a: ${sig.aleatoric_vol_pct.toFixed(2)}% | σ²_e: ${sig.epistemic_uncertainty.toFixed(4)}`;
+        document.getElementById('art-gamma').style.color = sig.predicted_return_pct >= 0 ? 'var(--positive)' : 'var(--negative)';
+        document.getElementById('art-unc').innerText = `${sig.aleatoric_vol_pct.toFixed(2)}% / ${sig.epistemic_uncertainty.toFixed(4)}`;
         document.getElementById('art-pb').innerText = `${(sig.drawdown_crash_prob * 100).toFixed(1)}%`;
       }
       mainChart.timeScale().fitContent();
     }
 
-    function updateTelemetryArtifact(sym, tele, sig) {
+    function updateTelemetryArtifact(sym, tele) {
       document.getElementById('brain-sym-lbl').innerText = sym;
       const headBody = document.getElementById('ensemble-heads-tbody');
       const members = (tele && tele.ensemble_members) || [];
       if (members.length > 0) {
         headBody.innerHTML = members.map(m => {
-          const col = m.predicted_20d_return_pct >= 0 ? 'var(--green)' : 'var(--red)';
+          const col = m.predicted_20d_return_pct >= 0 ? 'var(--positive)' : 'var(--negative)';
           return `<tr>
-            <td style="font-weight:600;">${m.member_id}</td>
-            <td style="color:${col}; font-weight:700;">${m.predicted_20d_return_pct >= 0 ? '+' : ''}${m.predicted_20d_return_pct.toFixed(2)}%</td>
+            <td style="font-weight:500;">${m.member_id}</td>
+            <td style="color:${col}; font-weight:600;">${m.predicted_20d_return_pct >= 0 ? '+' : ''}${m.predicted_20d_return_pct.toFixed(2)}%</td>
             <td>${m.aleatoric_sigma_pct.toFixed(2)}%</td>
             <td>${m.epistemic_var.toFixed(5)}</td>
             <td>${m.tail_breach_prob_pct.toFixed(1)}%</td>
@@ -1242,45 +1151,47 @@
 
       if (sim.mode === 'PORTFOLIO') {
         document.getElementById('led-taxes').innerText = fmt(sim.total_statutory_charges_inr || 0);
-        receipt.innerHTML = `<b style="color:var(--claude-accent);">[${sim.gate_status}]</b> ${sim.message}`;
+        receipt.innerHTML = `<span class="mono" style="font-weight:600;">[${sim.gate_status}]</span> ${sim.message}`;
         if (sim.allocations && sim.allocations.length) {
           tbody.innerHTML = sim.allocations.map(a => `
             <tr>
-              <td style="font-weight:600;">${a.symbol}</td>
+              <td style="font-weight:500;">${a.symbol}</td>
               <td>${a.shares}</td>
               <td>₹${a.price_inr.toFixed(1)}</td>
               <td>${fmt(a.notional_inr)}</td>
-              <td style="color:var(--red);">₹${a.statutory_tax_inr.toFixed(1)}</td>
+              <td style="color:var(--negative);">₹${a.statutory_tax_inr.toFixed(1)}</td>
             </tr>
           `).join('');
         } else {
-          tbody.innerHTML = `<tr><td colspan="5" style="text-align:center; color:var(--amber); padding:14px;">🛡️ 100% Settled Cash Preserved</td></tr>`;
+          tbody.innerHTML = `<tr><td colspan="5" style="text-align:center; color:var(--text-muted); padding:14px;">100% Settled Cash Preserved</td></tr>`;
         }
       } else if (sim.order) {
         const o = sim.order;
         document.getElementById('led-taxes').innerText = fmt(o.statutory_charges_inr || 0);
         const sig = (sim.cryptographic_proof && sim.cryptographic_proof.ed25519_signature) || '';
         receipt.innerHTML = `
-          <div><b style="color:var(--green);">[${sim.gate_status}]</b> ${o.side} ${o.quantity} × ${o.symbol}.NS @ ₹${o.limit_price.toFixed(2)}</div>
-          <div class="mono" style="font-size:11px; color:var(--text-muted); margin-top:4px;">Ed25519 Sig: 0x${sig ? sig.slice(0, 36) : 'VETOED'}...</div>
+          <div><span class="mono" style="font-weight:600;">[${sim.gate_status}]</span> ${o.side} ${o.quantity} × ${o.symbol}.NS @ ₹${o.limit_price.toFixed(2)}</div>
+          <div class="mono" style="font-size:10.5px; color:var(--text-muted); margin-top:4px;">Ed25519: ${sig ? sig.slice(0, 40) + '...' : 'VETOED'}</div>
         `;
         tbody.innerHTML = `
           <tr>
-            <td style="font-weight:600;">${o.symbol}</td>
+            <td style="font-weight:500;">${o.symbol}</td>
             <td>${o.quantity}</td>
             <td>₹${o.limit_price.toFixed(1)}</td>
             <td>${fmt(o.notional_value_inr)}</td>
-            <td style="color:var(--red);">₹${o.statutory_charges_inr.toFixed(1)}</td>
+            <td style="color:var(--negative);">₹${o.statutory_charges_inr.toFixed(1)}</td>
           </tr>
         `;
       }
     }
 
-    function formatClaudeMarkdown(md) {
+    function cleanFormatMarkdown(md) {
       if (!md) return '';
-      return md
-        .replace(/^### (.*)$/gm, '<h3>$1</h3>')
-        .replace(/^#### (.*)$/gm, '<h4>$1</h4>')
+      // Strip decorative emojis if any come from backend strings
+      const stripped = md.replace(/[\u{1F300}-\u{1FAFF}\u{2600}-\u{27BF}\u{FE0F}]/gu, '');
+      return stripped
+        .replace(/^###\s*(.*)$/gm, '<h3>$1</h3>')
+        .replace(/^####\s*(.*)$/gm, '<h4>$1</h4>')
         .replace(/\*\*([^*]+)\*\*/g, '<b>$1</b>')
         .replace(/`([^`]+)`/g, '<code>$1</code>')
         .replace(/\n/g, '<br/>');
@@ -1289,26 +1200,26 @@
     function resetConversation() {
       const container = document.getElementById('chat-container');
       container.innerHTML = `
-        <div class="claude-hero" id="hero-welcome">
-          <h1 class="serif"><span class="claude-star">✶</span> What shall we analyze on NSE today?</h1>
-          <p>Every message you send queries live Yahoo Finance NSE data and runs through your trained <b>AlphaNiti v25.0 ML Brain</b> (3-Member Evidential Deep Ensemble, Conformal 90% Bounds, Regime Switch Gate, Finance Act 2026 Taxes &amp; Ed25519 Safety Kernel).</p>
+        <div class="hero-block" id="hero-welcome">
+          <h1 class="serif">Institutional Equity Research &amp; Execution</h1>
+          <p>Enter a query below to evaluate any NSE security or construct an integer-sized portfolio against live market data, our 3-member Evidential Deep Ensemble, Split-Conformal bounds (q̂ = 1.3644), and the Finance Act 2026 safety kernel.</p>
         </div>
-        <div class="starter-grid" id="starter-grid">
-          <div class="starter-card" onclick="askBrain('Should I buy RELIANCE right now with ₹1,00,000?')">
-            <div class="starter-title"><span>📈</span> <span>Single-Stock ML Brain Verdict</span></div>
-            <div class="starter-desc">"Should I buy RELIANCE right now with ₹1,00,000?"</div>
+        <div class="prompt-grid" id="starter-grid">
+          <div class="prompt-card" onclick="askBrain('Should I buy RELIANCE right now with ₹1,00,000?')">
+            <div class="prompt-card-title">Single-Security Evaluation</div>
+            <div class="prompt-card-desc">Evaluate RELIANCE.NS for ₹1,00,000 with 20-day evidential return, tail risk, and statutory tax breakdown.</div>
           </div>
-          <div class="starter-card" onclick="askBrain('Compare TCS and INFY using live NSE data')">
-            <div class="starter-title"><span>⚖️</span> <span>Head-to-Head Stock Comparison</span></div>
-            <div class="starter-desc">"Compare TCS and INFY using live NSE data"</div>
+          <div class="prompt-card" onclick="askBrain('Compare TCS and INFY using live NSE data')">
+            <div class="prompt-card-title">Cross-Sectional Comparison</div>
+            <div class="prompt-card-desc">Compare TCS.NS and INFY.NS across 20-day expected drift, aleatoric volatility, and 90% conformal floor.</div>
           </div>
-          <div class="starter-card" onclick="askBrain('Where should I invest ₹2,50,000 today?')">
-            <div class="starter-title"><span>🧮</span> <span>Branch &amp; Bound Portfolio Sizer</span></div>
-            <div class="starter-desc">"Where should I invest ₹2,50,000 today?"</div>
+          <div class="prompt-card" onclick="askBrain('Where should I invest ₹2,50,000 today?')">
+            <div class="prompt-card-title">Discrete Portfolio Allocation</div>
+            <div class="prompt-card-desc">Run the Branch-and-Bound lattice solver for ₹2,50,000 across qualified NSE equities.</div>
           </div>
-          <div class="starter-card" onclick="askBrain('Analyze SUNPHARMA.NS live with my ML brain')">
-            <div class="starter-title"><span>🌐</span> <span>Live Fetch Any Custom NSE Ticker</span></div>
-            <div class="starter-desc">"Analyze SUNPHARMA.NS live with my ML brain"</div>
+          <div class="prompt-card" onclick="askBrain('Analyze SUNPHARMA.NS live with my ML brain')">
+            <div class="prompt-card-title">Dynamic Ticker Inference</div>
+            <div class="prompt-card-desc">Fetch live 6-month NSE history for SUNPHARMA.NS (or any custom .NS symbol) and run ensemble inference.</div>
           </div>
         </div>
       `;
@@ -1331,35 +1242,22 @@
       const container = document.getElementById('chat-container');
       const scrollEl = document.getElementById('chat-scroll');
 
-      // 1. User message row
       const uRow = document.createElement('div');
-      uRow.className = 'msg-row-user';
-      uRow.innerHTML = `<div class="user-bubble">${queryText.replace(/</g, '&lt;')}</div>`;
+      uRow.className = 'msg-user-row';
+      uRow.innerHTML = `<div class="msg-user-box">${queryText.replace(/</g, '&lt;')}</div>`;
       container.appendChild(uRow);
 
-      // 2. Claude Assistant row with Extended Thinking Accordion
       const aRow = document.createElement('div');
-      aRow.className = 'msg-row-assistant';
-      const thinkId = 'think-' + Date.now();
+      aRow.className = 'msg-response-row';
+      const traceId = 'trace-' + Date.now();
       const proseId = 'prose-' + Date.now();
       aRow.innerHTML = `
-        <div class="assistant-avatar">✶</div>
-        <div class="assistant-body">
-          <div class="thinking-box open" id="${thinkId}">
-            <div class="thinking-header" onclick="document.getElementById('${thinkId}').classList.toggle('open')">
-              <span id="${thinkId}-lbl">⚡ Querying Live NSE Data &amp; Running 3-Head Evidential Neural Ensemble...</span>
-              <span>▾</span>
-            </div>
-            <div class="thinking-steps">
-              <div>1. Connecting to Render Cloud API (${API_BASE}/api/ask-brain)</div>
-              <div>2. Computing 20 causal features (RSI-14, EMA-12/26, Parkinson Vol, Market Rel Mom) over 60D window</div>
-              <div>3. Forward pass through 3-Member Evidential GRU-Attention Ensemble (γ, ν, α, β, P_breach)</div>
-              <div>4. Evaluating Regime Switch Gate &amp; 3-Gate Formal Safety Kernel + Finance Act 2026 Statutory Taxes</div>
-            </div>
-          </div>
-          <div class="assistant-prose" id="${proseId}">
-            <span style="color:var(--text-muted);">Synthesizing live market telemetry...</span>
-          </div>
+        <div class="trace-bar" id="${traceId}">
+          <span>Executing live NSE query &amp; 3-member Evidential Ensemble...</span>
+          <span>RENDER API</span>
+        </div>
+        <div class="response-prose" id="${proseId}">
+          <span style="color:var(--text-muted);">Loading telemetry...</span>
         </div>
       `;
       container.appendChild(aRow);
@@ -1367,8 +1265,8 @@
 
       const cap = parseFloat(document.getElementById('inp-capital').value || '100000') || 100000;
       const forceRisk = document.getElementById('inp-force-riskon').checked;
-
       const t0 = performance.now();
+
       try {
         const res = await fetch(`${API_BASE}/api/ask-brain`, {
           method: 'POST',
@@ -1387,21 +1285,19 @@
         const data = await res.json();
         const elapsed = ((performance.now() - t0) / 1000).toFixed(2);
 
-        const thinkBox = document.getElementById(thinkId);
-        thinkBox.classList.remove('open');
-        document.getElementById(`${thinkId}-lbl`).innerText = `✓ Thought for ${elapsed}s · Live Feed: ${data.data_source} · Intent: ${data.intent}`;
+        document.getElementById(traceId).innerHTML = `
+          <span>Feed: ${data.data_source} · Pipeline: ${data.intent}</span>
+          <span>${elapsed}s</span>
+        `;
 
         const sym = data.focus_symbol || CURRENT_SYMBOL;
-        document.getElementById(proseId).innerHTML = formatClaudeMarkdown(data.reply_markdown) + `
-          <div class="artifact-trigger-card" onclick="document.getElementById('artifact-panel').classList.remove('closed'); switchArtifactTab('chart'); resizeCharts();">
-            <div style="display:flex; align-items:center; gap:10px;">
-              <span style="font-size:18px; color:var(--claude-accent);">❖</span>
-              <div>
-                <div style="font-weight:600; font-size:13px;">Interactive Artifact: NSE:${sym} Chart &amp; 3-Head Neural Telemetry</div>
-                <div class="mono" style="font-size:11px; color:var(--text-muted);">Click to inspect 20D Evidential Cone, 20 Causal Features &amp; Ed25519 Receipt →</div>
-              </div>
+        document.getElementById(proseId).innerHTML = cleanFormatMarkdown(data.reply_markdown) + `
+          <div class="sheet-link-card" onclick="document.getElementById('artifact-panel').classList.remove('closed'); switchArtifactTab('chart'); resizeCharts();">
+            <div>
+              <div style="font-weight:600; font-size:12.5px;">NSE:${sym} — Chart, Ensemble Heads &amp; 20 Causal Features</div>
+              <div class="mono" style="font-size:11px; color:var(--text-muted);">Open right-hand inspector panel</div>
             </div>
-            <span class="badge green">LIVE ARTIFACT</span>
+            <span class="mono" style="font-size:11px; color:var(--text-secondary);">View →</span>
           </div>
         `;
 
@@ -1411,25 +1307,27 @@
         }
         if (sym) {
           await loadChartForSymbol(sym);
-          updateTelemetryArtifact(sym, data.brain_telemetry, data.signal);
+          updateTelemetryArtifact(sym, data.brain_telemetry);
         }
         if (data.simulation) {
           updateLedgerArtifact(data.simulation);
         }
       } catch (err) {
-        // Instant fallback if Render container is waking
         const focus = SIGNALS.find(s => queryText.toUpperCase().includes(s.symbol)) || SIGNALS[0];
-        document.getElementById(`${thinkId}-lbl`).innerText = `✓ Processed via Embedded Snapshot Engine (${focus.symbol})`;
+        document.getElementById(traceId).innerHTML = `
+          <span>Feed: SNAPSHOT_FALLBACK · Symbol: ${focus.symbol}</span>
+          <span>Local</span>
+        `;
         document.getElementById(proseId).innerHTML = `
-          <h3>🧠 AlphaNiti v25.0 ML Brain — ${focus.symbol}.NS</h3>
-          <p>Spot Price: <code>₹${focus.close_price.toFixed(2)}</code> | Expected 20D Return: <b>${focus.predicted_return_pct >= 0 ? '+' : ''}${focus.predicted_return_pct.toFixed(2)}%</b> | Crash Risk: <code>${(focus.drawdown_crash_prob * 100).toFixed(1)}%</code> → <b>${focus.recommended_action}</b></p>
+          <h3>AlphaNiti v25.0 — ${focus.symbol}.NS</h3>
+          <p>Spot Price: <code>₹${focus.close_price.toFixed(2)}</code> | Expected 20D Return: <b>${focus.predicted_return_pct >= 0 ? '+' : ''}${focus.predicted_return_pct.toFixed(2)}%</b> | Tail Breach Prob: <code>${(focus.drawdown_crash_prob * 100).toFixed(1)}%</code> → <b>${focus.recommended_action}</b></p>
         `;
         await loadChartForSymbol(focus.symbol);
       }
       scrollEl.scrollTop = scrollEl.scrollHeight;
     }
 
-    window.addEventListener('DOMContentLoaded', bootClaudeApp);
+    window.addEventListener('DOMContentLoaded', bootApp);
   </script>
 </body>
 </html>
