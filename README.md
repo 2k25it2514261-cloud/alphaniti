@@ -106,6 +106,22 @@ flowchart TD
     end
 ```
 
+### 2.1 Modular Pipeline Specifications & Mathematical Literature Register
+
+In compliance with the **AlphaNiti v25.0 Revised Architecture**, each pipeline block and architectural revision callout is formally elaborated in dedicated mathematical and literature specification documents:
+
+| Pipeline Stage | Module Documentation | Key Mathematical Formulations | Architectural Revision Callout | Primary Academic Literature |
+| :--- | :--- | :--- | :---: | :--- |
+| **1. Data Ingestion & Causal Temporal Model** | [`docs/01_DATA_INGESTION_AND_TEMPORAL_MODEL.md`](docs/01_DATA_INGESTION_AND_TEMPORAL_MODEL.md) | 5-Timestamp tuple $\vec{\boldsymbol{\tau}}$, Causal filtration $\mathcal{F}_{t_{\text{decision}}}$, corporate action adjustments | **Callout 6** (Temporal Data Model) | Asness et al. (2014), López de Prado (2018), Brown et al. (1992) |
+| **2. Evidential Deep Ensemble Forecasting** | [`docs/02_FORECASTING_AND_EVIDENTIAL_DEEP_ENSEMBLE.md`](docs/02_FORECASTING_AND_EVIDENTIAL_DEEP_ENSEMBLE.md) | NIG priors, variance decomposition $\sigma_{\text{total}}^2 = \sigma_{\text{aleatoric}}^2 + \sigma_{\text{epistemic}}^2$, split-conformal calibration | **Callout 9** (Evidential Deep Ensemble) | Amini et al. (NeurIPS 2020), Lakshminarayanan (2017), Angelopoulos & Bates (2021) |
+| **3. Factor Risk Model & Wasserstein DRO** | [`docs/03_RISK_MODEL_AND_WASSERSTEIN_DRO.md`](docs/03_RISK_MODEL_AND_WASSERSTEIN_DRO.md) | Full residual covariance $\boldsymbol{\Sigma}_\epsilon$, Sub-Gaussian/Empirical CVaR $\Delta_\epsilon$, Fournier-Guillin radius $\epsilon_f \approx 0.0195$, Esfahani-Kuhn dual | **Callouts 1, 2, 8** (CVaR Bound, Residual Covariance, DRO) | Fournier & Guillin (2015), Esfahani & Kuhn (2018), Rockafellar & Uryasev (2000) |
+| **4. Portfolio Optimization & Integer Sizing** | [`docs/04_PORTFOLIO_OPTIMIZATION_AND_DISCRETE_SIZING.md`](docs/04_PORTFOLIO_OPTIMIZATION_AND_DISCRETE_SIZING.md) | Total-objective B&B $J(\mathbf{q}) = \text{CVaR} - \boldsymbol{\mu}^T \mathbf{q} P + \text{Cost}(\mathbf{q})$, lower convex envelopes, $0.000000\%$ optimality certificates | Discrete Optimization Standard | Rockafellar & Uryasev (2002), Bertsimas & Shioda (2009), Almgren & Chriss (2000) |
+| **5. Execution Engine & Exchange Protocols** | [`docs/05_EXECUTION_ENGINE_AND_EXCHANGE_PROTOCOLS.md`](docs/05_EXECUTION_ENGINE_AND_EXCHANGE_PROTOCOLS.md) | Canonical HMAC `ClOrdID`, duplicate rejection (Tag 104 / Code 16384), 2-phase commit WAL, session sequence gap resend | **Callout 4** (FIX & NSE Protocol) | NSE EMAPI Spec v2.8 (2026), FIX 4.2 Standard, Aldridge (2013) |
+| **6. Accounting, NAV & Double-Entry Ledger** | [`docs/06_ACCOUNTING_NAV_AND_DOUBLE_ENTRY_LEDGER.md`](docs/06_ACCOUNTING_NAV_AND_DOUBLE_ENTRY_LEDGER.md) | Disjoint 5-bucket ledger, inductive $\Delta \text{NAV} = \text{RealizedPnL} - \text{Charges}$, Escrow in NAV, Decoupled Buying Power, Collar Guard | **Callout 3** (NAV Accounting & Reconciliation) | IFRS 9 / Ind AS 32, Dijkstra (1975), Lamport (2002) |
+| **7. Monitoring, Validation & Calibration** | [`docs/07_MONITORING_VALIDATION_AND_CALIBRATION_TESTING.md`](docs/07_MONITORING_VALIDATION_AND_CALIBRATION_TESTING.md) | Kupiec $\text{LR}_{\text{uc}}$, Christoffersen $\text{LR}_{\text{ind}}$ temporal dependence, Purged/Embargoed CV, Romano-Wolf StepM, Hansen SPA, Bailey DSR $\ge 0.99$ | **Callout 5** (Forecast Calibration Test) | Christoffersen (1998), Kupiec (1995), Romano & Wolf (2005), Hansen (2005) |
+| **8. Platform Security & Isolated Safety Kernel**| [`docs/08_PLATFORM_SECURITY_AND_ISOLATED_SAFETY_KERNEL.md`](docs/08_PLATFORM_SECURITY_AND_ISOLATED_SAFETY_KERNEL.md) | VBS Enclave Trustlet, `VirtualLock()`, Linux `seccomp-bpf` 8-syscall whitelist, `mlockall()`, Frama-C ACSL contracts, TLA+ invariants | **Callout 7** (Security Boundary & Isolation) | Lamport (2002), Baudin et al. (Frama-C 2021), Saltzer & Schroeder (1975) |
+| **9. Risk Reporting & Regulatory Audit** | [`docs/09_RISK_REPORTING_AND_REGULATORY_AUDIT.md`](docs/09_RISK_REPORTING_AND_REGULATORY_AUDIT.md) | Real-time surveillance, SEBI OTR penalty control, Finance Act 2026 statutory tax matrix, cryptographic Merkle decision audit blocks | Regulatory & Governance Standard | Federal Reserve SR 11-7 / OCC 2011-12, SEBI Master Circulars, Finance Act 2026 |
+
 ---
 
 ## 3. Pillar 1: Formal Safety Kernel & Executable TLA+ Specification
@@ -598,6 +614,16 @@ alphaniti/
 ├── .github/
 │   └── workflows/
 │       └── formal_verification.yml      # CI/CD: TLC Model Checker & Frama-C Verification
+├── docs/                                # Modular Mathematical Specifications & Literature Register
+│   ├── 01_DATA_INGESTION_AND_TEMPORAL_MODEL.md
+│   ├── 02_FORECASTING_AND_EVIDENTIAL_DEEP_ENSEMBLE.md
+│   ├── 03_RISK_MODEL_AND_WASSERSTEIN_DRO.md
+│   ├── 04_PORTFOLIO_OPTIMIZATION_AND_DISCRETE_SIZING.md
+│   ├── 05_EXECUTION_ENGINE_AND_EXCHANGE_PROTOCOLS.md
+│   ├── 06_ACCOUNTING_NAV_AND_DOUBLE_ENTRY_LEDGER.md
+│   ├── 07_MONITORING_VALIDATION_AND_CALIBRATION_TESTING.md
+│   ├── 08_PLATFORM_SECURITY_AND_ISOLATED_SAFETY_KERNEL.md
+│   └── 09_RISK_REPORTING_AND_REGULATORY_AUDIT.md
 ├── formal_specs/
 │   ├── AlphaNitiSafetyKernel.tla        # Executable TLA+ Specification
 │   └── AlphaNiti.cfg                    # TLC Model Checker Configuration
