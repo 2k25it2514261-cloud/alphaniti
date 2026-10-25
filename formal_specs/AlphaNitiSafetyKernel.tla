@@ -141,7 +141,7 @@ BrokerTimeout(id) ==
         /\ UNCHANGED <<w_settled, w_escrow, w_recv, w_lien, w_payable, positions, prices, active_orders, merkle_root>>
 
 Next ==
-    \/ \E sym \in Symbols, q \in {1, 2}, px \in {PMin, PMin + 1}, c \in {1..MaxBudget} : SafetyKernelAuthorize(sym, q, px, c)
+    \/ \E sym \in Symbols, q \in {1, 2}, px \in {PMin, PMin + 1}, c \in 1..MaxBudget : SafetyKernelAuthorize(sym, q, px, c)
     \/ \E id \in {1, 2}, sym \in Symbols, q \in {1, 2}, px \in {PMin, PMin + 1}, c \in 1..MaxBudget : DispatchBuy(id, sym, q, px, c)
     \/ \E id \in {1, 2}, px \in {PMin}, fee \in {0, 1} : FillBuy(id, px, fee)
     \/ \E id \in {1, 2}, sym \in Symbols, q \in {1} : DispatchSell(id, sym, q)
