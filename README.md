@@ -372,7 +372,7 @@ $$J(\mathbf{q}) \equiv \text{CVaR}_\alpha(\mathbf{q}) - \sum_{i=1}^N \mu_i q_i P
 
 At search tree node $\mathcal{N}$ with bounds $\mathbf{l} \le \mathbf{q} \le \mathbf{u}$:
 
-$$z_{\text{LP}}(\mathcal{N}) \equiv \min_{\mathbf{q} \in [\mathbf{l}, \mathbf{u}], \gamma \in \mathbb{R}, \mathbf{s} \in \mathbb{R}_{\ge 0}^S} \left\{ \gamma + \frac{1}{(1-\alpha)S}\sum_{s=1}^S s_s - \sum_{i=1}^N \mu_i q_i P_i^{\text{eval}} + \sum_{i=1}^N \text{Cost}_i^{\text{cvx}}(q_i) \right\}$$
+$$z_{\text{LP}}(\mathcal{N}) \equiv \min_{\mathbf{q} \in [\mathbf{l}, \mathbf{u}], \gamma \in \mathbb{R}, \mathbf{s} \in \mathbb{R}_{\ge 0}^S} \left\lbrace \gamma + \frac{1}{(1-\alpha)S}\sum_{s=1}^S s_s - \sum_{i=1}^N \mu_i q_i P_i^{\text{eval}} + \sum_{i=1}^N \text{Cost}_i^{\text{cvx}}(q_i) \right\rbrace$$
 $$\text{subject to:} \quad s_s \ge -\sum_{i=1}^N q_i r_{i, s} P_i^{\text{eval}} - \gamma, \quad \forall s \in \{1, \dots, S\}$$
 
 **Theorem 2 (Valid Total-Objective Lower Bound)**:
@@ -467,7 +467,7 @@ $$\mathbf{X} = \big( \text{Entity}, \; \text{Field}, \; \text{Value}, \; \tau^{\
 
 **Causal Inclusion Operator**:
 
-$$\mathcal{F}_{t_{\text{decision}}} \equiv \left\{ \mathbf{X} \in \mathcal{D} \;\middle|\; \max\big(\tau^{\text{pub}}(\mathbf{X}), \; \tau^{\text{vendor}}(\mathbf{X}), \; \tau^{\text{ingest}}(\mathbf{X})\big) < t_{\text{decision}} \right\}$$
+$$\mathcal{F}_{t_{\text{decision}}} \equiv \left\lbrace \mathbf{X} \in \mathcal{D} \;\middle\vert\; \max\big(\tau^{\text{pub}}(\mathbf{X}), \; \tau^{\text{vendor}}(\mathbf{X}), \; \tau^{\text{ingest}}(\mathbf{X})\big) < t_{\text{decision}} \right\rbrace$$
 
 - Strict inequality ($<$) prevents same-millisecond lookahead.
 - Distributed nodes synchronize via Precision Time Protocol (PTP IEEE 1588); clock skew $> 100\text{ms}$ raises critical alerts.
