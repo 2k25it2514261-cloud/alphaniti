@@ -42,7 +42,7 @@ flowchart TD
 Let $\mathbf{r} _ t \in \mathbb{R}^N$ denote the excess return vector of $N$ tradable assets at time $t$. The returns are projected onto a $k$-dimensional orthogonal factor basis ($k \le 5$):
 
 $$
-\mathbf{r}_t = \mathbf{B} \mathbf{f}_t + \boldsymbol{\epsilon}_t, \qquad \mathbf{B}^T \mathbf{B} = \mathbf{I}_k, \qquad \mathbb{E}[\boldsymbol{\epsilon}_t \mid \mathbf{f}_t] = \mathbf{0}
+\mathbf{r} _ t = \mathbf{B} \mathbf{f} _ t + \boldsymbol{\epsilon} _ t, \qquad \mathbf{B}^T \mathbf{B} = \mathbf{I} _ k, \qquad \mathbb{E}[\boldsymbol{\epsilon} _ t \mid \mathbf{f} _ t] = \mathbf{0}
 $$
 
 where $\mathbf{B} \in \mathbb{R}^{N \times k}$ is the factor exposure loading matrix, $\mathbf{f} _ t \in \mathbb{R}^k$ is the latent factor realization vector, and $\boldsymbol{\epsilon} _ t \in \mathbb{R}^N$ is the residual disturbance vector.
@@ -51,7 +51,7 @@ where $\mathbf{B} \in \mathbb{R}^{N \times k}$ is the factor exposure loading ma
 For any portfolio allocation vector $\mathbf{w} \in \mathbb{R}^N$, the scalar portfolio loss $\mathcal{L}(\mathbf{w}, \mathbf{r} _ t) \equiv -\mathbf{w}^T \mathbf{r} _ t$ decomposes identically as:
 
 $$
-\mathcal{L}(\mathbf{w}, \mathbf{r}_t) = \underbrace{-\mathbf{v}^T \mathbf{f}_t}_{\text{Factor Loss } \mathcal{L}_f(\mathbf{v}, \mathbf{f}_t)} + \underbrace{(-\xi_t)}_{\text{Residual Loss } \mathcal{L}_\epsilon(\mathbf{w}, \boldsymbol{\epsilon}_t)}
+\mathcal{L}(\mathbf{w}, \mathbf{r} _ t) = \underbrace{-\mathbf{v}^T \mathbf{f} _ t} _ {\text{Factor Loss } \mathcal{L} _ f(\mathbf{v}, \mathbf{f} _ t)} + \underbrace{(-\xi _ t)} _ {\text{Residual Loss } \mathcal{L} _ \epsilon(\mathbf{w}, \boldsymbol{\epsilon} _ t)}
 $$
 
 where $\mathbf{v} \equiv \mathbf{B}^T \mathbf{w} \in \mathbb{R}^k$ represents the factor-space allocation vector, and $\xi _ t \equiv \mathbf{w}^T \boldsymbol{\epsilon} _ t$ is the scalar residual portfolio return.
@@ -62,14 +62,14 @@ In institutional literature, residual risk is frequently oversimplified as a dia
 1. **Full Residual Covariance Mode (Default Institutional Benchmark)**:
 
 $$
-\boldsymbol{\Sigma}_\epsilon \equiv \mathbb{E}[\boldsymbol{\epsilon}_t \boldsymbol{\epsilon}_t^T] \in \mathbb{R}^{N \times N}
+\boldsymbol{\Sigma} _ \epsilon \equiv \mathbb{E}[\boldsymbol{\epsilon} _ t \boldsymbol{\epsilon} _ t^T] \in \mathbb{R}^{N \times N}
 $$
 
    Estimated using Ledoit-Wolf analytical shrinkage towards a constant correlation target, preserving cross-sectional idiosyncratic dependencies.
 2. **Validated Diagonal Mode**: Permitted **only** if the empirical cross-sectional residual correlation test satisfies:
 
 $$
-\max_{i \ne j} |\operatorname{Corr}(\epsilon_{i, t}, \epsilon_{j, t})| < 0.08
+\max _ {i \ne j} |\text{Corr}(\epsilon _ {i, t}, \epsilon _ {j, t})| < 0.08
 $$
 
    If this empirical hypothesis is rejected, the full shrinkage covariance matrix is strictly retained.
@@ -77,7 +77,7 @@ $$
 The portfolio residual variance is computed without simplification:
 
 $$
-\sigma_\xi^2(\mathbf{w}) = \mathbf{w}^T \boldsymbol{\Sigma}_\epsilon \mathbf{w}
+\sigma _ \xi^2(\mathbf{w}) = \mathbf{w}^T \boldsymbol{\Sigma} _ \epsilon \mathbf{w}
 $$
 
 ---
@@ -87,7 +87,7 @@ $$
 By the sub-additivity axiom of Conditional Value-at-Risk (Rockafellar & Uryasev 2000):
 
 $$
-\text{CVaR}_\alpha(\mathbf{w}) \le \text{CVaR}_\alpha(\mathbf{v}^T \mathbf{f}) + \text{CVaR}_\alpha(\xi)
+\text{CVaR} _ \alpha(\mathbf{w}) \le \text{CVaR} _ \alpha(\mathbf{v}^T \mathbf{f}) + \text{CVaR} _ \alpha(\xi)
 $$
 
 To satisfy **Callout 1**, AlphaNiti eliminates unverified distribution-free claims and formalizes the exact tail bounds under explicit assumptions:
@@ -97,14 +97,14 @@ To satisfy **Callout 1**, AlphaNiti eliminates unverified distribution-free clai
 The residual scalar loss $\xi _ t = \mathbf{w}^T \boldsymbol{\epsilon} _ t$ is conditionally mean-zero sub-Gaussian with parameter $\sigma _ \xi^2(\mathbf{w})$:
 
 $$
-\mathbb{E}[\exp(\lambda \xi_t)] \le \exp\left( \frac{\lambda^2 \sigma_\xi^2(\mathbf{w})}{2} \right), \quad \forall \lambda \in \mathbb{R}
+\mathbb{E}[\exp(\lambda \xi _ t)] \le \exp\left( \frac{\lambda^2 \sigma _ \xi^2(\mathbf{w})}{2} \right), \quad \forall \lambda \in \mathbb{R}
 $$
 
 **Theorem 1 (Analytical Sub-Gaussian CVaR Bound)**:  
 Under Assumption 1, the CVaR at tail confidence $\alpha \in (0, 1)$ satisfies the explicit upper bound:
 
 $$
-\text{CVaR}_\alpha(\xi) \le \frac{\sigma_\xi(\mathbf{w})}{(1 - \alpha)\sqrt{2\pi}} \exp\left( -\frac{(\Phi^{-1}(\alpha))^2}{2} \right) \equiv \Delta_\epsilon^{\text{gauss}}(\mathbf{w}, \alpha)
+\text{CVaR} _ \alpha(\xi) \le \frac{\sigma _ \xi(\mathbf{w})}{(1 - \alpha)\sqrt{2\pi}} \exp\left( -\frac{(\Phi^{-1}(\alpha))^2}{2} \right) \equiv \Delta _ \epsilon^{\text{gauss}}(\mathbf{w}, \alpha)
 $$
 
 where $\Phi(\cdot)$ denotes the standard normal cumulative distribution function.
@@ -112,14 +112,14 @@ where $\Phi(\cdot)$ denotes the standard normal cumulative distribution function
 *Numerical Verification*: For $\alpha = 0.95$, $\Phi^{-1}(0.95) \approx 1.64485$. Under regulatory concentration constraints ($w _ i \le 0.05$ across $N=100$ assets) with idiosyncratic daily volatility $\sigma _ {\epsilon, i} \le 0.02$, $\sigma _ \xi(\mathbf{w}) \le 0.001$, yielding:
 
 $$
-\Delta_\epsilon^{\text{gauss}}(\mathbf{w}, 0.95) \le \frac{0.001}{0.05 \sqrt{2\pi}} \exp(-1.35277) \approx 0.00798 \times 0.2585 \approx 0.206\%
+\Delta _ \epsilon^{\text{gauss}}(\mathbf{w}, 0.95) \le \frac{0.001}{0.05 \sqrt{2\pi}} \exp(-1.35277) \approx 0.00798 \times 0.2585 \approx 0.206\%
 $$
 
 ### 3.2 Non-Gaussian / Empirical Conservative Bound (Callout 1 Alternative)
 If the Hill tail-index test on residuals rejects sub-Gaussianity ($\hat{\alpha} _ {\text{Hill}} < 4.0$), AlphaNiti automatically routes to a non-parametric empirical bootstrap bound:
 
 $$
-\Delta_\epsilon^{\text{emp}}(\mathbf{w}, \alpha) \equiv \text{Quantile}_{0.99}\left( \left\lbrace \text{CVaR}_\alpha(\mathbf{w}^T \boldsymbol{\epsilon}_s^{(b)}) \right\rbrace_{b=1}^B \right)
+\Delta _ \epsilon^{\text{emp}}(\mathbf{w}, \alpha) \equiv \text{Quantile} _ {0.99}\left( \left\lbrace \text{CVaR} _ \alpha(\mathbf{w}^T \boldsymbol{\epsilon} _ s^{(b)}) \right\rbrace _ {b=1}^B \right)
 $$
 
 ensuring valid conservative coverage without unsupported distribution-free assertions.
@@ -132,27 +132,27 @@ ensuring valid conservative coverage without unsupported distribution-free asser
 Let $\widehat{\mathbb{P}} _ S = \frac{1}{S}\sum _ {s=1}^S \delta _ {\mathbf{f} _ s}$ represent the empirical discrete measure over $S$ historical factor scenarios. The 1-Wasserstein ambiguity ball in $\mathbb{R}^k$ is:
 
 $$
-\mathbb{B}_{\epsilon_f}(\widehat{\mathbb{P}}_S) \equiv \left\lbrace \mathbb{Q} \in \mathcal{P}_1(\mathbb{R}^k) \;\middle\vert\; \mathcal{W}_1(\mathbb{Q}, \widehat{\mathbb{P}}_S) \le \epsilon_f(S, \delta) \right\rbrace
+\mathbb{B} _ {\epsilon _ f}(\widehat{\mathbb{P}} _ S) \equiv \left\lbrace \mathbb{Q} \in \mathcal{P} _ 1(\mathbb{R}^k) \;\middle\vert\; \mathcal{W} _ 1(\mathbb{Q}, \widehat{\mathbb{P}} _ S) \le \epsilon _ f(S, \delta) \right\rbrace
 $$
 
 ### 4.2 Fournier–Guillin Measure Concentration Theorem
 **Theorem 2 (Fournier & Guillin 2015, Theorem 2)**:  
-Let the factor distribution $\mathbb{P}$ satisfy the exponential moment condition $\mathbb{E}[\exp(\|\mathbf{f}\| _ 2^2 / \sigma _ f^2)] \le 2$. For dimension $k \ge 3$, there exist explicit positive constants $C _ 1, C _ 2$ such that for any sample size $S \ge 1$ and confidence parameter $\delta \in (0, 1)$:
+Let the factor distribution $\mathbb{P}$ satisfy the exponential moment condition $\mathbb{E}[\exp(\Vert \mathbf{f}\Vert _ 2^2 / \sigma _ f^2)] \le 2$. For dimension $k \ge 3$, there exist explicit positive constants $C _ 1, C _ 2$ such that for any sample size $S \ge 1$ and confidence parameter $\delta \in (0, 1)$:
 
 $$
-\mathbb{P}\left( \mathcal{W}_1(\mathbb{P}, \widehat{\mathbb{P}}_S) \le \epsilon_f(S, \delta) \right) \ge 1 - \delta
+\mathbb{P}\left( \mathcal{W} _ 1(\mathbb{P}, \widehat{\mathbb{P}} _ S) \le \epsilon _ f(S, \delta) \right) \ge 1 - \delta
 $$
 
 where the exact analytical constants are:
 
 $$
-C_1 = 2 \left( 1 + \sqrt{\frac{k}{2}} \right), \qquad C_2 = 2
+C _ 1 = 2 \left( 1 + \sqrt{\frac{k}{2}} \right), \qquad C _ 2 = 2
 $$
 
 and the certified ambiguity radius is:
 
 $$
-\epsilon_f(S, \delta) \equiv C_1 \sigma_f \left( \frac{\ln(C_2 / \delta)}{S} \right)^{1/k}
+\epsilon _ f(S, \delta) \equiv C _ 1 \sigma _ f \left( \frac{\ln(C _ 2 / \delta)}{S} \right)^{1/k}
 $$
 
 #### Exact Numerical Derivation:
@@ -163,7 +163,7 @@ For $k = 3$ factors, $S = 1,000$ daily scenarios, $\delta = 0.01$ (99% confidenc
 4. **Calculated Radius**:
 
 $$
-\epsilon_f = 4.44949 \times 0.025 \times 0.174338 = 0.111237 \times 0.174338 \approx \mathbf{0.01939} \approx \mathbf{0.0195}
+\epsilon _ f = 4.44949 \times 0.025 \times 0.174338 = 0.111237 \times 0.174338 \approx \mathbf{0.01939} \approx \mathbf{0.0195}
 $$
 
 ### 4.3 Exact Esfahani-Kuhn Convex Dual Program
@@ -171,16 +171,16 @@ By strong duality in optimal transport (Esfahani & Kuhn 2018), the infinite-dime
 
 $$
 \begin{aligned}
-\min_{\gamma \in \mathbb{R}, \lambda \ge 0, \mathbf{s} \in \mathbb{R}_{\ge 0}^S} \quad & \gamma + \lambda \epsilon_f + \frac{1}{(1 - \alpha)S} \sum_{s=1}^S s_s \\
-\text{subject to:} \quad & s_s \ge -\mathbf{v}^T \mathbf{f}_s - \gamma, \quad \forall s \in \lbrace 1, \dots, S\rbrace  \\
-& \|\mathbf{v}\|_2 \le \lambda (1 - \alpha)
+\min _ {\gamma \in \mathbb{R}, \lambda \ge 0, \mathbf{s} \in \mathbb{R} _ {\ge 0}^S} \quad & \gamma + \lambda \epsilon _ f + \frac{1}{(1 - \alpha)S} \sum _ {s=1}^S s _ s \\
+\text{subject to:} \quad & s _ s \ge -\mathbf{v}^T \mathbf{f} _ s - \gamma, \quad \forall s \in \lbrace 1, \dots, S\rbrace  \\
+& \Vert \mathbf{v}\Vert _ 2 \le \lambda (1 - \alpha)
 \end{aligned}
 $$
 
 **Complete Out-of-Sample Portfolio Tail Guarantee**:
 
 $$
-\mathbb{P}\left( \text{CVaR}_\alpha^{\text{true}}(\mathbf{w}^{\star}) \le \sup_{\mathbb{Q} \in \mathbb{B}_{\epsilon_f}} \text{CVaR}_\alpha^{\mathbb{Q}}(\mathbf{v}^T \mathbf{f}) + \Delta_\epsilon(\mathbf{w}^{\star}, \alpha) \right) \ge 1 - \delta
+\mathbb{P}\left( \text{CVaR} _ \alpha^{\text{true}}(\mathbf{w}^{\star}) \le \sup _ {\mathbb{Q} \in \mathbb{B} _ {\epsilon _ f}} \text{CVaR} _ \alpha^{\mathbb{Q}}(\mathbf{v}^T \mathbf{f}) + \Delta _ \epsilon(\mathbf{w}^{\star}, \alpha) \right) \ge 1 - \delta
 $$
 
 ---

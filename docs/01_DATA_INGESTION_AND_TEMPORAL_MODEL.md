@@ -38,7 +38,7 @@ flowchart TD
 Every ingested primitive observation $\mathbf{X}$ is stored as an immutable 6-tuple:
 
 $$
-\mathbf{X} \equiv \big( \text{EntityID}, \; \text{Field}, \; \text{Value}, \; \vec{\boldsymbol{\tau}}, \; \text{Hash}_{\text{SHA256}} \big)
+\mathbf{X} \equiv \big( \text{EntityID}, \; \text{Field}, \; \text{Value}, \; \vec{\boldsymbol{\tau}}, \; \text{Hash} _ {\text{SHA256}} \big)
 $$
 
 where the temporal vector $\vec{\boldsymbol{\tau}} \in \mathbb{R} _ {\ge 0}^5$ comprises five distinct, strictly ordered physical and regulatory timestamps:
@@ -66,7 +66,7 @@ Any incoming payload violating this monotonicity ordering is quarantined immedia
 Let $t _ {\text{decision}}$ denote the discrete time cutoff at which the portfolio optimization engine is triggered. The **Causal Filtration Operator** $\mathcal{F} _ {t _ {\text{decision}}}$ is formally defined as:
 
 $$
-\mathcal{F}_{t_{\text{decision}}} \equiv \left\lbrace \mathbf{X} \in \mathcal{D} \;\middle\vert\; \max\big( \tau^{\text{pub}}(\mathbf{X}), \; \tau^{\text{vendor}}(\mathbf{X}), \; \tau^{\text{ingest}}(\mathbf{X}) \big) < t_{\text{decision}} \;\land\; \tau^{\text{effective}}(\mathbf{X}) \le t_{\text{decision}} \right\rbrace
+\mathcal{F} _ {t _ {\text{decision}}} \equiv \left\lbrace \mathbf{X} \in \mathcal{D} \;\middle\vert\; \max\big( \tau^{\text{pub}}(\mathbf{X}), \; \tau^{\text{vendor}}(\mathbf{X}), \; \tau^{\text{ingest}}(\mathbf{X}) \big) < t _ {\text{decision}} \;\land\; \tau^{\text{effective}}(\mathbf{X}) \le t _ {\text{decision}} \right\rbrace
 $$
 
 #### Crucial Invariant Properties:
@@ -83,7 +83,7 @@ Unadjusted price and volume series exhibit synthetic price discontinuities when 
 Let $k \in \lbrace 1, \dots, K\rbrace$ index the historical corporate action events for asset $i$ occurring at ex-dates $t _ k$. The cumulative adjustment factor at historical time $t$ relative to decision date $t _ {\text{decision}}$ is:
 
 $$
-c_i(t \mid t_{\text{decision}}) \equiv \prod_{k: \; t < t_k \le t_{\text{decision}}} f_{i, k}
+c _ i(t \mid t _ {\text{decision}}) \equiv \prod _ {k: \; t < t _ k \le t _ {\text{decision}}} f _ {i, k}
 $$
 
 where $f _ {i, k}$ is the event-specific adjustment factor.
@@ -94,36 +94,36 @@ where $f _ {i, k}$ is the event-specific adjustment factor.
 For a split of $A$ existing shares into $B$ new shares (e.g., 10:1 split, $A=1, B=10$):
 
 $$
-f_{i, k} = \frac{A}{B}
+f _ {i, k} = \frac{A}{B}
 $$
 
 $$
-\widetilde{P}_i(t) = P_i(t) \cdot f_{i, k}, \qquad \widetilde{V}_i(t) = V_i(t) \cdot \frac{1}{f_{i, k}}
+\widetilde{P} _ i(t) = P _ i(t) \cdot f _ {i, k}, \qquad \widetilde{V} _ i(t) = V _ i(t) \cdot \frac{1}{f _ {i, k}}
 $$
 
 #### 2. Bonus Share Issues
 For a bonus issue in the ratio of $B$ bonus shares for every $A$ existing shares held (e.g., 1:1 bonus, $A=1, B=1$):
 
 $$
-f_{i, k} = \frac{A}{A + B}
+f _ {i, k} = \frac{A}{A + B}
 $$
 
 #### 3. Rights Offerings
 For a rights offering of $B$ shares at subscription price $P _ {\text{rights}}$ for every $A$ shares held, where $P _ {\text{cum}}$ is the closing price on the last cum-rights day:
 
 $$
-P_{\text{ex-theoretical}} = \frac{A \cdot P_{\text{cum}} + B \cdot P_{\text{rights}}}{A + B}
+P _ {\text{ex-theoretical}} = \frac{A \cdot P _ {\text{cum}} + B \cdot P _ {\text{rights}}}{A + B}
 $$
 
 $$
-f_{i, k} = \frac{P_{\text{ex-theoretical}}}{P_{\text{cum}}} = \frac{A \cdot P_{\text{cum}} + B \cdot P_{\text{rights}}}{(A + B) \cdot P_{\text{cum}}}
+f _ {i, k} = \frac{P _ {\text{ex-theoretical}}}{P _ {\text{cum}}} = \frac{A \cdot P _ {\text{cum}} + B \cdot P _ {\text{rights}}}{(A + B) \cdot P _ {\text{cum}}}
 $$
 
 #### 4. Ordinary Cash Dividends
 For a cash dividend of $D$ per share with cum-dividend closing price $P _ {\text{cum}}$:
 
 $$
-f_{i, k} = 1 - \frac{D}{P_{\text{cum}}}
+f _ {i, k} = 1 - \frac{D}{P _ {\text{cum}}}
 $$
 
 *Note: For cash dividend adjustments, prices are scaled by $f _ {i, k}$ while volume remains invariant.*
@@ -136,23 +136,23 @@ $$
 Raw return distributions in Indian equities exhibit heavy tails and intermittent microstructure outliers. Raw features are normalized using the **Median Absolute Deviation (MAD)** rather than sample standard deviation:
 
 $$
-\text{Median}_i = \operatorname{median}(\mathbf{x}_i)
+\text{Median} _ i = \text{median}(\mathbf{x} _ i)
 $$
 
 $$
-\text{MAD}_i = 1.4826 \cdot \operatorname{median}\big( |\mathbf{x}_i - \text{Median}_i| \big)
+\text{MAD} _ i = 1.4826 \cdot \text{median}\big( |\mathbf{x} _ i - \text{Median} _ i| \big)
 $$
 
 The modified robust Z-score is defined as:
 
 $$
-z_{i, t} = \frac{x_{i, t} - \text{Median}_i}{\max\big( \text{MAD}_i, \; 10^{-6} \big)}
+z _ {i, t} = \frac{x _ {i, t} - \text{Median} _ i}{\max\big( \text{MAD} _ i, \; 10^{-6} \big)}
 $$
 
 Features are softly winsorized at threshold $c _ {\text{clip}} = 4.5$:
 
 $$
-\widetilde{z}_{i, t} = \operatorname{sign}(z_{i, t}) \cdot \min\big( |z_{i, t}|, \; c_{\text{clip}} \big)
+\widetilde{z} _ {i, t} = \text{sign}(z _ {i, t}) \cdot \min\big( |z _ {i, t}|, \; c _ {\text{clip}} \big)
 $$
 
 ---

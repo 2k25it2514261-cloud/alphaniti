@@ -56,7 +56,7 @@ $$
 AlphaNiti constructs an immutable 32-character canonical `ClOrdID` (Tag 11):
 
 $$
-\text{ClOrdID} \equiv \text{YYYYMMDD-MEMBER-STRAT-} \parallel \text{HMAC-SHA256}(K_{\text{secret}}, \; \text{Nonce} \parallel \text{Symbol} \parallel \text{Qty})_{[:14]}
+\text{ClOrdID} \equiv \text{YYYYMMDD-MEMBER-STRAT-} \parallel \text{HMAC-SHA256}(K _ {\text{secret}}, \; \text{Nonce} \parallel \text{Symbol} \parallel \text{Qty}) _ {[:14]}
 $$
 
 - **`YYYYMMDD`**: Trading date prefix matching the exchange business date.

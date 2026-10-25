@@ -44,7 +44,7 @@ flowchart TD
 Assume excess returns follow a normal likelihood with unknown mean $\mu$ and unknown variance $\sigma^2$:
 
 $$
-r_t \sim \mathcal{N}(\mu, \sigma^2)
+r _ t \sim \mathcal{N}(\mu, \sigma^2)
 $$
 
 Rather than placing point weights on $\mu$ and $\sigma^2$, evidential regression models the joint conjugate prior distribution $\text{NIG}(\gamma, \nu, \alpha, \beta)$:
@@ -69,7 +69,7 @@ where the four evidential parameters satisfy constraints:
 Integrating out the latent parameters $\mu$ and $\sigma^2$ yields the marginal predictive distribution of asset returns, which is an exact **Student-$t$ distribution**:
 
 $$
-p(r \mid \gamma, \nu, \alpha, \beta) = \int_0^\infty \int_{-\infty}^\infty p(r \mid \mu, \sigma^2) \, p(\mu, \sigma^2 \mid \gamma, \nu, \alpha, \beta) \, d\mu \, d\sigma^2 = \text{Student-}t\left( r \;\middle\vert\; 2\alpha, \; \gamma, \; \frac{\beta(\nu + 1)}{\nu \alpha} \right)
+p(r \mid \gamma, \nu, \alpha, \beta) = \int _ 0^\infty \int _ {-\infty}^\infty p(r \mid \mu, \sigma^2) \, p(\mu, \sigma^2 \mid \gamma, \nu, \alpha, \beta) \, d\mu \, d\sigma^2 = \text{Student-}t\left( r \;\middle\vert\; 2\alpha, \; \gamma, \; \frac{\beta(\nu + 1)}{\nu \alpha} \right)
 $$
 
 with $2\alpha$ degrees of freedom, location $\gamma$, and scale parameter $\sqrt{\frac{\beta(\nu + 1)}{\nu \alpha}}$.
@@ -78,7 +78,7 @@ with $2\alpha$ degrees of freedom, location $\gamma$, and scale parameter $\sqrt
 For $\alpha > 1$, the total predictive variance decomposes analytically into two mutually orthogonal components:
 
 $$
-\operatorname{Var}(r \mid \gamma, \nu, \alpha, \beta) = \underbrace{\frac{\beta}{\alpha - 1}}_{\sigma_{\text{aleatoric}}^2} + \underbrace{\frac{\beta}{\nu (\alpha - 1)}}_{\sigma_{\text{epistemic}}^2}
+\text{Var}(r \mid \gamma, \nu, \alpha, \beta) = \underbrace{\frac{\beta}{\alpha - 1}} _ {\sigma _ {\text{aleatoric}}^2} + \underbrace{\frac{\beta}{\nu (\alpha - 1)}} _ {\sigma _ {\text{epistemic}}^2}
 $$
 
 - **Aleatoric Variance ($\sigma _ {\text{aleatoric}}^2$)**: Measures intrinsic market noise. As sample size $T \to \infty$, $\sigma _ {\text{aleatoric}}^2$ converges to the true conditional volatility of the asset.
@@ -91,14 +91,14 @@ $$
 Each neural network within the ensemble parameterizes $\boldsymbol{\theta} _ m(\mathbf{x} _ t) = (\gamma _ t, \nu _ t, \alpha _ t, \beta _ t)$. Training minimizes the total loss function:
 
 $$
-\mathcal{L}(\boldsymbol{\theta}) = \mathcal{L}_{\text{NLL}}(\boldsymbol{\theta}) + \lambda_{\text{reg}} \mathcal{L}_{\text{reg}}(\boldsymbol{\theta})
+\mathcal{L}(\boldsymbol{\theta}) = \mathcal{L} _ {\text{NLL}}(\boldsymbol{\theta}) + \lambda _ {\text{reg}} \mathcal{L} _ {\text{reg}}(\boldsymbol{\theta})
 $$
 
 ### 3.1 Negative Log-Likelihood ($\mathcal{L} _ {\text{NLL}}$)
 Using the Student-$t$ marginal density:
 
 $$
-\mathcal{L}_{\text{NLL}}(\boldsymbol{\theta}) = \frac{1}{2}\ln\left( \frac{\pi}{\nu} \right) - \alpha \ln(\Omega) + \left( \alpha + \frac{1}{2} \right)\ln\left( (r - \gamma)^2 \nu + \Omega \right) + \ln\left( \frac{\Gamma(\alpha)}{\Gamma(\alpha + 1/2)} \right)
+\mathcal{L} _ {\text{NLL}}(\boldsymbol{\theta}) = \frac{1}{2}\ln\left( \frac{\pi}{\nu} \right) - \alpha \ln(\Omega) + \left( \alpha + \frac{1}{2} \right)\ln\left( (r - \gamma)^2 \nu + \Omega \right) + \ln\left( \frac{\Gamma(\alpha)}{\Gamma(\alpha + 1/2)} \right)
 $$
 
 where $\Omega \equiv 2\beta(1 + \nu)$.
@@ -107,7 +107,7 @@ where $\Omega \equiv 2\beta(1 + \nu)$.
 To penalize overconfidence on out-of-distribution samples and large prediction errors, an evidence regularizer is imposed:
 
 $$
-\mathcal{L}_{\text{reg}}(\boldsymbol{\theta}) = |r - \gamma| \cdot (2\nu + \alpha)
+\mathcal{L} _ {\text{reg}}(\boldsymbol{\theta}) = |r - \gamma| \cdot (2\nu + \alpha)
 $$
 
 This term acts as an adversarial penalty: if the model exhibits high virtual evidence ($\nu$) while making a large prediction error ($|r - \gamma|$), the loss scales severely, forcing the network to inflate epistemic uncertainty on samples it fails to fit accurately.
@@ -120,11 +120,11 @@ This term acts as an adversarial penalty: if the model exhibits high virtual evi
 For an ensemble of $M$ independent evidential networks initialized with diverse random seeds and bootstrapped feature subspaces, the mixture parameters are pooled via:
 
 $$
-\bar{\gamma} = \frac{1}{M}\sum_{m=1}^M \gamma_m, \qquad \bar{\sigma}_{\text{aleatoric}}^2 = \frac{1}{M}\sum_{m=1}^M \frac{\beta_m}{\alpha_m - 1}
+\bar{\gamma} = \frac{1}{M}\sum _ {m=1}^M \gamma _ m, \qquad \bar{\sigma} _ {\text{aleatoric}}^2 = \frac{1}{M}\sum _ {m=1}^M \frac{\beta _ m}{\alpha _ m - 1}
 $$
 
 $$
-\bar{\sigma}_{\text{epistemic}}^2 = \underbrace{\frac{1}{M}\sum_{m=1}^M \frac{\beta_m}{\nu_m (\alpha_m - 1)}}_{\text{Within-Model Epistemic}} + \underbrace{\frac{1}{M}\sum_{m=1}^M (\gamma_m - \bar{\gamma})^2}_{\text{Between-Model Ensemble Variance}}
+\bar{\sigma} _ {\text{epistemic}}^2 = \underbrace{\frac{1}{M}\sum _ {m=1}^M \frac{\beta _ m}{\nu _ m (\alpha _ m - 1)}} _ {\text{Within-Model Epistemic}} + \underbrace{\frac{1}{M}\sum _ {m=1}^M (\gamma _ m - \bar{\gamma})^2} _ {\text{Between-Model Ensemble Variance}}
 $$
 
 ### 4.2 Split-Conformal Prediction Interval Calibration
@@ -133,26 +133,26 @@ To guarantee finite-sample non-parametric coverage error $\le \epsilon _ {\text{
 2. Compute conformity non-conformity scores on calibration data:
 
 $$
-s_i = \frac{|r_i - \bar{\gamma}(\mathbf{x}_i)|}{\sqrt{\bar{\sigma}_{\text{aleatoric}}^2(\mathbf{x}_i) + \bar{\sigma}_{\text{epistemic}}^2(\mathbf{x}_i)}}
+s _ i = \frac{|r _ i - \bar{\gamma}(\mathbf{x} _ i)|}{\sqrt{\bar{\sigma} _ {\text{aleatoric}}^2(\mathbf{x} _ i) + \bar{\sigma} _ {\text{epistemic}}^2(\mathbf{x} _ i)}}
 $$
 
 3. Compute the empirical $(1 - \epsilon _ {\text{cal}})$-quantile:
 
 $$
-\hat{q} = \text{Quantile}\left( s_1, \dots, s_K ; \; \frac{\lceil (K+1)(1 - \epsilon_{\text{cal}}) \rceil}{K} \right)
+\hat{q} = \text{Quantile}\left( s _ 1, \dots, s _ K ; \; \frac{\lceil (K+1)(1 - \epsilon _ {\text{cal}}) \rceil}{K} \right)
 $$
 
 4. The calibrated prediction interval for future return $r _ {t+1}$ is:
 
 $$
-\mathcal{C}(\mathbf{x}_{t+1}) = \left[ \bar{\gamma}(\mathbf{x}_{t+1}) - \hat{q} \cdot \bar{\sigma}_{\text{total}}(\mathbf{x}_{t+1}), \;\; \bar{\gamma}(\mathbf{x}_{t+1}) + \hat{q} \cdot \bar{\sigma}_{\text{total}}(\mathbf{x}_{t+1}) \right]
+\mathcal{C}(\mathbf{x} _ {t+1}) = \left[ \bar{\gamma}(\mathbf{x} _ {t+1}) - \hat{q} \cdot \bar{\sigma} _ {\text{total}}(\mathbf{x} _ {t+1}), \;\; \bar{\gamma}(\mathbf{x} _ {t+1}) + \hat{q} \cdot \bar{\sigma} _ {\text{total}}(\mathbf{x} _ {t+1}) \right]
 $$
 
 **Lemma (Vovk Finite-Sample Validity)**:
 Under exchangeability of calibration and test observations:
 
 $$
-\mathbb{P}\left( r_{t+1} \in \mathcal{C}(\mathbf{x}_{t+1}) \right) \ge 1 - \epsilon_{\text{cal}}
+\mathbb{P}\left( r _ {t+1} \in \mathcal{C}(\mathbf{x} _ {t+1}) \right) \ge 1 - \epsilon _ {\text{cal}}
 $$
 
 ---

@@ -45,7 +45,7 @@ flowchart TD
 To curb quote stuffing and excessive cancel traffic, SEBI circulars mandate financial penalties on trading algorithms exceeding defined Order-to-Trade Ratios. For any symbol $i$ within trading session $t$:
 
 $$
-\text{OTR}_i \equiv \frac{\text{Total Order Modifications}_i + \text{Total Order Cancellations}_i}{\max\big( 1, \; \text{Total Executed Trades}_i \big)}
+\text{OTR} _ i \equiv \frac{\text{Total Order Modifications} _ i + \text{Total Order Cancellations} _ i}{\max\big( 1, \; \text{Total Executed Trades} _ i \big)}
 $$
 
 The SEBI penalty tier function $\mathcal{P}(\text{OTR})$ imposes escalating penalties:
@@ -71,7 +71,7 @@ AlphaNiti dynamically tracks $\text{OTR} _ i$ in real time. If $\text{OTR} _ i >
 Pursuant to the Finance Act revisions effective **April 1, 2026** (applicable as of today, October 25, 2026), all transaction cost calculations and post-trade accounting are governed by the parametric statutory schedule:
 
 $$
-\text{TaxSchedule} \equiv f(\text{Instrument}, \; \text{Side}, \; t_{\text{trade}})
+\text{TaxSchedule} \equiv f(\text{Instrument}, \; \text{Side}, \; t _ {\text{trade}})
 $$
 
 ### 3.1 Official Statutory Tax Schedule (Effective April 1, 2026)
@@ -96,7 +96,7 @@ For a trade of $q$ shares executed at price $P$:
 7. **Total Statutory Frictional Drag**:
 
 $$
-\mathcal{C}_{\text{statutory}} = \text{STT} + \text{Stamp} + \text{Exch} + \text{SEBI} + \text{GST} + \text{Brokerage}
+\mathcal{C} _ {\text{statutory}} = \text{STT} + \text{Stamp} + \text{Exch} + \text{SEBI} + \text{GST} + \text{Brokerage}
 $$
 
 ---
@@ -106,7 +106,7 @@ $$
 For every discrete rebalancing cycle $k$, AlphaNiti generates an append-only JSON audit block committed to a Merkle tree:
 
 $$
-\text{Block}_k \equiv \big( k, \; t_{\text{decision}}, \; \text{Hash}_{\text{PrevBlock}}, \; \mathcal{F}_{t_{\text{decision}}}^{\text{Root}}, \; \mathbf{q}_k^{\star}, \; \text{Cert}_{\text{optimality}}, \; \text{Sig}_{\text{enclave}} \big)
+\text{Block} _ k \equiv \big( k, \; t _ {\text{decision}}, \; \text{Hash} _ {\text{PrevBlock}}, \; \mathcal{F} _ {t _ {\text{decision}}}^{\text{Root}}, \; \mathbf{q} _ k^{\star}, \; \text{Cert} _ {\text{optimality}}, \; \text{Sig} _ {\text{enclave}} \big)
 $$
 
 The Merkle root is anchored daily into an external immutable ledger, enabling third-party auditors and regulators to verify:

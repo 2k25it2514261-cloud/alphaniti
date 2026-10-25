@@ -49,19 +49,19 @@ flowchart TD
 Let $q _ i \in \mathbb{Z} _ {\ge 0}$ denote the integer share quantity allocated to asset $i \in \lbrace 1, \dots, N\rbrace$ with current reference price $P _ i^{\text{eval}}$. The total objective $J(\mathbf{q})$ to be minimized is:
 
 $$
-J(\mathbf{q}) \equiv \underbrace{\text{CVaR}_\alpha(\mathbf{q})}_{\text{Portfolio Tail Risk}} - \underbrace{\sum_{i=1}^N \mu_i q_i P_i^{\text{eval}}}_{\text{Expected Portfolio Return}} + \underbrace{\sum_{i=1}^N \text{Cost}_i(q_i)}_{\text{Execution & Statutory Costs}}
+J(\mathbf{q}) \equiv \underbrace{\text{CVaR} _ \alpha(\mathbf{q})} _ {\text{Portfolio Tail Risk}} - \underbrace{\sum _ {i=1}^N \mu _ i q _ i P _ i^{\text{eval}}} _ {\text{Expected Portfolio Return}} + \underbrace{\sum _ {i=1}^N \text{Cost} _ i(q _ i)} _ {\text{Execution & Statutory Costs}}
 $$
 
 where the portfolio loss under scenario $s \in \lbrace 1, \dots, S\rbrace$ is:
 
 $$
-\mathcal{L}_s(\mathbf{q}) = -\sum_{i=1}^N q_i r_{i, s} P_i^{\text{eval}}
+\mathcal{L} _ s(\mathbf{q}) = -\sum _ {i=1}^N q _ i r _ {i, s} P _ i^{\text{eval}}
 $$
 
 and $\text{CVaR} _ \alpha(\mathbf{q})$ is the exact Conditional Value-at-Risk at confidence level $\alpha \in (0, 1)$:
 
 $$
-\text{CVaR}_\alpha(\mathbf{q}) \equiv \min_{\gamma \in \mathbb{R}} \left\lbrace \gamma + \frac{1}{(1 - \alpha)S} \sum_{s=1}^S \max\big( 0, \; \mathcal{L}_s(\mathbf{q}) - \gamma \big) \right\rbrace
+\text{CVaR} _ \alpha(\mathbf{q}) \equiv \min _ {\gamma \in \mathbb{R}} \left\lbrace \gamma + \frac{1}{(1 - \alpha)S} \sum _ {s=1}^S \max\big( 0, \; \mathcal{L} _ s(\mathbf{q}) - \gamma \big) \right\rbrace
 $$
 
 ### 2.2 Execution Cost & Tax Non-Convexity
@@ -69,13 +69,13 @@ The transaction cost function $\text{Cost} _ i(q _ i)$ incorporates:
 1. **Bid-Ask Spread & Quadratic Market Impact**:
 
 $$
-\text{SpreadCost}_i(q_i) = q_i \cdot \frac{\text{Spread}_i}{2} + \eta_i \sigma_i \sqrt{\frac{q_i}{\text{ADV}_i}} \cdot q_i P_i^{\text{eval}}
+\text{SpreadCost} _ i(q _ i) = q _ i \cdot \frac{\text{Spread} _ i}{2} + \eta _ i \sigma _ i \sqrt{\frac{q _ i}{\text{ADV} _ i}} \cdot q _ i P _ i^{\text{eval}}
 $$
 
 2. **Statutory Tax Slabs & Fixed Brokerage Minimums**:
 
 $$
-\text{Brokerage}_i(q_i) = \max\big( \text{Fee}_{\min}, \; c_{\text{rate}} \cdot q_i P_i^{\text{eval}} \big)
+\text{Brokerage} _ i(q _ i) = \max\big( \text{Fee} _ {\min}, \; c _ {\text{rate}} \cdot q _ i P _ i^{\text{eval}} \big)
 $$
 
 Because $\text{Fee} _ {\min}$ introduces a non-convex downward kink at $q _ i = 0$, standard quadratic programming solvers produce invalid solutions or fail to converge.
@@ -90,7 +90,7 @@ At any node $\mathcal{N}$ in the Branch-and-Bound search tree, the integer varia
 For each asset $i$, let $\lbrace q _ {(1)}, q _ {(2)}, \dots, q _ {(M)}\rbrace$ represent the critical piecewise linear breakpoints of $\text{Cost} _ i(q)$ on the interval $[l _ i, u _ i]$. The lower convex envelope $\text{Cost} _ i^{\text{cvx}}(q)$ is defined as the point-wise supremum over all affine functions underestimating $\text{Cost} _ i(q)$:
 
 $$
-\text{Cost}_i^{\text{cvx}}(q) \equiv \min_{\boldsymbol{\lambda} \in \Delta_M} \sum_{j=1}^M \lambda_j \text{Cost}_i(q_{(j)}) \qquad \text{subject to} \quad \sum_{j=1}^M \lambda_j q_{(j)} = q
+\text{Cost} _ i^{\text{cvx}}(q) \equiv \min _ {\boldsymbol{\lambda} \in \Delta _ M} \sum _ {j=1}^M \lambda _ j \text{Cost} _ i(q _ {(j)}) \qquad \text{subject to} \quad \sum _ {j=1}^M \lambda _ j q _ {(j)} = q
 $$
 
 where $\Delta _ M \equiv \left\lbrace \boldsymbol{\lambda} \in \mathbb{R} _ {\ge 0}^M \;\middle\vert\; \sum _ {j=1}^M \lambda _ j = 1 \right\rbrace$.
@@ -100,10 +100,10 @@ The lower bound at search node $\mathcal{N}$ is computed via the continuous conv
 
 $$
 \begin{aligned}
-z_{\text{LP}}(\mathcal{N}) \equiv \min_{\substack{\mathbf{q} \in [\mathbf{l}, \mathbf{u}] \\ \gamma \in \mathbb{R}, \; \mathbf{s} \in \mathbb{R}_{\ge 0}^S}} \quad & \gamma + \frac{1}{(1-\alpha)S}\sum_{s=1}^S s_s - \sum_{i=1}^N \mu_i q_i P_i^{\text{eval}} + \sum_{i=1}^N \text{Cost}_i^{\text{cvx}}(q_i) \\
-\text{subject to:} \quad & s_s \ge -\sum_{i=1}^N q_i r_{i, s} P_i^{\text{eval}} - \gamma, \quad \forall s \in \lbrace 1, \dots, S\rbrace  \\
-& \sum_{i=1}^N q_i P_i^{\text{eval}} \le W^{\text{settled}} - W^{\text{lien}} - W^{\text{payable}} \\
-& q_i P_i^{\text{eval}} \le w_{\max} \cdot \text{NAV}, \quad \forall i \in \lbrace 1, \dots, N\rbrace
+z _ {\text{LP}}(\mathcal{N}) \equiv \min _ {\mathbf{q} \in [\mathbf{l}, \mathbf{u}], \; \gamma \in \mathbb{R}, \; \mathbf{s} \in \mathbb{R} _ {\ge 0}^S} \quad & \gamma + \frac{1}{(1-\alpha)S}\sum _ {s=1}^S s _ s - \sum _ {i=1}^N \mu _ i q _ i P _ i^{\text{eval}} + \sum _ {i=1}^N \text{Cost} _ i^{\text{cvx}}(q _ i) \\
+\text{subject to:} \quad & s _ s \ge -\sum _ {i=1}^N q _ i r _ {i, s} P _ i^{\text{eval}} - \gamma, \quad \forall s \in \lbrace 1, \dots, S\rbrace  \\
+& \sum _ {i=1}^N q _ i P _ i^{\text{eval}} \le W^{\text{settled}} - W^{\text{lien}} - W^{\text{payable}} \\
+& q _ i P _ i^{\text{eval}} \le w _ {\max} \cdot \text{NAV}, \quad \forall i \in \lbrace 1, \dots, N\rbrace
 \end{aligned}
 $$
 
@@ -112,14 +112,14 @@ $$
 For any search node $\mathcal{N}$ with domain $\mathcal{D}(\mathcal{N}) \equiv [\mathbf{l}, \mathbf{u}] \cap \mathbb{Z}^N$:
 
 $$
-z_{\text{LP}}(\mathcal{N}) \le \min_{\mathbf{q} \in \mathcal{D}(\mathcal{N})} J(\mathbf{q})
+z _ {\text{LP}}(\mathcal{N}) \le \min _ {\mathbf{q} \in \mathcal{D}(\mathcal{N})} J(\mathbf{q})
 $$
 
 **Proof**:  
 1. By construction of the lower convex envelope, $\text{Cost} _ i^{\text{cvx}}(q) \le \text{Cost} _ i(q)$ for all $q \in [l _ i, u _ i]$.
 2. For any fixed integer vector $\mathbf{q} \in \mathbb{Z}^N$, the auxiliary variable formulation $\min _ {\gamma, \mathbf{s}} \lbrace  \gamma + \frac{1}{(1-\alpha)S}\sum s _ s \rbrace$ is mathematically equivalent to the exact discrete CVaR formula $\text{CVaR} _ \alpha(\mathbf{q})$ (Rockafellar & Uryasev 2000).
 3. The feasible region of the continuous LP strictly contains the integer lattice points: $\mathcal{D}(\mathcal{N}) \subset [\mathbf{l}, \mathbf{u}]$.
-Since the objective is minimized over a superset using a point-wise lower bound on the cost terms, the resulting LP minimum $z _ {\text{LP}}(\mathcal{N})$ is a valid lower bound for all integer solutions within subtree $\mathcal{N}$. $\blacksquare$
+Since the objective is minimized over a superset using a point-wise lower bound on the cost terms, the resulting LP minimum $z _ {\text{LP}}(\mathcal{N})$ is a valid lower bound for all integer solutions within subtree $\mathcal{N}$. ∎
 
 **Pruning Corollary**: Pruning any search node $\mathcal{N}$ where $z _ {\text{LP}}(\mathcal{N}) \ge \text{UB} _ {\text{incumbent}}$ cannot eliminate any globally superior integer solution.
 
@@ -131,7 +131,7 @@ Since the objective is minimized over a superset using a point-wise lower bound 
 Under the regulatory solvency ceiling and minimum tick size $P _ {\min} > 0$, the maximum tradable shares for any asset $i$ is strictly bounded:
 
 $$
-U_i \equiv \left\lfloor \frac{W^{\text{settled}}}{P_i^{\text{eval}} (1 - R_{\max})} \right\rfloor < \infty
+U _ i \equiv \left\lfloor \frac{W^{\text{settled}}}{P _ i^{\text{eval}} (1 - R _ {\max})} \right\rfloor < \infty
 $$
 
 The maximum tree depth is bounded by $\sum _ {i=1}^N U _ i < \infty$, guaranteeing finite termination of the branch-and-bound exploration.
