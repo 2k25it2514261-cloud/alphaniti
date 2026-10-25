@@ -6,7 +6,7 @@
 
 ## 1. Module Overview & Architectural Placement
 
-In institutional quantitative execution, continuous optimal weights $\mathbf{w}^* \in \mathbb{R}^N$ cannot be dispatched directly to exchange matching engines. Rounding continuous weights to discrete integer share quantities $\mathbf{q} \in \mathbb{Z}_{\ge 0}^N$ via heuristic post-hoc rounding introduces severe tracking errors, violates cash solvency constraints, and frequently triggers constraint violations.
+In institutional quantitative execution, continuous optimal weights $\mathbf{w}^{\star} \in \mathbb{R}^N$ cannot be dispatched directly to exchange matching engines. Rounding continuous weights to discrete integer share quantities $\mathbf{q} \in \mathbb{Z}_{\ge 0}^N$ via heuristic post-hoc rounding introduces severe tracking errors, violates cash solvency constraints, and frequently triggers constraint violations.
 
 AlphaNiti solves the **Total-Objective Discrete Integer Program** directly over the integer lattice $\mathbb{Z}_{\ge 0}^N$ using a specialized **Branch-and-Bound Lattice Solver**:
 1. Minimizes the complete risk-adjusted, transaction-cost-aware objective (not just the risk term in isolation).
@@ -46,42 +46,42 @@ flowchart TD
 ## 2. Total-Objective Discrete Mathematical Formulation
 
 ### 2.1 The Complete Integer Objective Function
-Let $q_i \in \mathbb{Z}_{\ge 0}$ denote the integer share quantity allocated to asset $i \in \{1, \dots, N\}$ with current reference price $P_i^{\text{eval}}$. The total objective $J(\mathbf{q})$ to be minimized is:
+Let $q_i \in \mathbb{Z}_{\ge 0}$ denote the integer share quantity allocated to asset $i \in \lbrace 1, \dots, N\rbrace $ with current reference price $P_i^{\text{eval}}$. The total objective $J(\mathbf{q})$ to be minimized is:
 
-$
+$$
 J(\mathbf{q}) \equiv \underbrace{\text{CVaR}_\alpha(\mathbf{q})}_{\text{Portfolio Tail Risk}} - \underbrace{\sum_{i=1}^N \mu_i q_i P_i^{\text{eval}}}_{\text{Expected Portfolio Return}} + \underbrace{\sum_{i=1}^N \text{Cost}_i(q_i)}_{\text{Execution & Statutory Costs}}
 
-$
+$$
 
-where the portfolio loss under scenario $s \in \{1, \dots, S\}$ is:
+where the portfolio loss under scenario $s \in \lbrace 1, \dots, S\rbrace $ is:
 
-$
+$$
 \mathcal{L}_s(\mathbf{q}) = -\sum_{i=1}^N q_i r_{i, s} P_i^{\text{eval}}
 
-$
+$$
 
 and $\text{CVaR}_\alpha(\mathbf{q})$ is the exact Conditional Value-at-Risk at confidence level $\alpha \in (0, 1)$:
 
-$
+$$
 \text{CVaR}_\alpha(\mathbf{q}) \equiv \min_{\gamma \in \mathbb{R}} \left\lbrace \gamma + \frac{1}{(1 - \alpha)S} \sum_{s=1}^S \max\big( 0, \; \mathcal{L}_s(\mathbf{q}) - \gamma \big) \right\rbrace
 
-$
+$$
 
 ### 2.2 Execution Cost & Tax Non-Convexity
 The transaction cost function $\text{Cost}_i(q_i)$ incorporates:
 1. **Bid-Ask Spread & Quadratic Market Impact**:
 
-$
+$$
 \text{SpreadCost}_i(q_i) = q_i \cdot \frac{\text{Spread}_i}{2} + \eta_i \sigma_i \sqrt{\frac{q_i}{\text{ADV}_i}} \cdot q_i P_i^{\text{eval}}
 
-$
+$$
 
 2. **Statutory Tax Slabs & Fixed Brokerage Minimums**:
 
-$
+$$
 \text{Brokerage}_i(q_i) = \max\big( \text{Fee}_{\min}, \; c_{\text{rate}} \cdot q_i P_i^{\text{eval}} \big)
 
-$
+$$
 
 Because $\text{Fee}_{\min}$ introduces a non-convex downward kink at $q_i = 0$, standard quadratic programming solvers produce invalid solutions or fail to converge.
 
@@ -92,40 +92,40 @@ Because $\text{Fee}_{\min}$ introduces a non-convex downward kink at $q_i = 0$, 
 At any node $\mathcal{N}$ in the Branch-and-Bound search tree, the integer variables are restricted to box bounds $\mathbf{l} \le \mathbf{q} \le \mathbf{u}$ with $\mathbf{l}, \mathbf{u} \in \mathbb{Z}_{\ge 0}^N$.
 
 ### 3.1 Lower Convex Envelope Definition
-For each asset $i$, let $\{q_{(1)}, q_{(2)}, \dots, q_{(M)}\}$ represent the critical piecewise linear breakpoints of $\text{Cost}_i(q)$ on the interval $[l_i, u_i]$. The lower convex envelope $\text{Cost}_i^{\text{cvx}}(q)$ is defined as the point-wise supremum over all affine functions underestimating $\text{Cost}_i(q)$:
+For each asset $i$, let $\lbrace q_{(1)}, q_{(2)}, \dots, q_{(M)}\rbrace $ represent the critical piecewise linear breakpoints of $\text{Cost}_i(q)$ on the interval $[l_i, u_i]$. The lower convex envelope $\text{Cost}_i^{\text{cvx}}(q)$ is defined as the point-wise supremum over all affine functions underestimating $\text{Cost}_i(q)$:
 
-$
+$$
 \text{Cost}_i^{\text{cvx}}(q) \equiv \min_{\boldsymbol{\lambda} \in \Delta_M} \sum_{j=1}^M \lambda_j \text{Cost}_i(q_{(j)}) \qquad \text{subject to} \quad \sum_{j=1}^M \lambda_j q_{(j)} = q
 
-$
+$$
 
 where $\Delta_M \equiv \left\lbrace \boldsymbol{\lambda} \in \mathbb{R}_{\ge 0}^M \;\middle\vert\; \sum_{j=1}^M \lambda_j = 1 \right\rbrace$.
 
 ### 3.2 Node Linear Programming Relaxation ($z_{\text{LP}}(\mathcal{N})$)
 The lower bound at search node $\mathcal{N}$ is computed via the continuous convex relaxation:
 
-$
+$$
 \begin{aligned}
 z_{\text{LP}}(\mathcal{N}) \equiv \min_{\substack{\mathbf{q} \in [\mathbf{l}, \mathbf{u}] \\ \gamma \in \mathbb{R}, \; \mathbf{s} \in \mathbb{R}_{\ge 0}^S}} \quad & \gamma + \frac{1}{(1-\alpha)S}\sum_{s=1}^S s_s - \sum_{i=1}^N \mu_i q_i P_i^{\text{eval}} + \sum_{i=1}^N \text{Cost}_i^{\text{cvx}}(q_i) \\
-\text{subject to:} \quad & s_s \ge -\sum_{i=1}^N q_i r_{i, s} P_i^{\text{eval}} - \gamma, \quad \forall s \in \{1, \dots, S\} \\
+\text{subject to:} \quad & s_s \ge -\sum_{i=1}^N q_i r_{i, s} P_i^{\text{eval}} - \gamma, \quad \forall s \in \lbrace 1, \dots, S\rbrace  \\
 & \sum_{i=1}^N q_i P_i^{\text{eval}} \le W^{\text{settled}} - W^{\text{lien}} - W^{\text{payable}} \\
-& q_i P_i^{\text{eval}} \le w_{\max} \cdot \text{NAV}, \quad \forall i \in \{1, \dots, N\}
+& q_i P_i^{\text{eval}} \le w_{\max} \cdot \text{NAV}, \quad \forall i \in \lbrace 1, \dots, N\rbrace 
 \end{aligned}
 
-$
+$$
 
 ### 3.3 Theorem (Valid Total-Objective Lower Bound)
 **Theorem 1**:  
 For any search node $\mathcal{N}$ with domain $\mathcal{D}(\mathcal{N}) \equiv [\mathbf{l}, \mathbf{u}] \cap \mathbb{Z}^N$:
 
-$
+$$
 z_{\text{LP}}(\mathcal{N}) \le \min_{\mathbf{q} \in \mathcal{D}(\mathcal{N})} J(\mathbf{q})
 
-$
+$$
 
 **Proof**:  
 1. By construction of the lower convex envelope, $\text{Cost}_i^{\text{cvx}}(q) \le \text{Cost}_i(q)$ for all $q \in [l_i, u_i]$.
-2. For any fixed integer vector $\mathbf{q} \in \mathbb{Z}^N$, the auxiliary variable formulation $\min_{\gamma, \mathbf{s}} \{ \gamma + \frac{1}{(1-\alpha)S}\sum s_s \}$ is mathematically equivalent to the exact discrete CVaR formula $\text{CVaR}_\alpha(\mathbf{q})$ (Rockafellar & Uryasev 2000).
+2. For any fixed integer vector $\mathbf{q} \in \mathbb{Z}^N$, the auxiliary variable formulation $\min_{\gamma, \mathbf{s}} \lbrace  \gamma + \frac{1}{(1-\alpha)S}\sum s_s \rbrace $ is mathematically equivalent to the exact discrete CVaR formula $\text{CVaR}_\alpha(\mathbf{q})$ (Rockafellar & Uryasev 2000).
 3. The feasible region of the continuous LP strictly contains the integer lattice points: $\mathcal{D}(\mathcal{N}) \subset [\mathbf{l}, \mathbf{u}]$.
 Since the objective is minimized over a superset using a point-wise lower bound on the cost terms, the resulting LP minimum $z_{\text{LP}}(\mathcal{N})$ is a valid lower bound for all integer solutions within subtree $\mathcal{N}$. $\blacksquare$
 
@@ -138,10 +138,10 @@ Since the objective is minimized over a superset using a point-wise lower bound 
 ### 4.1 Bounded Search Depth
 Under the regulatory solvency ceiling and minimum tick size $P_{\min} > 0$, the maximum tradable shares for any asset $i$ is strictly bounded:
 
-$
+$$
 U_i \equiv \left\lfloor \frac{W^{\text{settled}}}{P_i^{\text{eval}} (1 - R_{\max})} \right\rfloor < \infty
 
-$
+$$
 
 The maximum tree depth is bounded by $\sum_{i=1}^N U_i < \infty$, guaranteeing finite termination of the branch-and-bound exploration.
 

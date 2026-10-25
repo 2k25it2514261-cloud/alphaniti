@@ -37,17 +37,17 @@ flowchart TD
 ### 2.1 Formal Timestamp Tuple Definition
 Every ingested primitive observation $\mathbf{X}$ is stored as an immutable 6-tuple:
 
-$
+$$
 \mathbf{X} \equiv \big( \text{EntityID}, \; \text{Field}, \; \text{Value}, \; \vec{\boldsymbol{\tau}}, \; \text{Hash}_{\text{SHA256}} \big)
 
-$
+$$
 
 where the temporal vector $\vec{\boldsymbol{\tau}} \in \mathbb{R}_{\ge 0}^5$ comprises five distinct, strictly ordered physical and regulatory timestamps:
 
-$
+$$
 \vec{\boldsymbol{\tau}} \equiv \begin{pmatrix} \tau^{\text{event}} \\ \tau^{\text{pub}} \\ \tau^{\text{vendor}} \\ \tau^{\text{ingest}} \\ \tau^{\text{effective}} \end{pmatrix}
 
-$
+$$
 
 1. **Event Timestamp ($\tau^{\text{event}}$)**: The physical instant the real-world phenomenon occurred (e.g., matching engine execution timestamp for a trade, board meeting conclusion timestamp for quarterly financial results).
 2. **Publication Timestamp ($\tau^{\text{pub}}$)**: The instant the information was officially broadcast to the public domain (e.g., regulatory disclosure upload on NSE NEAPS / BSE Listing Centre, press wire dispatch).
@@ -58,20 +58,20 @@ $
 ### 2.2 Temporal Monotonicity Axiom
 For any valid data record $\mathbf{X}$:
 
-$
+$$
 \tau^{\text{event}}(\mathbf{X}) \le \tau^{\text{pub}}(\mathbf{X}) \le \tau^{\text{vendor}}(\mathbf{X}) \le \tau^{\text{ingest}}(\mathbf{X})
 
-$
+$$
 
 Any incoming payload violating this monotonicity ordering is quarantined immediately into an error ledger, raising an `IngestionMonotonicityViolation` alert.
 
 ### 2.3 Causal Eligibility Operator
 Let $t_{\text{decision}}$ denote the discrete time cutoff at which the portfolio optimization engine is triggered. The **Causal Filtration Operator** $\mathcal{F}_{t_{\text{decision}}}$ is formally defined as:
 
-$
+$$
 \mathcal{F}_{t_{\text{decision}}} \equiv \left\lbrace \mathbf{X} \in \mathcal{D} \;\middle\vert\; \max\big( \tau^{\text{pub}}(\mathbf{X}), \; \tau^{\text{vendor}}(\mathbf{X}), \; \tau^{\text{ingest}}(\mathbf{X}) \big) < t_{\text{decision}} \;\land\; \tau^{\text{effective}}(\mathbf{X}) \le t_{\text{decision}} \right\rbrace
 
-$
+$$
 
 #### Crucial Invariant Properties:
 - **Strict Inequality ($<$)**: Enforces that information arriving in the exact millisecond of the decision cycle cannot be acted upon within the same millisecond, precluding zero-latency lookahead.
@@ -84,12 +84,12 @@ $
 Unadjusted price and volume series exhibit synthetic price discontinuities when corporate actions occur. AlphaNiti maintains both **Unadjusted (Raw Point-in-Time)** series for exact execution accounting and **Causally Adjusted** series for statistical feature extraction.
 
 ### 3.1 Cumulative Adjustment Factor
-Let $k \in \{1, \dots, K\}$ index the historical corporate action events for asset $i$ occurring at ex-dates $t_k$. The cumulative adjustment factor at historical time $t$ relative to decision date $t_{\text{decision}}$ is:
+Let $k \in \lbrace 1, \dots, K\rbrace $ index the historical corporate action events for asset $i$ occurring at ex-dates $t_k$. The cumulative adjustment factor at historical time $t$ relative to decision date $t_{\text{decision}}$ is:
 
-$
+$$
 c_i(t \mid t_{\text{decision}}) \equiv \prod_{k: \; t < t_k \le t_{\text{decision}}} f_{i, k}
 
-$
+$$
 
 where $f_{i, k}$ is the event-specific adjustment factor.
 
@@ -98,44 +98,44 @@ where $f_{i, k}$ is the event-specific adjustment factor.
 #### 1. Stock Splits and Consolidations (Reverse Splits)
 For a split of $A$ existing shares into $B$ new shares (e.g., 10:1 split, $A=1, B=10$):
 
-$
+$$
 f_{i, k} = \frac{A}{B}
 
-$
+$$
 
-$
+$$
 \widetilde{P}_i(t) = P_i(t) \cdot f_{i, k}, \qquad \widetilde{V}_i(t) = V_i(t) \cdot \frac{1}{f_{i, k}}
 
-$
+$$
 
 #### 2. Bonus Share Issues
 For a bonus issue in the ratio of $B$ bonus shares for every $A$ existing shares held (e.g., 1:1 bonus, $A=1, B=1$):
 
-$
+$$
 f_{i, k} = \frac{A}{A + B}
 
-$
+$$
 
 #### 3. Rights Offerings
 For a rights offering of $B$ shares at subscription price $P_{\text{rights}}$ for every $A$ shares held, where $P_{\text{cum}}$ is the closing price on the last cum-rights day:
 
-$
+$$
 P_{\text{ex-theoretical}} = \frac{A \cdot P_{\text{cum}} + B \cdot P_{\text{rights}}}{A + B}
 
-$
+$$
 
-$
+$$
 f_{i, k} = \frac{P_{\text{ex-theoretical}}}{P_{\text{cum}}} = \frac{A \cdot P_{\text{cum}} + B \cdot P_{\text{rights}}}{(A + B) \cdot P_{\text{cum}}}
 
-$
+$$
 
 #### 4. Ordinary Cash Dividends
 For a cash dividend of $D$ per share with cum-dividend closing price $P_{\text{cum}}$:
 
-$
+$$
 f_{i, k} = 1 - \frac{D}{P_{\text{cum}}}
 
-$
+$$
 
 *Note: For cash dividend adjustments, prices are scaled by $f_{i, k}$ while volume remains invariant.*
 
@@ -146,29 +146,29 @@ $
 ### 4.1 Robust Scale & Outlier Winsorization
 Raw return distributions in Indian equities exhibit heavy tails and intermittent microstructure outliers. Raw features are normalized using the **Median Absolute Deviation (MAD)** rather than sample standard deviation:
 
-$
+$$
 \text{Median}_i = \operatorname{median}(\mathbf{x}_i)
 
-$
+$$
 
-$
+$$
 \text{MAD}_i = 1.4826 \cdot \operatorname{median}\big( |\mathbf{x}_i - \text{Median}_i| \big)
 
-$
+$$
 
 The modified robust Z-score is defined as:
 
-$
+$$
 z_{i, t} = \frac{x_{i, t} - \text{Median}_i}{\max\big( \text{MAD}_i, \; 10^{-6} \big)}
 
-$
+$$
 
 Features are softly winsorized at threshold $c_{\text{clip}} = 4.5$:
 
-$
+$$
 \widetilde{z}_{i, t} = \operatorname{sign}(z_{i, t}) \cdot \min\big( |z_{i, t}|, \; c_{\text{clip}} \big)
 
-$
+$$
 
 ---
 

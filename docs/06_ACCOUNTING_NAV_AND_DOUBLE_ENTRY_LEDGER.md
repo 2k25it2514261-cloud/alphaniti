@@ -54,31 +54,31 @@ At discrete time step $k$, the fund balance sheet is partitioned into five mutua
 ### 2.2 The Exact Net Asset Value (NAV) Formulation
 In compliance with **Callout 3**, restricted funds ($W_k^{\text{escrow}}$) remain the physical legal property of the fund and are **not** deducted from equity value. True Net Asset Value is defined strictly as:
 
-$
+$$
 \begin{aligned}
 \text{Total Asset Value (TAV)}_k &\equiv W_k^{\text{settled}} + W_k^{\text{escrow}} + W_k^{\text{recv}} + \sum_{i=1}^N q_{i, k} P_{i, k}^{\text{eval}} \\
 \text{Total Liabilities}_k &\equiv W_k^{\text{lien}} + W_k^{\text{payable}}
 \end{aligned}
 
-$
+$$
 
-$
+$$
 \text{NAV}_k \equiv \text{TAV}_k - \text{Total Liabilities}_k
 
-$
+$$
 
-$
+$$
 \text{NAV}_k = \left( W_k^{\text{settled}} + W_k^{\text{escrow}} + W_k^{\text{recv}} \right) - \left( W_k^{\text{lien}} + W_k^{\text{payable}} \right) + \sum_{i=1}^N q_{i, k} P_{i, k}^{\text{eval}}
 
-$
+$$
 
 ### 2.3 Decoupled Available Buying Power Formulation
 To preclude bankruptcy without distorting NAV, **Available Buying Power** is computed separately:
 
-$
+$$
 \text{BuyingPower}_k \equiv W_k^{\text{settled}} - W_k^{\text{lien}} - W_k^{\text{payable}}
 
-$
+$$
 
 - Restricted funds ($W_k^{\text{escrow}}$) are excluded from Buying Power because they are already committed to in-flight buy orders.
 - Unsettled receivables ($W_k^{\text{recv}}$) are excluded from Buying Power under SEBI circular mandates until cleared on T+1.
@@ -91,10 +91,10 @@ $
 **Theorem (NAV Conservation Invariant)**:  
 Across all legal transactional state transitions $k \to k+1$ in the execution lifecycle:
 
-$
+$$
 \Delta \text{NAV}_k \equiv \text{NAV}_{k+1} - \text{NAV}_k = \Delta \text{UnrealizedPnL}_k + \text{RealizedPnL}_k - \text{Charges}_k + \Delta \text{ExternalCash}_k
 
-$
+$$
 
 ### Proof by Exhaustive Case Induction:
 
@@ -104,10 +104,10 @@ An order to buy $q$ shares of symbol $i$ at limit price $P_{\text{limit}}$ is di
 - $W_{k+1}^{\text{escrow}} = W_k^{\text{escrow}} + C$
 - Positions, receivables, liabilities, and market prices remain unchanged.
 
-$
+$$
 \Delta \text{NAV} = (-C) + (+C) + 0 - 0 + 0 = 0 \quad \checkmark
 
-$
+$$
 
 *(Conservation holds identically; cash is transferred between asset buckets).*
 
@@ -119,14 +119,14 @@ Since $P_{\text{fill}} \le P_{\text{limit}}$, refund $\Delta_{\text{refund}} \eq
 - $q_{i, k+1} = q_{i, k} + q$
 - Asset evaluation mark is initialized to $P_{\text{fill}}$: $\Delta \text{Equity} = q \cdot P_{\text{fill}}$
 
-$
+$$
 \begin{aligned}
 \Delta \text{NAV} &= (-C) + \Delta_{\text{refund}} + (q \cdot P_{\text{fill}}) \\
 &= -C + (C - q P_{\text{fill}} - \mathcal{C}_{\text{actual}}) + q P_{\text{fill}} \\
 &= -\mathcal{C}_{\text{actual}} \equiv -\text{Charges}_k \quad \checkmark
 \end{aligned}
 
-$
+$$
 
 *(NAV decreases by exactly the incurred transaction costs and taxes).*
 
@@ -136,7 +136,7 @@ An existing custody position of $q$ shares purchased at cost basis $P_{\text{bas
 - Net proceeds $R_{\text{net}} \equiv q \cdot P_{\text{fill}} - \mathcal{C}_{\text{actual}}$
 - $W_{k+1}^{\text{recv}} = W_k^{\text{recv}} + R_{\text{net}}$
 
-$
+$$
 \begin{aligned}
 \Delta \text{NAV} &= R_{\text{net}} - (q \cdot P_{\text{basis}}) \\
 &= (q P_{\text{fill}} - \mathcal{C}_{\text{actual}}) - q P_{\text{basis}} \\
@@ -144,27 +144,27 @@ $
 &\equiv \text{RealizedPnL}_k - \text{Charges}_k \quad \checkmark
 \end{aligned}
 
-$
+$$
 
 #### Case 4: NSCCL T+1 Settlement Batch
 Clearing house settles trade receivables of amount $A$:
 - $W_{k+1}^{\text{recv}} = W_k^{\text{recv}} - A$
 - $W_{k+1}^{\text{settled}} = W_k^{\text{settled}} + A$
 
-$
+$$
 \Delta \text{NAV} = (-A) + (+A) = 0 \quad \checkmark
 
-$
+$$
 
 #### Case 5: Corporate Action Cash Dividend
 Company distributes dividend $D$ per share on $q_i$ custody shares. Ex-date price drops by $D$: $\Delta P_i = -D$.
 - Cash received: $W_{k+1}^{\text{recv}} = W_k^{\text{recv}} + q_i \cdot D$
 - Equity valuation change: $\Delta \text{Equity} = q_i \cdot (-D) = -q_i D$
 
-$
+$$
 \Delta \text{NAV} = (+q_i D) + (-q_i D) = 0 \quad \checkmark
 
-$
+$$
 
 By mathematical induction, the NAV conservation invariant holds across all transitions. $\blacksquare$
 
@@ -174,20 +174,20 @@ By mathematical induction, the NAV conservation invariant holds across all trans
 
 To guarantee that actual fill outlays never exceed the pre-quarantined escrow amount ($W^{\text{escrow}}$), every buy order dispatched by AlphaNiti enforces an exchange limit price satisfying the **Collar Guard Inequality**:
 
-$
-P_{\text{limit}, i} \le \frac{\text{EscrowAllocated}_i - \mathcal{C}_{\max}(q_i^*, \text{EscrowAllocated}_i)}{q_i^*}
+$$
+P_{\text{limit}, i} \le \frac{\text{EscrowAllocated}_i - \mathcal{C}_{\max}(q_i^{\star}, \text{EscrowAllocated}_i)}{q_i^{\star}}
 
-$
+$$
 
 where $\mathcal{C}_{\max}$ is the maximum possible statutory tax and fee charge calculated at the ceiling price.
 
 **Theorem (Solvency Non-Negativity)**:  
 Under the Limit Collar Guard, market slippage cannot cause cleared cash to drop below zero:
 
-$
+$$
 W_t^{\text{settled}} \ge 0, \quad \forall t \ge 0
 
-$
+$$
 
 ---
 

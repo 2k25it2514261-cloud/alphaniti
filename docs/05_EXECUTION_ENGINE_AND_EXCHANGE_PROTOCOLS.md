@@ -49,17 +49,17 @@ flowchart TD
 ### 2.1 Uniqueness Scope & ClOrdID Specification
 Under Section 4.3 of the *NSE India Cash Market FIX Protocol Specification*, client order identifier uniqueness is enforced per:
 
-$
+$$
 \text{Scope} \equiv \big( \text{TradingMemberID}, \; \text{TraderID}, \; \text{OrderDate}, \; \text{ClOrdID} \big)
 
-$
+$$
 
 AlphaNiti constructs an immutable 32-character canonical `ClOrdID` (Tag 11):
 
-$
+$$
 \text{ClOrdID} \equiv \text{YYYYMMDD-MEMBER-STRAT-} \parallel \text{HMAC-SHA256}(K_{\text{secret}}, \; \text{Nonce} \parallel \text{Symbol} \parallel \text{Qty})_{[:14]}
 
-$
+$$
 
 - **`YYYYMMDD`**: Trading date prefix matching the exchange business date.
 - **`MEMBER`**: 5-digit SEBI registered Trading Member ID.
