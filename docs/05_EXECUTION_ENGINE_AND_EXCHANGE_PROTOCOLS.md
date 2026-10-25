@@ -51,14 +51,12 @@ Under Section 4.3 of the *NSE India Cash Market FIX Protocol Specification*, cli
 
 $$
 \text{Scope} \equiv \big( \text{TradingMemberID}, \; \text{TraderID}, \; \text{OrderDate}, \; \text{ClOrdID} \big)
-
 $$
 
 AlphaNiti constructs an immutable 32-character canonical `ClOrdID` (Tag 11):
 
 $$
 \text{ClOrdID} \equiv \text{YYYYMMDD-MEMBER-STRAT-} \parallel \text{HMAC-SHA256}(K_{\text{secret}}, \; \text{Nonce} \parallel \text{Symbol} \parallel \text{Qty})_{[:14]}
-
 $$
 
 - **`YYYYMMDD`**: Trading date prefix matching the exchange business date.
@@ -80,7 +78,7 @@ If network latency or a gateway failover causes a retransmission of an identical
 ## 3. Order Lifecycle State Machine & Two-Phase Commit
 
 ### 3.1 Order State Transition Table
-The formal execution state machine $\mathcal{S}_{\text{exec}}$ enforces the following valid transitions:
+The formal execution state machine $\mathcal{S} _ {\text{exec}}$ enforces the following valid transitions:
 
 | Current State | Event / Inbound Message | Next State | Action / Ledger Notification |
 | :--- | :--- | :--- | :--- |

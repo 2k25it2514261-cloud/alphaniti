@@ -40,7 +40,7 @@ Quantitative trading architectures frequently fail between backtest and producti
 1. **Point-in-Time Leakage**: Joining fundamental restatements or corporate disclosures on event dates rather than public broadcast and ingestion timestamps.
 2. **Conflated Uncertainty**: Treating irreducible market volatility (aleatoric noise) identically to model unfamiliarity (epistemic risk), or triggering indiscriminate market-order liquidations during regime breaks.
 3. **High-Dimensional DRO Degeneracy**: Applying Wasserstein Distributionally Robust Optimization (DRO) directly in $N$-dimensional asset space, where the concentration radius scales as $\mathcal{O}(S^{-1/N})$, reducing the optimizer to a trivial $1/N$ allocation.
-4. **Heuristic Share Rounding**: Rounding continuous weights $\mathbf{w}^{\star} \in \mathbb{R}^N$ to discrete shares $\mathbf{q} \in \mathbb{Z}_{\ge 0}^N$ post-hoc, violating cash solvency and distorting non-convex tiered fee schedules.
+4. **Heuristic Share Rounding**: Rounding continuous weights $\mathbf{w}^{\star} \in \mathbb{R}^N$ to discrete shares $\mathbf{q} \in \mathbb{Z} _ {\ge 0}^N$ post-hoc, violating cash solvency and distorting non-convex tiered fee schedules.
 5. **Unmonitored Cash Accounting**: Treating cash as a single scalar rather than a conserved double-entry state machine across cleared cash, trade-date escrow, $T+1$ receivables, liens, and statutory payables.
 
 ### Epistemic Discipline: No Unverified Claims
@@ -49,13 +49,13 @@ In accordance with institutional research governance ([`RESEARCH_ROADMAP.md`](RE
 
 | Architectural Pillar | Core Mechanism | Primary Repository Artifact | Epistemic Verification Class | Falsifiable Acceptance / Proof Criterion |
 | :--- | :--- | :--- | :---: | :--- |
-| **1. Causal Data Engine** | Pent-temporal tuple $\vec{\boldsymbol{\tau}}$ & filtration $\mathcal{F}_{t_{\text{decision}}}$ | [`docs/01_DATA_INGESTION_AND_TEMPORAL_MODEL.md`](docs/01_DATA_INGESTION_AND_TEMPORAL_MODEL.md) | **Analytical Definition & Invariant** | Future-record mutation test ($t_{\text{ingest}} \ge t_{\text{decision}}$) yields $\Delta \mathbf{q}_t^{\star} = \mathbf{0}$ |
+| **1. Causal Data Engine** | Pent-temporal tuple $\vec{\boldsymbol{\tau}}$ & filtration $\mathcal{F} _ {t _ {\text{decision}}}$ | [`docs/01_DATA_INGESTION_AND_TEMPORAL_MODEL.md`](docs/01_DATA_INGESTION_AND_TEMPORAL_MODEL.md) | **Analytical Definition & Invariant** | Future-record mutation test ($t _ {\text{ingest}} \ge t _ {\text{decision}}$) yields $\Delta \mathbf{q} _ t^{\star} = \mathbf{0}$ |
 | **2. Evidential Forecasting** | NIG conjugate posterior & 4-tier graduated abstention | [`docs/02_FORECASTING_AND_EVIDENTIAL_DEEP_ENSEMBLE.md`](docs/02_FORECASTING_AND_EVIDENTIAL_DEEP_ENSEMBLE.md) | **Closed-Form Derivation + Empirical Gate** | Exact Student-$t$ variance decomposition; out-of-fold Brier score & Kupiec/Christoffersen coverage $p > 0.05$ |
-| **3. Factor-Space DRO Risk** | Orthogonal factor DRO ($k \le 5$) + residual CVaR bound $\Delta_\epsilon$ | [`docs/03_RISK_MODEL_AND_WASSERSTEIN_DRO.md`](docs/03_RISK_MODEL_AND_WASSERSTEIN_DRO.md) | **Analytical Proof (Fournier–Guillin 2015)** | Sub-additivity bound $\text{CVaR}_\alpha(\mathbf{w}) \le \text{CVaR}_\alpha^{\text{DRO}}(\mathbf{v}^T \mathbf{f}) + \Delta_\epsilon(\mathbf{w}, \alpha)$ |
-| **4. Discrete Lattice Sizing** | Total-objective B&B with lower convex fee envelopes | [`docs/04_PORTFOLIO_OPTIMIZATION_AND_DISCRETE_SIZING.md`](docs/04_PORTFOLIO_OPTIMIZATION_AND_DISCRETE_SIZING.md) | **Analytical Proof (Rockafellar–Uryasev)** | Node lower bound $z_{\text{LP}}(\mathcal{N}) \le \min_{\mathbf{q} \in \mathbb{Z}^N \cap [\mathbf{l}, \mathbf{u}]} J(\mathbf{q})$; optimality gap $\le 10^{-6}$ |
+| **3. Factor-Space DRO Risk** | Orthogonal factor DRO ($k \le 5$) + residual CVaR bound $\Delta _ \epsilon$ | [`docs/03_RISK_MODEL_AND_WASSERSTEIN_DRO.md`](docs/03_RISK_MODEL_AND_WASSERSTEIN_DRO.md) | **Analytical Proof (Fournier–Guillin 2015)** | Sub-additivity bound $\text{CVaR} _ \alpha(\mathbf{w}) \le \text{CVaR} _ \alpha^{\text{DRO}}(\mathbf{v}^T \mathbf{f}) + \Delta _ \epsilon(\mathbf{w}, \alpha)$ |
+| **4. Discrete Lattice Sizing** | Total-objective B&B with lower convex fee envelopes | [`docs/04_PORTFOLIO_OPTIMIZATION_AND_DISCRETE_SIZING.md`](docs/04_PORTFOLIO_OPTIMIZATION_AND_DISCRETE_SIZING.md) | **Analytical Proof (Rockafellar–Uryasev)** | Node lower bound $z _ {\text{LP}}(\mathcal{N}) \le \min _ {\mathbf{q} \in \mathbb{Z}^N \cap [\mathbf{l}, \mathbf{u}]} J(\mathbf{q})$; optimality gap $\le 10^{-6}$ |
 | **5. Exchange Protocol** | HMAC `ClOrdID`, duplicate reject (Tag 104), 2PC WAL recovery | [`docs/05_EXECUTION_ENGINE_AND_EXCHANGE_PROTOCOLS.md`](docs/05_EXECUTION_ENGINE_AND_EXCHANGE_PROTOCOLS.md) | **Protocol Specification (NSE FIX 4.2)** | Zero duplicate order re-transmission prior to `OrderStatusRequest (35=H)` reconciliation |
-| **6. Double-Entry Ledger** | 5-bucket state machine & pre-trade limit-price collar guard | [`docs/06_ACCOUNTING_NAV_AND_DOUBLE_ENTRY_LEDGER.md`](docs/06_ACCOUNTING_NAV_AND_DOUBLE_ENTRY_LEDGER.md) | **Inductive Mathematical Proof** | $\Delta W_k^{\text{NAV}} = \Delta \text{UnrealizedPnL}_k + \text{RealizedPnL}_k - \text{Charges}_k$; $W_k^{\text{settled}} \ge 0$ |
-| **7. Econometric Validation** | Purged Walk-Forward, CPCV, Hill tail router, StepM / SPA / DSR | [`docs/07_MONITORING_VALIDATION_AND_CALIBRATION_TESTING.md`](docs/07_MONITORING_VALIDATION_AND_CALIBRATION_TESTING.md) | **Empirical Falsification Protocol** | Simultaneously pass $p_{\text{StepM}} < 0.05$, $p_{\text{SPA}}^c < 0.01$, and $\text{DSR} \ge 0.99$ on untouched holdouts |
+| **6. Double-Entry Ledger** | 5-bucket state machine & pre-trade limit-price collar guard | [`docs/06_ACCOUNTING_NAV_AND_DOUBLE_ENTRY_LEDGER.md`](docs/06_ACCOUNTING_NAV_AND_DOUBLE_ENTRY_LEDGER.md) | **Inductive Mathematical Proof** | $\Delta W _ k^{\text{NAV}} = \Delta \text{UnrealizedPnL} _ k + \text{RealizedPnL} _ k - \text{Charges} _ k$; $W _ k^{\text{settled}} \ge 0$ |
+| **7. Econometric Validation** | Purged Walk-Forward, CPCV, Hill tail router, StepM / SPA / DSR | [`docs/07_MONITORING_VALIDATION_AND_CALIBRATION_TESTING.md`](docs/07_MONITORING_VALIDATION_AND_CALIBRATION_TESTING.md) | **Empirical Falsification Protocol** | Simultaneously pass $p _ {\text{StepM}} < 0.05$, $p _ {\text{SPA}}^c < 0.01$, and $\text{DSR} \ge 0.99$ on untouched holdouts |
 | **8. Isolated Safety Kernel** | Hardware/OS memory locking, syscall filtering & TLA+ model | [`docs/08_PLATFORM_SECURITY_AND_ISOLATED_SAFETY_KERNEL.md`](docs/08_PLATFORM_SECURITY_AND_ISOLATED_SAFETY_KERNEL.md)<br/>[`formal_specs/AlphaNitiSafetyKernel.tla`](formal_specs/AlphaNitiSafetyKernel.tla) | **Formal State-Machine Specification** | TLC invariant verification of `TypeOK`, `SolvencyInvariant`, and `NonNegativeBalancesInvariant` |
 | **9. Tax & Regulatory Audit** | Finance Act 2026 statutory matrix & SEBI OTR throttle | [`docs/09_RISK_REPORTING_AND_REGULATORY_AUDIT.md`](docs/09_RISK_REPORTING_AND_REGULATORY_AUDIT.md) | **Statutory & Regulatory Schedule** | Exact match against NSE/SEBI circular fee formulas and Finance Act 2026 STT rates |
 
@@ -113,13 +113,13 @@ Every stage of the pipeline is documented in a dedicated specification file insi
 
 | Document | Architectural Scope & Mathematical Contents | Primary Literature & Standards |
 | :--- | :--- | :--- |
-| [`docs/01_DATA_INGESTION_AND_TEMPORAL_MODEL.md`](docs/01_DATA_INGESTION_AND_TEMPORAL_MODEL.md) | 5-timestamp vector $\vec{\boldsymbol{\tau}}$, strict causal filtration $\mathcal{F}_{t_{\text{decision}}}$, exact split/bonus/rights/dividend adjustments, MAD robust Z-scoring | López de Prado (2018), Asness et al. (2014), Brown et al. (1992) |
+| [`docs/01_DATA_INGESTION_AND_TEMPORAL_MODEL.md`](docs/01_DATA_INGESTION_AND_TEMPORAL_MODEL.md) | 5-timestamp vector $\vec{\boldsymbol{\tau}}$, strict causal filtration $\mathcal{F} _ {t _ {\text{decision}}}$, exact split/bonus/rights/dividend adjustments, MAD robust Z-scoring | López de Prado (2018), Asness et al. (2014), Brown et al. (1992) |
 | [`docs/02_FORECASTING_AND_EVIDENTIAL_DEEP_ENSEMBLE.md`](docs/02_FORECASTING_AND_EVIDENTIAL_DEEP_ENSEMBLE.md) | Normal-Inverse-Gamma (NIG) conjugate updates, exact Student-$t$ aleatoric/epistemic decomposition, split-conformal quantile calibration, 4-tier abstention | Amini et al. (NeurIPS 2020), Lakshminarayanan et al. (2017), Angelopoulos & Bates (2021) |
-| [`docs/03_RISK_MODEL_AND_WASSERSTEIN_DRO.md`](docs/03_RISK_MODEL_AND_WASSERSTEIN_DRO.md) | Factor-residual decomposition, full residual covariance $\boldsymbol{\Sigma}_\epsilon$, sub-Gaussian & empirical residual CVaR bounds $\Delta_\epsilon$, Fournier–Guillin radius $\epsilon_f$, Esfahani–Kuhn LP dual | Fournier & Guillin (2015), Esfahani & Kuhn (2018), Rockafellar & Uryasev (2000), Ledoit & Wolf (2004) |
-| [`docs/04_PORTFOLIO_OPTIMIZATION_AND_DISCRETE_SIZING.md`](docs/04_PORTFOLIO_OPTIMIZATION_AND_DISCRETE_SIZING.md) | Total-objective integer program $J(\mathbf{q})$, lower convex fee envelopes $\text{Cost}_i^{\text{cvx}}(q_i)$, valid B&B node lower bounds, optimality certificate schema | Rockafellar & Uryasev (2002), Bertsimas & Shioda (2009), Almgren & Chriss (2000) |
+| [`docs/03_RISK_MODEL_AND_WASSERSTEIN_DRO.md`](docs/03_RISK_MODEL_AND_WASSERSTEIN_DRO.md) | Factor-residual decomposition, full residual covariance $\boldsymbol{\Sigma} _ \epsilon$, sub-Gaussian & empirical residual CVaR bounds $\Delta _ \epsilon$, Fournier–Guillin radius $\epsilon _ f$, Esfahani–Kuhn LP dual | Fournier & Guillin (2015), Esfahani & Kuhn (2018), Rockafellar & Uryasev (2000), Ledoit & Wolf (2004) |
+| [`docs/04_PORTFOLIO_OPTIMIZATION_AND_DISCRETE_SIZING.md`](docs/04_PORTFOLIO_OPTIMIZATION_AND_DISCRETE_SIZING.md) | Total-objective integer program $J(\mathbf{q})$, lower convex fee envelopes $\text{Cost} _ i^{\text{cvx}}(q _ i)$, valid B&B node lower bounds, optimality certificate schema | Rockafellar & Uryasev (2002), Bertsimas & Shioda (2009), Almgren & Chriss (2000) |
 | [`docs/05_EXECUTION_ENGINE_AND_EXCHANGE_PROTOCOLS.md`](docs/05_EXECUTION_ENGINE_AND_EXCHANGE_PROTOCOLS.md) | NSE EMAPI / FIX 4.2 session state machine, HMAC `ClOrdID` uniqueness, Tag 104 / Code 16384 duplicate rejection, 2-phase commit WAL crash recovery | NSE EMAPI Spec, FIX 4.2 Protocol Standard, Aldridge (2013) |
 | [`docs/06_ACCOUNTING_NAV_AND_DOUBLE_ENTRY_LEDGER.md`](docs/06_ACCOUNTING_NAV_AND_DOUBLE_ENTRY_LEDGER.md) | Disjoint 5-bucket balance sheet, inductive NAV conservation proof across all transitions, decoupled buying power vs. NAV, pre-trade limit collar guard | IFRS 9 / Ind AS 32, Dijkstra (1975), Lamport (2002) |
-| [`docs/07_MONITORING_VALIDATION_AND_CALIBRATION_TESTING.md`](docs/07_MONITORING_VALIDATION_AND_CALIBRATION_TESTING.md) | Kupiec $\text{LR}_{\text{uc}}$ & Christoffersen $\text{LR}_{\text{ind}}$ calibration tests, Purged/Embargoed CV, Hill tail index router, Romano–Wolf StepM, Hansen SPA, Bailey DSR | Christoffersen (1998), Kupiec (1995), Romano & Wolf (2005), Hansen (2005), Bailey & López de Prado (2014) |
+| [`docs/07_MONITORING_VALIDATION_AND_CALIBRATION_TESTING.md`](docs/07_MONITORING_VALIDATION_AND_CALIBRATION_TESTING.md) | Kupiec $\text{LR} _ {\text{uc}}$ & Christoffersen $\text{LR} _ {\text{ind}}$ calibration tests, Purged/Embargoed CV, Hill tail index router, Romano–Wolf StepM, Hansen SPA, Bailey DSR | Christoffersen (1998), Kupiec (1995), Romano & Wolf (2005), Hansen (2005), Bailey & López de Prado (2014) |
 | [`docs/08_PLATFORM_SECURITY_AND_ISOLATED_SAFETY_KERNEL.md`](docs/08_PLATFORM_SECURITY_AND_ISOLATED_SAFETY_KERNEL.md) | Windows VBS Enclave (`VirtualLock`), Linux `seccomp-bpf` 8-syscall whitelist (`mlockall`), Frama-C ACSL contracts, TLA+ safety specification | Lamport (2002), Baudin et al. (Frama-C 2021), Saltzer & Schroeder (1975) |
 | [`docs/09_RISK_REPORTING_AND_REGULATORY_AUDIT.md`](docs/09_RISK_REPORTING_AND_REGULATORY_AUDIT.md) | SEBI Order-to-Trade Ratio (OTR) penalty avoidance, Finance Act 2026 statutory tax schedule, cryptographic Merkle decision audit trail, SR 11-7 governance | Federal Reserve SR 11-7, SEBI Master Circulars, Finance Act 2026 |
 | [`RESEARCH_ROADMAP.md`](RESEARCH_ROADMAP.md) | 10 ranked theoretical upgrades, literature anchoring matrix (what is supported vs. unproven), and 7-stage implementation sequence | Gu, Kelly & Xiu (2020), Ke, Kelly & Xiu (2019), Bailey et al. (2017) |
@@ -131,7 +131,7 @@ Every stage of the pipeline is documented in a dedicated specification file insi
 
 > **Full Specification**: [`docs/01_DATA_INGESTION_AND_TEMPORAL_MODEL.md`](docs/01_DATA_INGESTION_AND_TEMPORAL_MODEL.md)
 
-Backtest lookahead bias frequently arises from conflating the date an economic event occurred with the timestamp at which the data vendor delivered the parsed record to the trading engine. Every ingested observation $\mathbf{X}$ in AlphaNiti is modeled as an immutable tuple containing a five-component temporal vector $\vec{\boldsymbol{\tau}} \in \mathbb{R}_{\ge 0}^5$:
+Backtest lookahead bias frequently arises from conflating the date an economic event occurred with the timestamp at which the data vendor delivered the parsed record to the trading engine. Every ingested observation $\mathbf{X}$ in AlphaNiti is modeled as an immutable tuple containing a five-component temporal vector $\vec{\boldsymbol{\tau}} \in \mathbb{R} _ {\ge 0}^5$:
 
 $$
 \mathbf{X} \equiv \big( \text{EntityID}, \; \text{Field}, \; \text{Value}, \; \vec{\boldsymbol{\tau}}, \; \text{Hash}_{\text{SHA256}} \big), \qquad \vec{\boldsymbol{\tau}} \equiv \begin{pmatrix} \tau^{\text{event}} \\ \tau^{\text{pub}} \\ \tau^{\text{vendor}} \\ \tau^{\text{ingest}} \\ \tau^{\text{effective}} \end{pmatrix}
@@ -139,7 +139,7 @@ $$
 
 ### Temporal Monotonicity & Causal Filtration Operator
 
-Every valid record must satisfy the physical monotonicity ordering $\tau^{\text{event}}(\mathbf{X}) \le \tau^{\text{pub}}(\mathbf{X}) \le \tau^{\text{vendor}}(\mathbf{X}) \le \tau^{\text{ingest}}(\mathbf{X})$. For any decision cutoff $t_{\text{decision}}$, the **Causal Filtration Operator** $\mathcal{F}_{t_{\text{decision}}}$ admits only records satisfying strict causal availability:
+Every valid record must satisfy the physical monotonicity ordering $\tau^{\text{event}}(\mathbf{X}) \le \tau^{\text{pub}}(\mathbf{X}) \le \tau^{\text{vendor}}(\mathbf{X}) \le \tau^{\text{ingest}}(\mathbf{X})$. For any decision cutoff $t _ {\text{decision}}$, the **Causal Filtration Operator** $\mathcal{F} _ {t _ {\text{decision}}}$ admits only records satisfying strict causal availability:
 
 $$
 \mathcal{F}_{t_{\text{decision}}} \equiv \left\lbrace \mathbf{X} \in \mathcal{D} \;\middle\vert\; \max\big(\tau^{\text{pub}}(\mathbf{X}), \; \tau^{\text{vendor}}(\mathbf{X}), \; \tau^{\text{ingest}}(\mathbf{X})\big) < t_{\text{decision}} \;\land\; \tau^{\text{effective}}(\mathbf{X}) \le t_{\text{decision}} \right\rbrace
@@ -147,7 +147,7 @@ $$
 
 - **Strict Inequality ($<$)**: Precludes same-millisecond lookahead bias.
 - **Restatement Preservation**: Corporate financial revisions append a new record $\mathbf{X}^{(v+1)}$ with $\tau^{\text{ingest}}(\mathbf{X}^{(v+1)}) > \tau^{\text{ingest}}(\mathbf{X}^{(v)})$ rather than overwriting $\mathbf{X}^{(v)}$ in place.
-- **Falsifiable Permutation Invariance**: Perturbing or deleting any subset of records with $\tau^{\text{ingest}}(\mathbf{X}) \ge t_{\text{decision}}$ must produce zero change in the historical decision vector ($\Delta \mathbf{q}_{t_{\text{decision}}}^{\star} = \mathbf{0}$).
+- **Falsifiable Permutation Invariance**: Perturbing or deleting any subset of records with $\tau^{\text{ingest}}(\mathbf{X}) \ge t _ {\text{decision}}$ must produce zero change in the historical decision vector ($\Delta \mathbf{q} _ {t _ {\text{decision}}}^{\star} = \mathbf{0}$).
 
 ---
 
@@ -157,19 +157,19 @@ $$
 
 ### 4.1 Normal-Inverse-Gamma (NIG) Analytical Variance Decomposition
 
-Asset excess returns $r_t \sim \mathcal{N}(\mu, \sigma^2)$ are placed under a conjugate Normal-Inverse-Gamma prior $\text{NIG}(m_0, \nu_0, \alpha_0, \beta_0)$ with $\nu_0 > 0, \alpha_0 > 1, \beta_0 > 0$. Given $T$ observations with sample mean $\bar{r} = \frac{1}{T}\sum_{t=1}^T r_t$ and sum of squared deviations $\text{SS} = \sum_{t=1}^T (r_t - \bar{r})^2$, the exact posterior parameters are:
+Asset excess returns $r _ t \sim \mathcal{N}(\mu, \sigma^2)$ are placed under a conjugate Normal-Inverse-Gamma prior $\text{NIG}(m _ 0, \nu _ 0, \alpha _ 0, \beta _ 0)$ with $\nu _ 0 > 0, \alpha _ 0 > 1, \beta _ 0 > 0$. Given $T$ observations with sample mean $\bar{r} = \frac{1}{T}\sum _ {t=1}^T r _ t$ and sum of squared deviations $\text{SS} = \sum _ {t=1}^T (r _ t - \bar{r})^2$, the exact posterior parameters are:
 
 $$
 \nu_T = \nu_0 + T, \quad m_T = \frac{\nu_0 m_0 + T \bar{r}}{\nu_T}, \quad \alpha_T = \alpha_0 + \frac{T}{2}, \quad \beta_T = \beta_0 + \frac{1}{2}\text{SS} + \frac{T \nu_0 (\bar{r} - m_0)^2}{2 \nu_T}
 $$
 
-Integrating out $(\mu, \sigma^2)$ yields a Student-$t$ predictive distribution $r_{T+1} \mid \mathbf{r} \sim t_{2\alpha_T}\!\left(m_T, \frac{\beta_T(\nu_T + 1)}{\alpha_T \nu_T}\right)$. For $\alpha_T > 1$, the total predictive variance decomposes analytically into irreducible market noise and reducible model uncertainty:
+Integrating out $(\mu, \sigma^2)$ yields a Student-$t$ predictive distribution $r _ {T+1} \mid \mathbf{r} \sim t _ {2\alpha _ T}\!\left(m _ T, \frac{\beta _ T(\nu _ T + 1)}{\alpha _ T \nu _ T}\right)$. For $\alpha _ T > 1$, the total predictive variance decomposes analytically into irreducible market noise and reducible model uncertainty:
 
 $$
 \operatorname{Var}(r_{T+1} \mid \mathbf{r}) = \underbrace{\frac{\beta_T}{\alpha_T - 1}}_{\sigma_{\text{aleatoric}}^2 \text{ (Irreducible Market Noise)}} + \underbrace{\frac{\beta_T}{\nu_T (\alpha_T - 1)}}_{\sigma_{\text{epistemic}}^2 \text{ (Reducible Parameter Uncertainty)}} \quad (\alpha_T > 1)
 $$
 
-Across an ensemble of $M$ deep evidential networks outputting $\lbrace (m_{i,m}, \nu_{i,m}, \alpha_{i,m}, \beta_{i,m})\rbrace_{m=1}^M$, the law of total variance incorporates inter-model epistemic disagreement:
+Across an ensemble of $M$ deep evidential networks outputting $\lbrace (m _ {i,m}, \nu _ {i,m}, \alpha _ {i,m}, \beta _ {i,m})\rbrace _ {m=1}^M$, the law of total variance incorporates inter-model epistemic disagreement:
 
 $$
 \sigma_{\text{epistemic}, i}^2 = \frac{1}{M}\sum_{m=1}^M \frac{\beta_{i,m}}{\nu_{i,m}(\alpha_{i,m} - 1)} + \frac{1}{M}\sum_{m=1}^M \left( m_{i,m} - \bar{\mu}_i \right)^2
@@ -189,9 +189,9 @@ flowchart TD
     Check -->|"Tier 4: Macro Halt / Broker Down"| T4["Tier 4: Systemic Circuit Freeze<br/>Complete halt; preserve custody in depository"]
 ```
 
-1. **Tier 1 (Soft Uncertainty: $\gamma_{\text{soft}} < \sigma_{\text{epistemic}, i}^2 \le \gamma_{\text{hard}}$)**: Halt new buy orders ($q_i^{\text{buy}} = 0$) and cancel working buy orders for asset $i$. Existing settled custody positions are held untouched, incurring zero liquidation spread cost.
-2. **Tier 2 (Elevated Uncertainty: $\gamma_{\text{hard}} < \sigma_{\text{epistemic}, i}^2 \le \gamma_{\text{crit}}$)**: Cancel open buy orders and de-gross exposure by 25%–50% using passive limit orders pegged to the National Best Bid (NBB), capped at $5\%$ of 20-day Average Daily Volume ($\text{ADV}_{20\text{d}}$).
-3. **Tier 3 (Extreme Breakdown: $\sigma_{\text{epistemic}, i}^2 > \gamma_{\text{crit}}$)**: Execute an orderly passive TWAP exit exclusively for asset $i$; all unrelated portfolio holdings remain unaffected.
+1. **Tier 1 (Soft Uncertainty: $\gamma _ {\text{soft}} < \sigma _ {\text{epistemic}, i}^2 \le \gamma _ {\text{hard}}$)**: Halt new buy orders ($q _ i^{\text{buy}} = 0$) and cancel working buy orders for asset $i$. Existing settled custody positions are held untouched, incurring zero liquidation spread cost.
+2. **Tier 2 (Elevated Uncertainty: $\gamma _ {\text{hard}} < \sigma _ {\text{epistemic}, i}^2 \le \gamma _ {\text{crit}}$)**: Cancel open buy orders and de-gross exposure by 25%–50% using passive limit orders pegged to the National Best Bid (NBB), capped at $5\%$ of 20-day Average Daily Volume ($\text{ADV} _ {20\text{d}}$).
+3. **Tier 3 (Extreme Breakdown: $\sigma _ {\text{epistemic}, i}^2 > \gamma _ {\text{crit}}$)**: Execute an orderly passive TWAP exit exclusively for asset $i$; all unrelated portfolio holdings remain unaffected.
 4. **Tier 4 (Systemic Market Circuit / Broker Partition)**: Immediate execution freeze; all working orders are cancelled and custody assets remain segregated in NSDL/CDSL depository accounts.
 
 ### 4.3 Permitted Risk-Free Cash Instruments (Indian Jurisdiction)
@@ -209,13 +209,13 @@ Unallocated capital is restricted to sovereign-grade Indian liquidity instrument
 
 ### 5.1 Full Portfolio Factor-Residual Model
 
-Asset returns $\mathbf{r}_t \in \mathbb{R}^N$ are decomposed into $k \le 5$ orthogonal systematic factors $\mathbf{f}_t \in \mathbb{R}^k$ and an idiosyncratic residual vector $\boldsymbol{\epsilon}_t \in \mathbb{R}^N$:
+Asset returns $\mathbf{r} _ t \in \mathbb{R}^N$ are decomposed into $k \le 5$ orthogonal systematic factors $\mathbf{f} _ t \in \mathbb{R}^k$ and an idiosyncratic residual vector $\boldsymbol{\epsilon} _ t \in \mathbb{R}^N$:
 
 $$
 \mathbf{r}_t = \mathbf{B} \mathbf{f}_t + \boldsymbol{\epsilon}_t, \quad \mathbf{B}^T \mathbf{B} = \mathbf{I}_k, \quad \mathbb{E}[\boldsymbol{\epsilon}_t \mid \mathbf{f}_t] = \mathbf{0}, \quad \operatorname{Cov}(\boldsymbol{\epsilon}_t) = \boldsymbol{\Sigma}_\epsilon
 $$
 
-where $\boldsymbol{\Sigma}_\epsilon \in \mathbb{R}^{N \times N}$ is the full Ledoit–Wolf shrunk residual covariance matrix (preserving off-diagonal industry and supply-chain co-movements). For portfolio weights $\mathbf{w} \in \mathbb{R}^N$ and projected factor exposure $\mathbf{v} \equiv \mathbf{B}^T \mathbf{w} \in \mathbb{R}^k$, the portfolio loss $\mathcal{L}(\mathbf{w}, \mathbf{r}_t) = -\mathbf{w}^T \mathbf{r}_t$ decomposes as:
+where $\boldsymbol{\Sigma} _ \epsilon \in \mathbb{R}^{N \times N}$ is the full Ledoit–Wolf shrunk residual covariance matrix (preserving off-diagonal industry and supply-chain co-movements). For portfolio weights $\mathbf{w} \in \mathbb{R}^N$ and projected factor exposure $\mathbf{v} \equiv \mathbf{B}^T \mathbf{w} \in \mathbb{R}^k$, the portfolio loss $\mathcal{L}(\mathbf{w}, \mathbf{r} _ t) = -\mathbf{w}^T \mathbf{r} _ t$ decomposes as:
 
 $$
 \mathcal{L}(\mathbf{w}, \mathbf{r}_t) = \underbrace{-\mathbf{v}^T \mathbf{f}_t}_{\text{Factor Loss } \mathcal{L}_f(\mathbf{v}, \mathbf{f}_t)} + \underbrace{(-\xi_t)}_{\text{Residual Loss } \mathcal{L}_\epsilon(\mathbf{w}, \boldsymbol{\epsilon}_t)}, \qquad \xi_t \equiv \mathbf{w}^T \boldsymbol{\epsilon}_t
@@ -228,7 +228,7 @@ $$
 $$
 
 **Lemma 1 (Residual Sub-Gaussian CVaR Bound & Heavy-Tail Fallback)**:  
-When the standardized portfolio residual $\xi_t = \mathbf{w}^T \boldsymbol{\epsilon}_t$ satisfies sub-Gaussian tail decay with variance $\sigma_\xi^2(\mathbf{w}) = \mathbf{w}^T \boldsymbol{\Sigma}_\epsilon \mathbf{w}$:
+When the standardized portfolio residual $\xi _ t = \mathbf{w}^T \boldsymbol{\epsilon} _ t$ satisfies sub-Gaussian tail decay with variance $\sigma _ \xi^2(\mathbf{w}) = \mathbf{w}^T \boldsymbol{\Sigma} _ \epsilon \mathbf{w}$:
 
 $$
 \text{CVaR}_\alpha^{\text{subG}}(\xi) \le \frac{\sigma_\xi(\mathbf{w})}{(1 - \alpha)\sqrt{2\pi}} \exp\left( -\frac{(\Phi^{-1}(\alpha))^2}{2} \right)
@@ -242,13 +242,13 @@ $$
 
 ### 5.2 Factor-Space Concentration & Esfahani–Kuhn Convex Dual
 
-Under light-tailed factor conditions $\mathbb{E}[\exp(\|\mathbf{f}\|_2^2 / \sigma_f^2)] \le 2$, **Fournier & Guillin (2015, Theorem 2)** establishes that the 1-Wasserstein distance between the true factor measure $\mu$ and empirical measure $\hat{\mu}_S$ across $S$ scenarios satisfies, with probability at least $1 - \delta$:
+Under light-tailed factor conditions $\mathbb{E}[\exp(\|\mathbf{f}\| _ 2^2 / \sigma _ f^2)] \le 2$, **Fournier & Guillin (2015, Theorem 2)** establishes that the 1-Wasserstein distance between the true factor measure $\mu$ and empirical measure $\hat{\mu} _ S$ across $S$ scenarios satisfies, with probability at least $1 - \delta$:
 
 $$
 \mathcal{W}_1(\mu, \hat{\mu}_S) \le \epsilon_f(S, \delta) \equiv C_1 \sigma_f \left( \frac{\ln(C_2 / \delta)}{S} \right)^{1/k}
 $$
 
-Evaluating the analytical parameterization $C_1 = 2(1 + \sqrt{k/2})$ and $C_2 = 2$ for $k = 3$ orthogonal factors, $S = 1,000$ scenarios, $\delta = 0.01$, and daily factor volatility $\sigma_f = 0.025$:
+Evaluating the analytical parameterization $C _ 1 = 2(1 + \sqrt{k/2})$ and $C _ 2 = 2$ for $k = 3$ orthogonal factors, $S = 1,000$ scenarios, $\delta = 0.01$, and daily factor volatility $\sigma _ f = 0.025$:
 
 $$
 \epsilon_f = 4.44949 \times 0.025 \times \left( \frac{\ln(200)}{1000} \right)^{1/3} = 0.111237 \times 0.174338 \approx \mathbf{0.0195}
@@ -260,7 +260,7 @@ $$
 \mathbb{P}\left( \text{CVaR}_\alpha^{\text{true}}(\mathbf{w}^{\star}) \le \sup_{\mathbb{Q} \in \mathbb{B}_{\epsilon_f}(\hat{\mu}_S)} \text{CVaR}_\alpha^{\mathbb{Q}}(\mathbf{v}^T \mathbf{f}) + \Delta_\epsilon(\mathbf{w}^{\star}, \alpha) \right) \ge 1 - \delta
 $$
 
-By **Esfahani & Kuhn (2018, Theorem 4.2)**, the supremum over the 1-Wasserstein ball $\mathbb{B}_{\epsilon_f}(\hat{\mu}_S)$ is equivalent to the tractable finite-dimensional convex program:
+By **Esfahani & Kuhn (2018, Theorem 4.2)**, the supremum over the 1-Wasserstein ball $\mathbb{B} _ {\epsilon _ f}(\hat{\mu} _ S)$ is equivalent to the tractable finite-dimensional convex program:
 
 $$
 \begin{aligned}
@@ -278,34 +278,34 @@ $$
 
 ### 6.1 Total-Objective Discrete Formulation & Convex Envelope Lower Bounds
 
-Given reference prices $P_i^{\text{eval}}$, the discrete optimizer searches directly over integer share quantities $\mathbf{q} \in \mathbb{Z}_{\ge 0}^N$ to minimize the total risk-adjusted, transaction-cost-aware objective:
+Given reference prices $P _ i^{\text{eval}}$, the discrete optimizer searches directly over integer share quantities $\mathbf{q} \in \mathbb{Z} _ {\ge 0}^N$ to minimize the total risk-adjusted, transaction-cost-aware objective:
 
 $$
 J(\mathbf{q}) \equiv \text{CVaR}_\alpha(\mathbf{q}) - \sum_{i=1}^N \mu_i q_i P_i^{\text{eval}} + \sum_{i=1}^N \text{Cost}_i(q_i)
 $$
 
-Because real-world execution schedules $\text{Cost}_i(q_i)$ contain fixed minimum brokerage floors and tiered fee slabs (making them non-convex at $q_i \to 0^+$), each Branch-and-Bound tree node $\mathcal{N}$ with box bounds $\mathbf{l} \le \mathbf{q} \le \mathbf{u}$ replaces $\text{Cost}_i(q_i)$ with its **Lower Convex Envelope** $\text{Cost}_i^{\text{cvx}}(q_i) \le \text{Cost}_i(q_i)$:
+Because real-world execution schedules $\text{Cost} _ i(q _ i)$ contain fixed minimum brokerage floors and tiered fee slabs (making them non-convex at $q _ i \to 0^+$), each Branch-and-Bound tree node $\mathcal{N}$ with box bounds $\mathbf{l} \le \mathbf{q} \le \mathbf{u}$ replaces $\text{Cost} _ i(q _ i)$ with its **Lower Convex Envelope** $\text{Cost} _ i^{\text{cvx}}(q _ i) \le \text{Cost} _ i(q _ i)$:
 
 $$
 z_{\text{LP}}(\mathcal{N}) \equiv \min_{\mathbf{q} \in [\mathbf{l}, \mathbf{u}], \, \gamma \in \mathbb{R}, \, \mathbf{s} \in \mathbb{R}_{\ge 0}^S} \left\lbrace \gamma + \frac{1}{(1-\alpha)S}\sum_{s=1}^S s_s - \sum_{i=1}^N \mu_i q_i P_i^{\text{eval}} + \sum_{i=1}^N \text{Cost}_i^{\text{cvx}}(q_i) \right\rbrace
 $$
 
 $$
-\text{subject to:} \quad s_s \ge -\sum_{i=1}^N q_i r_{i, s} P_i^{\text{eval}} - \gamma, \quad \forall s \in \lbrace 1, \dots, S\rbrace 
+\text{subject to:} \quad s_s \ge -\sum_{i=1}^N q_i r_{i, s} P_i^{\text{eval}} - \gamma, \quad \forall s \in \lbrace 1, \dots, S\rbrace
 $$
 
 **Theorem 2 (Valid Node Lower Bound)**:  
-Because $\text{Cost}_i^{\text{cvx}}(q_i) \le \text{Cost}_i(q_i)$ everywhere on $[l_i, u_i]$, the continuous relaxation satisfies $\mathbb{Z}^N \cap [\mathbf{l}, \mathbf{u}] \subset [\mathbf{l}, \mathbf{u}]$, and the Rockafellar–Uryasev LP equals exact discrete CVaR at every feasible point:
+Because $\text{Cost} _ i^{\text{cvx}}(q _ i) \le \text{Cost} _ i(q _ i)$ everywhere on $[l _ i, u _ i]$, the continuous relaxation satisfies $\mathbb{Z}^N \cap [\mathbf{l}, \mathbf{u}] \subset [\mathbf{l}, \mathbf{u}]$, and the Rockafellar–Uryasev LP equals exact discrete CVaR at every feasible point:
 
 $$
 z_{\text{LP}}(\mathcal{N}) \le \min_{\mathbf{q} \in \mathbb{Z}^N \cap [\mathbf{l}, \mathbf{u}]} J(\mathbf{q})
 $$
 
-Consequently, pruning any subtree $\mathcal{N}$ when $z_{\text{LP}}(\mathcal{N}) \ge \text{UB}_{\text{incumbent}}$ is mathematically guaranteed never to discard a globally superior integer portfolio.
+Consequently, pruning any subtree $\mathcal{N}$ when $z _ {\text{LP}}(\mathcal{N}) \ge \text{UB} _ {\text{incumbent}}$ is mathematically guaranteed never to discard a globally superior integer portfolio.
 
 ### 6.2 Verifiable Optimality Certificate Schema
 
-Upon convergence ($(\text{UB}_{\text{incumbent}} - \text{LB}_{\text{global}}) / |\text{UB}_{\text{incumbent}}| \le 10^{-6}$), the solver emits a structured audit certificate:
+Upon convergence ($(\text{UB} _ {\text{incumbent}} - \text{LB} _ {\text{global}}) / |\text{UB} _ {\text{incumbent}}| \le 10^{-6}$), the solver emits a structured audit certificate:
 
 ```json
 {
@@ -355,7 +355,7 @@ flowchart TD
 
 ### 7.1 Inductive Balance Sheet Conservation
 
-At discrete event step $k$, total Net Asset Value ($W_k^{\text{NAV}}$) and immediate Buying Power ($\text{BP}_k$) are decoupled:
+At discrete event step $k$, total Net Asset Value ($W _ k^{\text{NAV}}$) and immediate Buying Power ($\text{BP} _ k$) are decoupled:
 
 $$
 W_k^{\text{NAV}} \equiv \left( W_k^{\text{settled}} + W_k^{\text{escrow}} + W_k^{\text{recv}} \right) - \left( W_k^{\text{lien}} + W_k^{\text{payable}} \right) + \sum_{i=1}^N q_{i, k} P_{i, k}^{\text{eval}}
@@ -365,29 +365,29 @@ $$
 \text{BP}_k \equiv W_k^{\text{settled}} - W_k^{\text{lien}} - W_k^{\text{payable}}
 $$
 
-When a buy order is dispatched, capital moves from $W^{\text{settled}}$ into $W^{\text{escrow}}$. This reduces $\text{BP}_k$ immediately (preventing double-spending of cash across concurrent orders) while keeping $W_k^{\text{NAV}}$ unchanged ($\Delta W_k^{\text{NAV}} = 0$). Across every legal transition $k \to k+1$, mathematical induction proves:
+When a buy order is dispatched, capital moves from $W^{\text{settled}}$ into $W^{\text{escrow}}$. This reduces $\text{BP} _ k$ immediately (preventing double-spending of cash across concurrent orders) while keeping $W _ k^{\text{NAV}}$ unchanged ($\Delta W _ k^{\text{NAV}} = 0$). Across every legal transition $k \to k+1$, mathematical induction proves:
 
 $$
 \Delta W_k^{\text{NAV}} = \Delta \text{UnrealizedPnL}_k + \text{RealizedPnL}_k - \text{Charges}_k + \Delta \text{ExternalCash}_k
 $$
 
-| State Transition | Account Debited ($-$) | Account Credited ($+$) | Equity Valuation Change | Net $\Delta W_k^{\text{NAV}}$ |
+| State Transition | Account Debited ($-$) | Account Credited ($+$) | Equity Valuation Change | Net $\Delta W _ k^{\text{NAV}}$ |
 | :--- | :--- | :--- | :--- | :---: |
-| **1. Buy Dispatch** | $W^{\text{settled}}$ ($-E_i$) | $W^{\text{escrow}}$ ($+E_i$) | $0$ | **$0$** |
-| **2. Buy Fill** | $W^{\text{escrow}}$ ($-E_i$) | $W^{\text{settled}}$ ($+R_i$) | $+q_i P_i^{\text{fill}} + \Delta\text{UnrealizedPnL}$ | **$\Delta\text{UnrealizedPnL} - \mathcal{C}_{\text{buy}}$** |
-| **3. Sell Fill** | Custody Shares ($-q_i P_{i,k-1}^{\text{eval}}$) | $W^{\text{recv}}$ ($+q_i P_i^{\text{fill}} - \mathcal{C}_{\text{sell}}$) | $-q_i P_{i,k-1}^{\text{eval}}$ | **$\text{RealizedPnL} - \mathcal{C}_{\text{sell}}$** |
+| **1. Buy Dispatch** | $W^{\text{settled}}$ ($-E _ i$) | $W^{\text{escrow}}$ ($+E _ i$) | $0$ | **$0$** |
+| **2. Buy Fill** | $W^{\text{escrow}}$ ($-E _ i$) | $W^{\text{settled}}$ ($+R _ i$) | $+q _ i P _ i^{\text{fill}} + \Delta\text{UnrealizedPnL}$ | **$\Delta\text{UnrealizedPnL} - \mathcal{C} _ {\text{buy}}$** |
+| **3. Sell Fill** | Custody Shares ($-q _ i P _ {i,k-1}^{\text{eval}}$) | $W^{\text{recv}}$ ($+q _ i P _ i^{\text{fill}} - \mathcal{C} _ {\text{sell}}$) | $-q _ i P _ {i,k-1}^{\text{eval}}$ | **$\text{RealizedPnL} - \mathcal{C} _ {\text{sell}}$** |
 | **4. $T+1$ Settlement** | $W^{\text{recv}}$ ($-S$) | $W^{\text{settled}}$ ($+S$) | $0$ | **$0$** |
-| **5. Buy Cancel** | $W^{\text{escrow}}$ ($-E_i$) | $W^{\text{settled}}$ ($+E_i$) | $0$ | **$0$** |
+| **5. Buy Cancel** | $W^{\text{escrow}}$ ($-E _ i$) | $W^{\text{settled}}$ ($+E _ i$) | $0$ | **$0$** |
 
 ### 7.2 Mandatory Pre-Trade Limit-Price Collar Guard
 
-Every buy order for $q_i^{\star}$ shares backed by quarantined cash $\text{EscrowAllocated}_i$ must carry an explicit exchange limit price satisfying:
+Every buy order for $q _ i^{\star}$ shares backed by quarantined cash $\text{EscrowAllocated} _ i$ must carry an explicit exchange limit price satisfying:
 
 $$
 P_{\text{limit}, i} \le \frac{\text{EscrowAllocated}_i - \mathcal{C}_{\max}(q_i^{\star}, \text{EscrowAllocated}_i)}{q_i^{\star}}
 $$
 
-Because the exchange matching engine guarantees $P_{\text{fill}, i} \le P_{\text{limit}, i}$, the post-fill refund satisfies $R_i = \text{EscrowAllocated}_i - (q_i^{\star} P_{\text{fill}, i} + \mathcal{C}_{\text{actual}}) \ge 0$, ensuring $W_{k+1}^{\text{settled}} \ge 0$ unconditionally.
+Because the exchange matching engine guarantees $P _ {\text{fill}, i} \le P _ {\text{limit}, i}$, the post-fill refund satisfies $R _ i = \text{EscrowAllocated} _ i - (q _ i^{\star} P _ {\text{fill}, i} + \mathcal{C} _ {\text{actual}}) \ge 0$, ensuring $W _ {k+1}^{\text{settled}} \ge 0$ unconditionally.
 
 ---
 
@@ -451,7 +451,7 @@ $$
 
 > **Full Specification**: [`docs/09_RISK_REPORTING_AND_REGULATORY_AUDIT.md`](docs/09_RISK_REPORTING_AND_REGULATORY_AUDIT.md)
 
-All transaction cost envelopes $\text{Cost}_i(q_i)$ and post-trade ledger deductions are parameterized by `(InstrumentCategory, Side, TradeDate)`. Pursuant to the **Finance Act revisions effective April 1, 2026**, the statutory schedule is:
+All transaction cost envelopes $\text{Cost} _ i(q _ i)$ and post-trade ledger deductions are parameterized by `(InstrumentCategory, Side, TradeDate)`. Pursuant to the **Finance Act revisions effective April 1, 2026**, the statutory schedule is:
 
 | Instrument Category | Side | STT Rate (Effective April 1, 2026) | Stamp Duty Rate | Exchange Turnover (NSE) | SEBI Turnover Charge | GST Rate | Regulatory Cash Base |
 | :--- | :---: | :--- | :--- | :--- | :--- | :--- | :--- |
@@ -459,8 +459,8 @@ All transaction cost envelopes $\text{Cost}_i(q_i)$ and post-trade ledger deduct
 | **Equity Delivery** | **SELL** | **0.10%** ($0.001 \times T$) | **Nil** ($0.0$) | 0.00297% | ₹10 / Crore ($10^{-6} \times T$) | 18% on fees | Gross Turnover $T = q \cdot P$ |
 | **Securities Futures** | **BUY** | **Nil** ($0.0$) | **0.002%** ($0.00002 \times T$) | 0.00173% | ₹10 / Crore ($10^{-6} \times T$) | 18% on fees | Notional Turnover $T = q \cdot P$ |
 | **Securities Futures** | **SELL** | **0.05%** ($0.0005 \times T$) | **Nil** ($0.0$) | 0.00173% | ₹10 / Crore ($10^{-6} \times T$) | 18% on fees | Notional Turnover $T = q \cdot P$ |
-| **Securities Options** | **BUY** | **Nil** ($0.0$) | **0.003%** on Premium | 0.03503% on Premium | ₹10 / Crore on Premium | 18% on fees | Premium Turnover $T_{\text{prem}} = q \cdot P_{\text{prem}}$ |
-| **Securities Options** | **SELL** | **0.15%** ($0.0015 \times T_{\text{prem}}$) | **Nil** ($0.0$) | 0.03503% on Premium | ₹10 / Crore on Premium | 18% on fees | Premium Turnover $T_{\text{prem}} = q \cdot P_{\text{prem}}$ |
+| **Securities Options** | **BUY** | **Nil** ($0.0$) | **0.003%** on Premium | 0.03503% on Premium | ₹10 / Crore on Premium | 18% on fees | Premium Turnover $T _ {\text{prem}} = q \cdot P _ {\text{prem}}$ |
+| **Securities Options** | **SELL** | **0.15%** ($0.0015 \times T _ {\text{prem}}$) | **Nil** ($0.0$) | 0.03503% on Premium | ₹10 / Crore on Premium | 18% on fees | Premium Turnover $T _ {\text{prem}} = q \cdot P _ {\text{prem}}$ |
 
 ---
 
@@ -470,13 +470,13 @@ All transaction cost envelopes $\text{Cost}_i(q_i)$ and post-trade ledger deduct
 
 ### 11.1 Christoffersen Conditional Coverage Calibration Gate
 
-Predictive interval violations $I_t \in \lbrace 0, 1\rbrace$ at nominal level $p = 1 - \alpha$ are audited continuously for both unconditional accuracy (**Kupiec 1995**, $\text{LR}_{\text{uc}} \sim \chi_1^2$) and first-order Markov serial independence (**Christoffersen 1998**, $\text{LR}_{\text{ind}} \sim \chi_1^2$):
+Predictive interval violations $I _ t \in \lbrace 0, 1\rbrace$ at nominal level $p = 1 - \alpha$ are audited continuously for both unconditional accuracy (**Kupiec 1995**, $\text{LR} _ {\text{uc}} \sim \chi _ 1^2$) and first-order Markov serial independence (**Christoffersen 1998**, $\text{LR} _ {\text{ind}} \sim \chi _ 1^2$):
 
 $$
 \text{LR}_{\text{cc}} = \text{LR}_{\text{uc}} + \text{LR}_{\text{ind}} = -2 \ln \left( \frac{(1 - p)^{T_0} p^{T_1}}{(1 - \hat{\pi}_{01})^{n_{00}} \hat{\pi}_{01}^{n_{01}} (1 - \hat{\pi}_{11})^{n_{10}} \hat{\pi}_{11}^{n_{11}}} \right) \xrightarrow{d} \chi_2^2
 $$
 
-If $\text{LR}_{\text{ind}} > 3.841$ ($p < 0.05$, indicating clustered tail breaches) or $\text{LR}_{\text{cc}} > 5.991$, the model fails calibration and automatically escalates to **Tier 1 / Tier 2 Abstention**.
+If $\text{LR} _ {\text{ind}} > 3.841$ ($p < 0.05$, indicating clustered tail breaches) or $\text{LR} _ {\text{cc}} > 5.991$, the model fails calibration and automatically escalates to **Tier 1 / Tier 2 Abstention**.
 
 ### 11.2 Dual-Path Sharpe Inference & Multiple Testing Triad
 
@@ -493,9 +493,9 @@ flowchart TD
 ```
 
 No candidate strategy configuration may be promoted without simultaneously passing all three multiple-testing hurdles across purged and embargoed walk-forward holdouts:
-1. **Romano–Wolf (2005) StepM**: Family-Wise Error Rate controlled at $p_{\text{StepM}} < 0.05$ across all $M$ evaluated strategy configurations.
-2. **Hansen (2005) Superior Predictive Ability (SPA)**: Studentized consistent p-value $p_{\text{SPA}}^c < 0.01$ against the benchmark.
-3. **Bailey & López de Prado (2014) Deflated Sharpe Ratio (DSR)**: $\text{DSR} \ge 0.99$ after penalizing for the total number of trials $M$, sample skewness $\hat{\gamma}_3$, and sample kurtosis $\hat{\gamma}_4$.
+1. **Romano–Wolf (2005) StepM**: Family-Wise Error Rate controlled at $p _ {\text{StepM}} < 0.05$ across all $M$ evaluated strategy configurations.
+2. **Hansen (2005) Superior Predictive Ability (SPA)**: Studentized consistent p-value $p _ {\text{SPA}}^c < 0.01$ against the benchmark.
+3. **Bailey & López de Prado (2014) Deflated Sharpe Ratio (DSR)**: $\text{DSR} \ge 0.99$ after penalizing for the total number of trials $M$, sample skewness $\hat{\gamma} _ 3$, and sample kurtosis $\hat{\gamma} _ 4$.
 
 ---
 
@@ -505,11 +505,11 @@ In compliance with [`RESEARCH_ROADMAP.md`](RESEARCH_ROADMAP.md) and [`validation
 
 | Domain & Primary Literature | What the Mathematical Proof / Citation Establishes | What It Does NOT Prove (Empirical Hypothesis) | Required Falsification / Validation Test |
 | :--- | :--- | :--- | :--- |
-| **Wasserstein DRO & Concentration**<br/>*Fournier & Guillin (2015); Esfahani & Kuhn (2018)* | Finite-sample concentration bound $\mathcal{W}_1(\mu, \hat{\mu}_S) \le \epsilon_f(S, \delta)$ in $k$-dimensional factor space and exact reformulation as a linear program. | That a specific factor basis ($k=3$ or $k=5$) captures all future NSE structural regime breaks or guarantees positive net trading returns. | Out-of-sample tail breach frequency audit on NSE crisis regimes (e.g., 2020 COVID crash, circuit lockouts). |
-| **Discrete CVaR & B&B Sizing**<br/>*Rockafellar & Uryasev (2000, 2002); Bertsimas & Shioda (2009)* | That $z_{\text{LP}}(\mathcal{N})$ is a valid lower bound on the discrete objective $J(\mathbf{q})$ and that B&B pruning preserves global integer optimality for a given scenario matrix. | That the input expected return vector $\boldsymbol{\mu}$ is positively correlated with realized future returns at $t+20\text{d}$ or $t+60\text{d}$. | Controlled ablation comparing integer B&B sizing against heuristic rounding on net post-cost Sharpe and turnover. |
-| **Evidential Priors & Conformal Calibration**<br/>*Amini et al. (2020); Angelopoulos & Bates (2021)* | Closed-form decomposition of NIG predictive variance into $\sigma_{\text{aleatoric}}^2 + \sigma_{\text{epistemic}}^2$ and marginal coverage under exchangeability. | That financial return residuals are exchangeable across regime shifts or that deep sequence models outperform GBDT/ElasticNet on Indian equities. | Out-of-fold Kupiec ($\text{LR}_{\text{uc}}$) and Christoffersen ($\text{LR}_{\text{ind}}$) conditional coverage tests + model family ablation ([`RESEARCH_ROADMAP.md`](RESEARCH_ROADMAP.md)). |
+| **Wasserstein DRO & Concentration**<br/>*Fournier & Guillin (2015); Esfahani & Kuhn (2018)* | Finite-sample concentration bound $\mathcal{W} _ 1(\mu, \hat{\mu} _ S) \le \epsilon _ f(S, \delta)$ in $k$-dimensional factor space and exact reformulation as a linear program. | That a specific factor basis ($k=3$ or $k=5$) captures all future NSE structural regime breaks or guarantees positive net trading returns. | Out-of-sample tail breach frequency audit on NSE crisis regimes (e.g., 2020 COVID crash, circuit lockouts). |
+| **Discrete CVaR & B&B Sizing**<br/>*Rockafellar & Uryasev (2000, 2002); Bertsimas & Shioda (2009)* | That $z _ {\text{LP}}(\mathcal{N})$ is a valid lower bound on the discrete objective $J(\mathbf{q})$ and that B&B pruning preserves global integer optimality for a given scenario matrix. | That the input expected return vector $\boldsymbol{\mu}$ is positively correlated with realized future returns at $t+20\text{d}$ or $t+60\text{d}$. | Controlled ablation comparing integer B&B sizing against heuristic rounding on net post-cost Sharpe and turnover. |
+| **Evidential Priors & Conformal Calibration**<br/>*Amini et al. (2020); Angelopoulos & Bates (2021)* | Closed-form decomposition of NIG predictive variance into $\sigma _ {\text{aleatoric}}^2 + \sigma _ {\text{epistemic}}^2$ and marginal coverage under exchangeability. | That financial return residuals are exchangeable across regime shifts or that deep sequence models outperform GBDT/ElasticNet on Indian equities. | Out-of-fold Kupiec ($\text{LR} _ {\text{uc}}$) and Christoffersen ($\text{LR} _ {\text{ind}}$) conditional coverage tests + model family ablation ([`RESEARCH_ROADMAP.md`](RESEARCH_ROADMAP.md)). |
 | **Double-Entry Ledger & Safety Kernel**<br/>*Lamport (2002); IFRS 9 / Ind AS 32* | Inductive balance-sheet conservation ($\Delta W^{\text{NAV}} = \text{PnL} - \text{Charges}$) and impossibility of negative settled cash when the limit-price collar holds. | Zero latency overhead or live broker gateway conformance without exchange sandbox integration testing. | TLC model checker run on [`formal_specs/AlphaNitiSafetyKernel.tla`](formal_specs/AlphaNitiSafetyKernel.tla) + NSE EMAPI certification sandbox replay. |
-| **Machine Learning Asset Pricing**<br/>*Gu, Kelly & Xiu (2020); López de Prado (2018); Bailey et al. (2017)* | Methodology for purged/embargoed cross-validation, meta-labeling, and Deflated Sharpe Ratio (DSR) adjustment for multiple testing. | That any specific feature set (price, Ind AS fundamentals, or FinBERT news sentiment) generates statistically significant alpha on NSE equities. | Strict 7-stage ablation protocol ([`RESEARCH_ROADMAP.md`](RESEARCH_ROADMAP.md)) with $\text{DSR} \ge 0.99$, $p_{\text{StepM}} < 0.05$, and $p_{\text{SPA}}^c < 0.01$. |
+| **Machine Learning Asset Pricing**<br/>*Gu, Kelly & Xiu (2020); López de Prado (2018); Bailey et al. (2017)* | Methodology for purged/embargoed cross-validation, meta-labeling, and Deflated Sharpe Ratio (DSR) adjustment for multiple testing. | That any specific feature set (price, Ind AS fundamentals, or FinBERT news sentiment) generates statistically significant alpha on NSE equities. | Strict 7-stage ablation protocol ([`RESEARCH_ROADMAP.md`](RESEARCH_ROADMAP.md)) with $\text{DSR} \ge 0.99$, $p _ {\text{StepM}} < 0.05$, and $p _ {\text{SPA}}^c < 0.01$. |
 
 ---
 
@@ -517,18 +517,18 @@ In compliance with [`RESEARCH_ROADMAP.md`](RESEARCH_ROADMAP.md) and [`validation
 
 | ID | Operational Requirement | Formal Mathematical Condition | Verification Basis | Runtime Enforcement Mechanism | Fail-Closed Action |
 | :--- | :--- | :--- | :---: | :--- | :--- |
-| **PO-1** | Conserved Balance Sheet | $\Delta W_k^{\text{NAV}} \equiv \Delta\text{UnrealizedPnL}_k + \text{RealizedPnL}_k - \text{Charges}_k$ | **Inductive Proof** ([`docs/06`](docs/06_ACCOUNTING_NAV_AND_DOUBLE_ENTRY_LEDGER.md)) | Atomic Double-Entry Ledger Monitor | Halt execution; trigger reconciliation alert |
-| **PO-2** | Pre-Trade Cleared Solvency | $W_k^{\text{settled}} - W_k^{\text{lien}} - W_k^{\text{payable}} \ge \sum \text{Cost}_i^{\text{buy}}$ | **TLA+ Invariant** ([`AlphaNitiSafetyKernel.tla`](formal_specs/AlphaNitiSafetyKernel.tla)) | Safety Kernel Gate 1 assertion | Reject order batch; log `INSUFFICIENT_FUNDS` |
-| **PO-3** | Rebate-Safe Finite Sizing | $q_i \le U_i \equiv \left\lfloor \frac{B_i}{P_{\min}(1 - R_{\max})} \right\rfloor$ | **Analytical Bound** ([`docs/04`](docs/04_PORTFOLIO_OPTIMIZATION_AND_DISCRETE_SIZING.md)) | Pre-solve domain clamping ($R_{\max} < 1$) | Reject fee schedule; log `FEE_UNSUPPORTED` |
-| **PO-4** | Execution Cost Monotonicity | $\Delta \text{Cost}_i(q_i) \ge P_{\min} > 0$ | **Analytical Bound** ([`docs/04`](docs/04_PORTFOLIO_OPTIMIZATION_AND_DISCRETE_SIZING.md)) | Convex envelope constructor check | Failover to conservative linear upper bound |
-| **PO-5** | Valid B&B Node Lower Bound | $z_{\text{LP}}(\mathcal{N}) \le \min_{\mathbf{q} \in \mathbb{Z}^N \cap [\mathbf{l}, \mathbf{u}]} J(\mathbf{q})$ | **Theorem 2 Proof** ([`docs/04`](docs/04_PORTFOLIO_OPTIMIZATION_AND_DISCRETE_SIZING.md)) | Dual optimality gap check ($\le 10^{-6}$) | Reject uncertified allocation; hold custody |
-| **PO-6** | Exact Fractional-Tail CVaR | $\left\lvert \text{CVaR}_\alpha^{\text{LP}}(\mathbf{q}^{\star}) - \text{CVaR}_\alpha^{\text{oracle}}(\mathbf{q}^{\star}) \right\rvert \le 10^{-12}$ | **Rockafellar–Uryasev Identity** ([`docs/03`](docs/03_RISK_MODEL_AND_WASSERSTEIN_DRO.md)) | Safety Kernel Gate 2 algebraic oracle check | Veto batch; route to $\mathbf{q}_{\text{buy}} = \mathbf{0}$ |
-| **PO-7** | B&B Finite Termination | Search tree depth $\le \sum_{i=1}^N (u_i - l_i) < \infty$ | **Finite Lattice Bound** ([`docs/04`](docs/04_PORTFOLIO_OPTIMIZATION_AND_DISCRETE_SIZING.md)) | Node counter & hard wall-clock timeout | Halt search; verify incumbent against safety gates |
-| **PO-8** | Factor-Residual DRO Bound | $\text{CVaR}_\alpha^{\text{true}}(\mathbf{w}^{\star}) \le \sup_{\mathbb{Q} \in \mathbb{B}_{\epsilon_f}} \text{CVaR}_\alpha^{\mathbb{Q}} + \Delta_\epsilon(\mathbf{w}^{\star}, \alpha)$ | **Fournier–Guillin Theorem** ([`docs/03`](docs/03_RISK_MODEL_AND_WASSERSTEIN_DRO.md)) | Dynamic radius $\epsilon_f(S, \delta)$ + kurtosis check | Switch $\Delta_\epsilon$ to empirical residual CVaR |
-| **PO-9** | Dual-Path Sharpe Inference | Hill gate $\hat{\alpha}_{\text{Hill}} - 1.96\text{SE} \ge 4.0$ routes GMM vs. Bootstrap | **Asymptotic Theory** ([`docs/07`](docs/07_MONITORING_VALIDATION_AND_CALIBRATION_TESTING.md)) | Automated tail-index router | Route heavy tails ($\hat{\alpha} < 4$) to Stationary Bootstrap |
-| **PO-10** | Causal Temporal Invariance | $\mathcal{F}_{t_{\text{decision}}} \cap \lbrace \mathbf{X} \mid \max(\vec{\boldsymbol{\tau}}) \ge t_{\text{decision}} \rbrace = \emptyset$ | **Set Definition** ([`docs/01`](docs/01_DATA_INGESTION_AND_TEMPORAL_MODEL.md)) | Pent-temporal filtration assertion | Quarantine record; raise `LookaheadViolation` |
+| **PO-1** | Conserved Balance Sheet | $\Delta W _ k^{\text{NAV}} \equiv \Delta\text{UnrealizedPnL} _ k + \text{RealizedPnL} _ k - \text{Charges} _ k$ | **Inductive Proof** ([`docs/06`](docs/06_ACCOUNTING_NAV_AND_DOUBLE_ENTRY_LEDGER.md)) | Atomic Double-Entry Ledger Monitor | Halt execution; trigger reconciliation alert |
+| **PO-2** | Pre-Trade Cleared Solvency | $W _ k^{\text{settled}} - W _ k^{\text{lien}} - W _ k^{\text{payable}} \ge \sum \text{Cost} _ i^{\text{buy}}$ | **TLA+ Invariant** ([`AlphaNitiSafetyKernel.tla`](formal_specs/AlphaNitiSafetyKernel.tla)) | Safety Kernel Gate 1 assertion | Reject order batch; log `INSUFFICIENT_FUNDS` |
+| **PO-3** | Rebate-Safe Finite Sizing | $q _ i \le U _ i \equiv \left\lfloor \frac{B _ i}{P _ {\min}(1 - R _ {\max})} \right\rfloor$ | **Analytical Bound** ([`docs/04`](docs/04_PORTFOLIO_OPTIMIZATION_AND_DISCRETE_SIZING.md)) | Pre-solve domain clamping ($R _ {\max} < 1$) | Reject fee schedule; log `FEE_UNSUPPORTED` |
+| **PO-4** | Execution Cost Monotonicity | $\Delta \text{Cost} _ i(q _ i) \ge P _ {\min} > 0$ | **Analytical Bound** ([`docs/04`](docs/04_PORTFOLIO_OPTIMIZATION_AND_DISCRETE_SIZING.md)) | Convex envelope constructor check | Failover to conservative linear upper bound |
+| **PO-5** | Valid B&B Node Lower Bound | $z _ {\text{LP}}(\mathcal{N}) \le \min _ {\mathbf{q} \in \mathbb{Z}^N \cap [\mathbf{l}, \mathbf{u}]} J(\mathbf{q})$ | **Theorem 2 Proof** ([`docs/04`](docs/04_PORTFOLIO_OPTIMIZATION_AND_DISCRETE_SIZING.md)) | Dual optimality gap check ($\le 10^{-6}$) | Reject uncertified allocation; hold custody |
+| **PO-6** | Exact Fractional-Tail CVaR | $\left\lvert \text{CVaR} _ \alpha^{\text{LP}}(\mathbf{q}^{\star}) - \text{CVaR} _ \alpha^{\text{oracle}}(\mathbf{q}^{\star}) \right\rvert \le 10^{-12}$ | **Rockafellar–Uryasev Identity** ([`docs/03`](docs/03_RISK_MODEL_AND_WASSERSTEIN_DRO.md)) | Safety Kernel Gate 2 algebraic oracle check | Veto batch; route to $\mathbf{q} _ {\text{buy}} = \mathbf{0}$ |
+| **PO-7** | B&B Finite Termination | Search tree depth $\le \sum _ {i=1}^N (u _ i - l _ i) < \infty$ | **Finite Lattice Bound** ([`docs/04`](docs/04_PORTFOLIO_OPTIMIZATION_AND_DISCRETE_SIZING.md)) | Node counter & hard wall-clock timeout | Halt search; verify incumbent against safety gates |
+| **PO-8** | Factor-Residual DRO Bound | $\text{CVaR} _ \alpha^{\text{true}}(\mathbf{w}^{\star}) \le \sup _ {\mathbb{Q} \in \mathbb{B} _ {\epsilon _ f}} \text{CVaR} _ \alpha^{\mathbb{Q}} + \Delta _ \epsilon(\mathbf{w}^{\star}, \alpha)$ | **Fournier–Guillin Theorem** ([`docs/03`](docs/03_RISK_MODEL_AND_WASSERSTEIN_DRO.md)) | Dynamic radius $\epsilon _ f(S, \delta)$ + kurtosis check | Switch $\Delta _ \epsilon$ to empirical residual CVaR |
+| **PO-9** | Dual-Path Sharpe Inference | Hill gate $\hat{\alpha} _ {\text{Hill}} - 1.96\text{SE} \ge 4.0$ routes GMM vs. Bootstrap | **Asymptotic Theory** ([`docs/07`](docs/07_MONITORING_VALIDATION_AND_CALIBRATION_TESTING.md)) | Automated tail-index router | Route heavy tails ($\hat{\alpha} < 4$) to Stationary Bootstrap |
+| **PO-10** | Causal Temporal Invariance | $\mathcal{F} _ {t _ {\text{decision}}} \cap \lbrace \mathbf{X} \mid \max(\vec{\boldsymbol{\tau}}) \ge t _ {\text{decision}} \rbrace = \emptyset$ | **Set Definition** ([`docs/01`](docs/01_DATA_INGESTION_AND_TEMPORAL_MODEL.md)) | Pent-temporal filtration assertion | Quarantine record; raise `LookaheadViolation` |
 | **PO-11** | Statutory Tax Precision | Parametric by `(Instrument, Side, TradeDate)` | **Finance Act 2026** ([`docs/09`](docs/09_RISK_REPORTING_AND_REGULATORY_AUDIT.md)) | Effective-date tax table lookup | Halt execution if tax schedule is expired |
-| **PO-12** | Idempotent Crash Recovery | $\text{Timeout} \to \text{SUBMITTED\_UNCONFIRMED} \to \text{35=H Query}$ | **FSM Protocol** ([`docs/05`](docs/05_EXECUTION_ENGINE_AND_EXCHANGE_PROTOCOLS.md)) | 2-Phase Commit WAL state machine | Block retry until matching engine status sync |
+| **PO-12** | Idempotent Crash Recovery | $\text{Timeout} \to \text{SUBMITTED-UNCONFIRMED} \to \text{35=H Query}$ | **FSM Protocol** ([`docs/05`](docs/05_EXECUTION_ENGINE_AND_EXCHANGE_PROTOCOLS.md)) | 2-Phase Commit WAL state machine | Block retry until matching engine status sync |
 
 ---
 

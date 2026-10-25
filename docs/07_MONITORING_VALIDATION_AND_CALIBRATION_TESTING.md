@@ -44,66 +44,59 @@ flowchart TD
 
 ## 2. Statistically Justified Forecast Calibration Testing (Callout 5 Resolution)
 
-When evaluating predictive distributions or confidence intervals $\mathcal{C}_{1-\alpha}(t)$ at nominal coverage level $1 - \alpha$, naive coverage checks ignore temporal clustering of prediction failures. In compliance with **Callout 5**, AlphaNiti implements a rigorous test battery accounting for sample size and temporal serial dependence.
+When evaluating predictive distributions or confidence intervals $\mathcal{C} _ {1-\alpha}(t)$ at nominal coverage level $1 - \alpha$, naive coverage checks ignore temporal clustering of prediction failures. In compliance with **Callout 5**, AlphaNiti implements a rigorous test battery accounting for sample size and temporal serial dependence.
 
 ### 2.1 The Hit Indicator Sequence
 For $T$ consecutive evaluation periods, define the binary violation indicator:
 
 $$
 I_t \equiv \begin{cases} 1, & \text{if } r_t \notin \mathcal{C}_{1-\alpha}(t) \quad (\text{Violation}) \\ 0, & \text{if } r_t \in \mathcal{C}_{1-\alpha}(t) \quad (\text{Correct Coverage}) \end{cases}
-
 $$
 
-Let $T_1 = \sum_{t=1}^T I_t$ denote the total number of failures, and $T_0 = T - T_1$. The empirical failure rate is $\hat{\pi} = \frac{T_1}{T}$.
+Let $T _ 1 = \sum _ {t=1}^T I _ t$ denote the total number of failures, and $T _ 0 = T - T _ 1$. The empirical failure rate is $\hat{\pi} = \frac{T _ 1}{T}$.
 
-### 2.2 Kupiec Unconditional Coverage Test ($\text{LR}_{\text{uc}}$)
-Under the null hypothesis $H_0: \mathbb{E}[I_t] = \alpha$, the likelihood ratio statistic is:
+### 2.2 Kupiec Unconditional Coverage Test ($\text{LR} _ {\text{uc}}$)
+Under the null hypothesis $H _ 0: \mathbb{E}[I _ t] = \alpha$, the likelihood ratio statistic is:
 
 $$
 \text{LR}_{\text{uc}} = -2 \ln\left( \frac{\alpha^{T_1} (1 - \alpha)^{T_0}}{\hat{\pi}^{T_1} (1 - \hat{\pi})^{T_0}} \right) \xrightarrow{d} \chi^2(1)
-
 $$
 
-Under nominal significance level $\beta = 0.05$, the critical threshold is $\chi_{0.95}^2(1) = 3.841$. If $\text{LR}_{\text{uc}} > 3.841$, unconditional calibration is rejected.
+Under nominal significance level $\beta = 0.05$, the critical threshold is $\chi _ {0.95}^2(1) = 3.841$. If $\text{LR} _ {\text{uc}} > 3.841$, unconditional calibration is rejected.
 
-### 2.3 Christoffersen Independence Test for Temporal Dependence ($\text{LR}_{\text{ind}}$)
-Failures must not cluster in time (e.g., consecutive model failures during volatility shocks). Assume $I_t$ follows a first-order two-state Markov chain with transition probability matrix:
+### 2.3 Christoffersen Independence Test for Temporal Dependence ($\text{LR} _ {\text{ind}}$)
+Failures must not cluster in time (e.g., consecutive model failures during volatility shocks). Assume $I _ t$ follows a first-order two-state Markov chain with transition probability matrix:
 
 $$
 \boldsymbol{\Pi} = \begin{bmatrix} 1 - \pi_{01} & \pi_{01} \\ 1 - \pi_{11} & \pi_{11} \end{bmatrix}, \qquad \pi_{ij} \equiv \mathbb{P}(I_t = j \mid I_{t-1} = i)
-
 $$
 
-Let $T_{ij}$ denote the observed number of transitions from state $i$ to state $j$. The maximum likelihood transition estimators are:
+Let $T _ {ij}$ denote the observed number of transitions from state $i$ to state $j$. The maximum likelihood transition estimators are:
 
 $$
 \hat{\pi}_{01} = \frac{T_{01}}{T_{00} + T_{01}}, \qquad \hat{\pi}_{11} = \frac{T_{11}}{T_{10} + T_{11}}
-
 $$
 
-Under the null hypothesis of independent failures $H_0: \pi_{01} = \pi_{11} = \hat{\pi}$:
+Under the null hypothesis of independent failures $H _ 0: \pi _ {01} = \pi _ {11} = \hat{\pi}$:
 
 $$
 \text{LR}_{\text{ind}} = -2 \ln\left( \frac{(1 - \hat{\pi})^{T_{00} + T_{10}} \hat{\pi}^{T_{01} + T_{11}}}{(1 - \hat{\pi}_{01})^{T_{00}} \hat{\pi}_{01}^{T_{01}} (1 - \hat{\pi}_{11})^{T_{10}} \hat{\pi}_{11}^{T_{11}}} \right) \xrightarrow{d} \chi^2(1)
-
 $$
 
-### 2.4 Complete Conditional Coverage Joint Statistic ($\text{LR}_{\text{cc}}$)
+### 2.4 Complete Conditional Coverage Joint Statistic ($\text{LR} _ {\text{cc}}$)
 The overall forecast calibration test combines coverage accuracy and dynamic independence:
 
 $$
 \text{LR}_{\text{cc}} \equiv \text{LR}_{\text{uc}} + \text{LR}_{\text{ind}} \xrightarrow{d} \chi^2(2)
-
 $$
 
-Under significance $\beta = 0.01$, the critical rejection threshold is $\chi_{0.99}^2(2) = 9.210$. A forecast model is accepted into production if and only if $\text{LR}_{\text{cc}} \le 9.210$, certifying both nominal coverage and absence of temporal clustering.
+Under significance $\beta = 0.01$, the critical rejection threshold is $\chi _ {0.99}^2(2) = 9.210$. A forecast model is accepted into production if and only if $\text{LR} _ {\text{cc}} \le 9.210$, certifying both nominal coverage and absence of temporal clustering.
 
 ### 2.5 Minimum Sample Size Requirement
-To achieve statistical power of $1 - \beta \ge 0.80$ against an alternative failure rate of $\pi_1 = 1.5 \alpha$ at $\alpha = 0.05$, the required out-of-sample evaluation sample size is:
+To achieve statistical power of $1 - \beta \ge 0.80$ against an alternative failure rate of $\pi _ 1 = 1.5 \alpha$ at $\alpha = 0.05$, the required out-of-sample evaluation sample size is:
 
 $$
 T_{\min} \ge \frac{\left( z_{1 - \beta} \sqrt{\pi_1 (1 - \pi_1)} + z_{1 - \alpha/2} \sqrt{\alpha (1 - \alpha)} \right)^2}{(\pi_1 - \alpha)^2} \approx \mathbf{1,200 \text{ trading days}} \approx 5 \text{ years}
-
 $$
 
 AlphaNiti mandates $T \ge 1,250$ trading days for institutional strategy certification.
@@ -122,10 +115,9 @@ Fold k:   |------- Train Set -------| [Purge Window] |--- Test Set ---| [Embargo
 
 $$
 t_{\text{purge}} = \max\big( \tau^{\text{event}}, \; t_{\text{holding}} \big)
-
 $$
 
-2. **Embargo Window**: Drops training samples immediately following the test set by an autoregressive memory length $h_{\text{embargo}} = 10 \text{ days}$ to eliminate serial correlation leakage.
+2. **Embargo Window**: Drops training samples immediately following the test set by an autoregressive memory length $h _ {\text{embargo}} = 10 \text{ days}$ to eliminate serial correlation leakage.
 
 ---
 
@@ -134,13 +126,12 @@ $$
 To ensure that reported trading alpha is not an artifact of data mining across multiple trials, every candidate strategy must pass the following three statistical hurdles simultaneously:
 
 ### 4.1 Romano-Wolf (2005) Stepwise FWER Control (StepM)
-Given $M$ candidate trading models with test statistics $t_{(1)} \ge t_{(2)} \ge \dots \ge t_{(M)}$:
+Given $M$ candidate trading models with test statistics $t _ {(1)} \ge t _ {(2)} \ge \dots \ge t _ {(M)}$:
 - Employs a non-parametric stationary bootstrap to preserve the unknown joint dependency structure across strategy returns.
 - Controls the Family-Wise Error Rate (FWER) such that:
 
 $$
 \mathbb{P}(\text{False Discoveries} \ge 1) \le 0.05
-
 $$
 
 ### 4.2 Hansen (2005) Superior Predictive Ability (SPA)
@@ -148,24 +139,21 @@ Tests whether the best performing strategy in the explored search family outperf
 
 $$
 H_0: \max_{m=1, \dots, M} \mathbb{E}[f_m(t)] \le 0
-
 $$
 
-Evaluated via the Politis-Romano stationary bootstrap with consistent p-value $p_{\text{SPA}}^c < 0.01$.
+Evaluated via the Politis-Romano stationary bootstrap with consistent p-value $p _ {\text{SPA}}^c < 0.01$.
 
 ### 4.3 Bailey & López de Prado (2014) Deflated Sharpe Ratio (DSR)
-Corrects the estimated Sharpe Ratio $\widehat{\text{SR}}$ for selection bias under $M$ independent trials, sample length $T$, skewness $\hat{\gamma}_3$, and kurtosis $\hat{\gamma}_4$:
+Corrects the estimated Sharpe Ratio $\widehat{\text{SR}}$ for selection bias under $M$ independent trials, sample length $T$, skewness $\hat{\gamma} _ 3$, and kurtosis $\hat{\gamma} _ 4$:
 
 $$
 \text{DSR} \equiv \Phi\left( \frac{(\widehat{\text{SR}} - \text{SR}_0) \sqrt{T - 1}}{\sqrt{1 - \hat{\gamma}_3 \widehat{\text{SR}} + \frac{\hat{\gamma}_4 - 1}{4}\widehat{\text{SR}}^2}} \right) \ge 0.99
-
 $$
 
 where the data-mining hurdle rate is:
 
 $$
 \text{SR}_0 \equiv \sqrt{\operatorname{Var}(\lbrace \widehat{\text{SR}}_m\rbrace )} \left( (1 - \gamma) \Phi^{-1}\left(1 - \frac{1}{M}\right) + \gamma \Phi^{-1}\left(1 - \frac{1}{M e}\right) \right)
-
 $$
 
 where $\gamma \approx 0.577215$ is the Euler-Mascheroni constant.

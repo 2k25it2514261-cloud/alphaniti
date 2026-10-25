@@ -46,23 +46,22 @@ To curb quote stuffing and excessive cancel traffic, SEBI circulars mandate fina
 
 $$
 \text{OTR}_i \equiv \frac{\text{Total Order Modifications}_i + \text{Total Order Cancellations}_i}{\max\big( 1, \; \text{Total Executed Trades}_i \big)}
-
 $$
 
 The SEBI penalty tier function $\mathcal{P}(\text{OTR})$ imposes escalating penalties:
 
 $$
-\mathcal{P}(\text{OTR}) = \begin{cases} 
+\mathcal{P}(\text{OTR}) = \begin{cases}
 0, & \text{if } \text{OTR} \le 50 \\
 \text{₹ } 0.01 \text{ per excess order}, & \text{if } 50 < \text{OTR} \le 100 \\
 \text{₹ } 0.05 \text{ per excess order}, & \text{if } 100 < \text{OTR} \le 250 \\
-\text{₹ } 0.10 \text{ per excess order} + \text{Algo Throttling}, & \text{if } \text{OTR} > 250 
+\text{₹ } 0.10 \text{ per excess order} + \text{Algo Throttling}, & \text{if } \text{OTR} > 250
 \end{cases}
 $$
 
 ### 2.2 Passive Order Throttle Algorithm
-AlphaNiti dynamically tracks $\text{OTR}_i$ in real time. If $\text{OTR}_i > 40$:
-1. Unnecessary limit price re-pegging modifications are delayed until price moves by at least 3 minimum price ticks ($3 \times \Delta P_{\min}$).
+AlphaNiti dynamically tracks $\text{OTR} _ i$ in real time. If $\text{OTR} _ i > 40$:
+1. Unnecessary limit price re-pegging modifications are delayed until price moves by at least 3 minimum price ticks ($3 \times \Delta P _ {\min}$).
 2. Cancel orders on passive fills are clamped, prioritizing fill completions over aggressive order modifications.
 
 ---
@@ -73,7 +72,6 @@ Pursuant to the Finance Act revisions effective **April 1, 2026** (applicable as
 
 $$
 \text{TaxSchedule} \equiv f(\text{Instrument}, \; \text{Side}, \; t_{\text{trade}})
-
 $$
 
 ### 3.1 Official Statutory Tax Schedule (Effective April 1, 2026)
@@ -84,14 +82,14 @@ $$
 | **Equity Delivery** | **SELL** | **0.10%** ($0.001 \times T$) | **Nil** ($0.0$) | 0.00297% | ₹10 / Crore ($10^{-6} \times T$) | 18% on fees | Gross Turnover $T = q \cdot P$ |
 | **Securities Futures** | **BUY** | **Nil** ($0.0$) | **0.002%** ($0.00002 \times T$) | 0.00173% | ₹10 / Crore ($10^{-6} \times T$) | 18% on fees | Notional Turnover $T = q \cdot P$ |
 | **Securities Futures** | **SELL** | **0.05%** ($0.0005 \times T$) | **Nil** ($0.0$) | 0.00173% | ₹10 / Crore ($10^{-6} \times T$) | 18% on fees | Notional Turnover $T = q \cdot P$ |
-| **Securities Options** | **BUY** | **Nil** ($0.0$) | **0.003%** on Premium | 0.03503% on Premium | ₹10 / Crore on Premium | 18% on fees | Premium Turnover $T_{\text{prem}} = q \cdot P_{\text{prem}}$ |
-| **Securities Options** | **SELL** | **0.15%** ($0.0015 \times T_{\text{prem}}$)| **Nil** ($0.0$) | 0.03503% on Premium | ₹10 / Crore on Premium | 18% on fees | Premium Turnover $T_{\text{prem}} = q \cdot P_{\text{prem}}$ |
+| **Securities Options** | **BUY** | **Nil** ($0.0$) | **0.003%** on Premium | 0.03503% on Premium | ₹10 / Crore on Premium | 18% on fees | Premium Turnover $T _ {\text{prem}} = q \cdot P _ {\text{prem}}$ |
+| **Securities Options** | **SELL** | **0.15%** ($0.0015 \times T _ {\text{prem}}$)| **Nil** ($0.0$) | 0.03503% on Premium | ₹10 / Crore on Premium | 18% on fees | Premium Turnover $T _ {\text{prem}} = q \cdot P _ {\text{prem}}$ |
 
 ### 3.2 Total Trade Frictional Deduction Formula
 For a trade of $q$ shares executed at price $P$:
 1. Turnover: $T = q \cdot P$.
-2. Securities Transaction Tax: $\text{STT} = \text{round}(\text{Rate}_{\text{STT}} \times T)$.
-3. Stamp Duty: $\text{Stamp} = \text{round}(\text{Rate}_{\text{Stamp}} \times T)$.
+2. Securities Transaction Tax: $\text{STT} = \text{round}(\text{Rate} _ {\text{STT}} \times T)$.
+3. Stamp Duty: $\text{Stamp} = \text{round}(\text{Rate} _ {\text{Stamp}} \times T)$.
 4. Exchange Turnover Fee: $\text{Exch} = 0.0000297 \times T$.
 5. SEBI Regulatory Fee: $\text{SEBI} = 0.000001 \times T$.
 6. Goods & Services Tax (GST): $\text{GST} = 0.18 \times (\text{Brokerage} + \text{Exch} + \text{SEBI})$.
@@ -99,7 +97,6 @@ For a trade of $q$ shares executed at price $P$:
 
 $$
 \mathcal{C}_{\text{statutory}} = \text{STT} + \text{Stamp} + \text{Exch} + \text{SEBI} + \text{GST} + \text{Brokerage}
-
 $$
 
 ---
@@ -110,7 +107,6 @@ For every discrete rebalancing cycle $k$, AlphaNiti generates an append-only JSO
 
 $$
 \text{Block}_k \equiv \big( k, \; t_{\text{decision}}, \; \text{Hash}_{\text{PrevBlock}}, \; \mathcal{F}_{t_{\text{decision}}}^{\text{Root}}, \; \mathbf{q}_k^{\star}, \; \text{Cert}_{\text{optimality}}, \; \text{Sig}_{\text{enclave}} \big)
-
 $$
 
 The Merkle root is anchored daily into an external immutable ledger, enabling third-party auditors and regulators to verify:

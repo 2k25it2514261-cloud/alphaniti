@@ -5,7 +5,7 @@
 The quantitative literature supports these 10 upgrades as the strongest foundation for AlphaNiti. They make the research specification complete, defensible, and falsifiable:
 
 1. **Predict a Conditional Return Distribution, Not Just a Point Estimate**  
-   Estimate conditional quantiles or a return distribution $F_H(r \mid X_t)$, then derive expected returns and downside probabilities. Evaluates both reward and tail risk. *(Basis: Gu, Kelly & Xiu 2020)*
+   Estimate conditional quantiles or a return distribution $F _ H(r \mid X _ t)$, then derive expected returns and downside probabilities. Evaluates both reward and tail risk. *(Basis: Gu, Kelly & Xiu 2020)*
 2. **Make Point-in-Time Data Integrity a Formal Invariant**  
    Enforce availability-time joins, historical constituent membership, filing-version history, and delisted-stock coverage. No feature may use information unavailable at the forecast origin.
 3. **Use Nested Walk-Forward Validation Plus CPCV**  
@@ -54,7 +54,7 @@ flowchart LR
 1. **Stage 1:** Point-in-time data engine, bitemporal schema, and mathematical target definitions (Day $t+1$ execution, net of NSE statutory friction).
 2. **Stage 2:** Leakage-controlled nested walk-forward cross-validation with date-grouped folds and $H$-day embargoing.
 3. **Stage 3:** ElasticNet, LightGBM, and naive momentum/factor baselines.
-4. **Stage 4:** Conditional return distribution estimation ($F_H(r \mid X_t)$) and downside-risk quantiles.
+4. **Stage 4:** Conditional return distribution estimation ($F _ H(r \mid X _ t)$) and downside-risk quantiles.
 5. **Stage 5:** Rigorous ablation experiments (Price-only vs. Fund-only vs. News-only vs. Combined).
 6. **Stage 6:** Out-of-fold meta-labeling and isotonic probability calibration.
 7. **Stage 7:** Cost-aware portfolio construction, circuit-band checks, and Deflated Sharpe Ratio / PBO diagnostics.

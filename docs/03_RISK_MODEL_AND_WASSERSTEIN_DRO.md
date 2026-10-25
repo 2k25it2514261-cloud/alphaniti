@@ -10,7 +10,7 @@ Standard Markowitz and empirical CVaR optimizers suffer from the "optimizer's cu
 
 AlphaNiti resolves this vulnerability through a **Factor-Space Wasserstein Distributionally Robust Optimization (DRO)** architecture:
 1. Low-dimensional orthogonal factor projection ($k \le 5$) collapses the sample-complexity exponent of the Wasserstein metric.
-2. The ambiguity set radius $\epsilon_f(S, \delta)$ is certified via the **Fournier–Guillin (2015) measure concentration theorem**.
+2. The ambiguity set radius $\epsilon _ f(S, \delta)$ is certified via the **Fournier–Guillin (2015) measure concentration theorem**.
 3. Residual asset-level risk is rigorously modeled using a full residual covariance matrix and validated sub-Gaussian or non-parametric empirical bounds (Callouts 1 & 2).
 
 ```mermaid
@@ -39,33 +39,30 @@ flowchart TD
 ## 2. Full Portfolio Factor-Residual Model (Callouts 1 & 2)
 
 ### 2.1 Orthogonal Factor Decomposition
-Let $\mathbf{r}_t \in \mathbb{R}^N$ denote the excess return vector of $N$ tradable assets at time $t$. The returns are projected onto a $k$-dimensional orthogonal factor basis ($k \le 5$):
+Let $\mathbf{r} _ t \in \mathbb{R}^N$ denote the excess return vector of $N$ tradable assets at time $t$. The returns are projected onto a $k$-dimensional orthogonal factor basis ($k \le 5$):
 
 $$
 \mathbf{r}_t = \mathbf{B} \mathbf{f}_t + \boldsymbol{\epsilon}_t, \qquad \mathbf{B}^T \mathbf{B} = \mathbf{I}_k, \qquad \mathbb{E}[\boldsymbol{\epsilon}_t \mid \mathbf{f}_t] = \mathbf{0}
-
 $$
 
-where $\mathbf{B} \in \mathbb{R}^{N \times k}$ is the factor exposure loading matrix, $\mathbf{f}_t \in \mathbb{R}^k$ is the latent factor realization vector, and $\boldsymbol{\epsilon}_t \in \mathbb{R}^N$ is the residual disturbance vector.
+where $\mathbf{B} \in \mathbb{R}^{N \times k}$ is the factor exposure loading matrix, $\mathbf{f} _ t \in \mathbb{R}^k$ is the latent factor realization vector, and $\boldsymbol{\epsilon} _ t \in \mathbb{R}^N$ is the residual disturbance vector.
 
 ### 2.2 Portfolio Loss Decomposition
-For any portfolio allocation vector $\mathbf{w} \in \mathbb{R}^N$, the scalar portfolio loss $\mathcal{L}(\mathbf{w}, \mathbf{r}_t) \equiv -\mathbf{w}^T \mathbf{r}_t$ decomposes identically as:
+For any portfolio allocation vector $\mathbf{w} \in \mathbb{R}^N$, the scalar portfolio loss $\mathcal{L}(\mathbf{w}, \mathbf{r} _ t) \equiv -\mathbf{w}^T \mathbf{r} _ t$ decomposes identically as:
 
 $$
 \mathcal{L}(\mathbf{w}, \mathbf{r}_t) = \underbrace{-\mathbf{v}^T \mathbf{f}_t}_{\text{Factor Loss } \mathcal{L}_f(\mathbf{v}, \mathbf{f}_t)} + \underbrace{(-\xi_t)}_{\text{Residual Loss } \mathcal{L}_\epsilon(\mathbf{w}, \boldsymbol{\epsilon}_t)}
-
 $$
 
-where $\mathbf{v} \equiv \mathbf{B}^T \mathbf{w} \in \mathbb{R}^k$ represents the factor-space allocation vector, and $\xi_t \equiv \mathbf{w}^T \boldsymbol{\epsilon}_t$ is the scalar residual portfolio return.
+where $\mathbf{v} \equiv \mathbf{B}^T \mathbf{w} \in \mathbb{R}^k$ represents the factor-space allocation vector, and $\xi _ t \equiv \mathbf{w}^T \boldsymbol{\epsilon} _ t$ is the scalar residual portfolio return.
 
 ### 2.3 Residual Covariance Architecture (Callout 2 Resolution)
-In institutional literature, residual risk is frequently oversimplified as a diagonal matrix ($\boldsymbol{\Sigma}_\epsilon = \text{diag}(\sigma_{\epsilon, 1}^2, \dots)$). In compliance with **Callout 2**, AlphaNiti implements two explicit, verifiable modes:
+In institutional literature, residual risk is frequently oversimplified as a diagonal matrix ($\boldsymbol{\Sigma} _ \epsilon = \text{diag}(\sigma _ {\epsilon, 1}^2, \dots)$). In compliance with **Callout 2**, AlphaNiti implements two explicit, verifiable modes:
 
 1. **Full Residual Covariance Mode (Default Institutional Benchmark)**:
 
 $$
 \boldsymbol{\Sigma}_\epsilon \equiv \mathbb{E}[\boldsymbol{\epsilon}_t \boldsymbol{\epsilon}_t^T] \in \mathbb{R}^{N \times N}
-
 $$
 
    Estimated using Ledoit-Wolf analytical shrinkage towards a constant correlation target, preserving cross-sectional idiosyncratic dependencies.
@@ -73,7 +70,6 @@ $$
 
 $$
 \max_{i \ne j} |\operatorname{Corr}(\epsilon_{i, t}, \epsilon_{j, t})| < 0.08
-
 $$
 
    If this empirical hypothesis is rejected, the full shrinkage covariance matrix is strictly retained.
@@ -82,7 +78,6 @@ The portfolio residual variance is computed without simplification:
 
 $$
 \sigma_\xi^2(\mathbf{w}) = \mathbf{w}^T \boldsymbol{\Sigma}_\epsilon \mathbf{w}
-
 $$
 
 ---
@@ -93,18 +88,16 @@ By the sub-additivity axiom of Conditional Value-at-Risk (Rockafellar & Uryasev 
 
 $$
 \text{CVaR}_\alpha(\mathbf{w}) \le \text{CVaR}_\alpha(\mathbf{v}^T \mathbf{f}) + \text{CVaR}_\alpha(\xi)
-
 $$
 
 To satisfy **Callout 1**, AlphaNiti eliminates unverified distribution-free claims and formalizes the exact tail bounds under explicit assumptions:
 
 ### 3.1 Explicit Gaussian / Sub-Gaussian Assumption
 **Assumption 1 (Residual Sub-Gaussianity)**:  
-The residual scalar loss $\xi_t = \mathbf{w}^T \boldsymbol{\epsilon}_t$ is conditionally mean-zero sub-Gaussian with parameter $\sigma_\xi^2(\mathbf{w})$:
+The residual scalar loss $\xi _ t = \mathbf{w}^T \boldsymbol{\epsilon} _ t$ is conditionally mean-zero sub-Gaussian with parameter $\sigma _ \xi^2(\mathbf{w})$:
 
 $$
 \mathbb{E}[\exp(\lambda \xi_t)] \le \exp\left( \frac{\lambda^2 \sigma_\xi^2(\mathbf{w})}{2} \right), \quad \forall \lambda \in \mathbb{R}
-
 $$
 
 **Theorem 1 (Analytical Sub-Gaussian CVaR Bound)**:  
@@ -112,24 +105,21 @@ Under Assumption 1, the CVaR at tail confidence $\alpha \in (0, 1)$ satisfies th
 
 $$
 \text{CVaR}_\alpha(\xi) \le \frac{\sigma_\xi(\mathbf{w})}{(1 - \alpha)\sqrt{2\pi}} \exp\left( -\frac{(\Phi^{-1}(\alpha))^2}{2} \right) \equiv \Delta_\epsilon^{\text{gauss}}(\mathbf{w}, \alpha)
-
 $$
 
 where $\Phi(\cdot)$ denotes the standard normal cumulative distribution function.
 
-*Numerical Verification*: For $\alpha = 0.95$, $\Phi^{-1}(0.95) \approx 1.64485$. Under regulatory concentration constraints ($w_i \le 0.05$ across $N=100$ assets) with idiosyncratic daily volatility $\sigma_{\epsilon, i} \le 0.02$, $\sigma_\xi(\mathbf{w}) \le 0.001$, yielding:
+*Numerical Verification*: For $\alpha = 0.95$, $\Phi^{-1}(0.95) \approx 1.64485$. Under regulatory concentration constraints ($w _ i \le 0.05$ across $N=100$ assets) with idiosyncratic daily volatility $\sigma _ {\epsilon, i} \le 0.02$, $\sigma _ \xi(\mathbf{w}) \le 0.001$, yielding:
 
 $$
 \Delta_\epsilon^{\text{gauss}}(\mathbf{w}, 0.95) \le \frac{0.001}{0.05 \sqrt{2\pi}} \exp(-1.35277) \approx 0.00798 \times 0.2585 \approx 0.206\%
-
 $$
 
 ### 3.2 Non-Gaussian / Empirical Conservative Bound (Callout 1 Alternative)
-If the Hill tail-index test on residuals rejects sub-Gaussianity ($\hat{\alpha}_{\text{Hill}} < 4.0$), AlphaNiti automatically routes to a non-parametric empirical bootstrap bound:
+If the Hill tail-index test on residuals rejects sub-Gaussianity ($\hat{\alpha} _ {\text{Hill}} < 4.0$), AlphaNiti automatically routes to a non-parametric empirical bootstrap bound:
 
 $$
 \Delta_\epsilon^{\text{emp}}(\mathbf{w}, \alpha) \equiv \text{Quantile}_{0.99}\left( \left\lbrace \text{CVaR}_\alpha(\mathbf{w}^T \boldsymbol{\epsilon}_s^{(b)}) \right\rbrace_{b=1}^B \right)
-
 $$
 
 ensuring valid conservative coverage without unsupported distribution-free assertions.
@@ -139,46 +129,41 @@ ensuring valid conservative coverage without unsupported distribution-free asser
 ## 4. Factor-Space Wasserstein DRO & Concentration Proof (Callout 8)
 
 ### 4.1 Ambiguity Ball in Factor Space
-Let $\widehat{\mathbb{P}}_S = \frac{1}{S}\sum_{s=1}^S \delta_{\mathbf{f}_s}$ represent the empirical discrete measure over $S$ historical factor scenarios. The 1-Wasserstein ambiguity ball in $\mathbb{R}^k$ is:
+Let $\widehat{\mathbb{P}} _ S = \frac{1}{S}\sum _ {s=1}^S \delta _ {\mathbf{f} _ s}$ represent the empirical discrete measure over $S$ historical factor scenarios. The 1-Wasserstein ambiguity ball in $\mathbb{R}^k$ is:
 
 $$
 \mathbb{B}_{\epsilon_f}(\widehat{\mathbb{P}}_S) \equiv \left\lbrace \mathbb{Q} \in \mathcal{P}_1(\mathbb{R}^k) \;\middle\vert\; \mathcal{W}_1(\mathbb{Q}, \widehat{\mathbb{P}}_S) \le \epsilon_f(S, \delta) \right\rbrace
-
 $$
 
 ### 4.2 Fournier–Guillin Measure Concentration Theorem
 **Theorem 2 (Fournier & Guillin 2015, Theorem 2)**:  
-Let the factor distribution $\mathbb{P}$ satisfy the exponential moment condition $\mathbb{E}[\exp(\|\mathbf{f}\|_2^2 / \sigma_f^2)] \le 2$. For dimension $k \ge 3$, there exist explicit positive constants $C_1, C_2$ such that for any sample size $S \ge 1$ and confidence parameter $\delta \in (0, 1)$:
+Let the factor distribution $\mathbb{P}$ satisfy the exponential moment condition $\mathbb{E}[\exp(\|\mathbf{f}\| _ 2^2 / \sigma _ f^2)] \le 2$. For dimension $k \ge 3$, there exist explicit positive constants $C _ 1, C _ 2$ such that for any sample size $S \ge 1$ and confidence parameter $\delta \in (0, 1)$:
 
 $$
 \mathbb{P}\left( \mathcal{W}_1(\mathbb{P}, \widehat{\mathbb{P}}_S) \le \epsilon_f(S, \delta) \right) \ge 1 - \delta
-
 $$
 
 where the exact analytical constants are:
 
 $$
 C_1 = 2 \left( 1 + \sqrt{\frac{k}{2}} \right), \qquad C_2 = 2
-
 $$
 
 and the certified ambiguity radius is:
 
 $$
 \epsilon_f(S, \delta) \equiv C_1 \sigma_f \left( \frac{\ln(C_2 / \delta)}{S} \right)^{1/k}
-
 $$
 
 #### Exact Numerical Derivation:
-For $k = 3$ factors, $S = 1,000$ daily scenarios, $\delta = 0.01$ (99% confidence), and factor volatility $\sigma_f = 0.025$:
-1. $C_1 = 2(1 + \sqrt{1.5}) = 2(1 + 1.22474) \approx 4.44949$.
-2. $\ln(C_2 / \delta) = \ln(2 / 0.01) = \ln(200) \approx 5.298317$.
+For $k = 3$ factors, $S = 1,000$ daily scenarios, $\delta = 0.01$ (99% confidence), and factor volatility $\sigma _ f = 0.025$:
+1. $C _ 1 = 2(1 + \sqrt{1.5}) = 2(1 + 1.22474) \approx 4.44949$.
+2. $\ln(C _ 2 / \delta) = \ln(2 / 0.01) = \ln(200) \approx 5.298317$.
 3. Ratio term: $\left( \frac{5.298317}{1000} \right)^{1/3} = (0.0052983)^{1/3} \approx 0.174338$.
 4. **Calculated Radius**:
 
 $$
 \epsilon_f = 4.44949 \times 0.025 \times 0.174338 = 0.111237 \times 0.174338 \approx \mathbf{0.01939} \approx \mathbf{0.0195}
-
 $$
 
 ### 4.3 Exact Esfahani-Kuhn Convex Dual Program
@@ -190,14 +175,12 @@ $$
 \text{subject to:} \quad & s_s \ge -\mathbf{v}^T \mathbf{f}_s - \gamma, \quad \forall s \in \lbrace 1, \dots, S\rbrace  \\
 & \|\mathbf{v}\|_2 \le \lambda (1 - \alpha)
 \end{aligned}
-
 $$
 
 **Complete Out-of-Sample Portfolio Tail Guarantee**:
 
 $$
 \mathbb{P}\left( \text{CVaR}_\alpha^{\text{true}}(\mathbf{w}^{\star}) \le \sup_{\mathbb{Q} \in \mathbb{B}_{\epsilon_f}} \text{CVaR}_\alpha^{\mathbb{Q}}(\mathbf{v}^T \mathbf{f}) + \Delta_\epsilon(\mathbf{w}^{\star}, \alpha) \right) \ge 1 - \delta
-
 $$
 
 ---
