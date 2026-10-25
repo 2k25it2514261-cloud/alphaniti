@@ -1,8 +1,8 @@
 """
 AlphaNiti v25.0: Pipeline Module 2 - Tensor Constructor Verification Suite
 Tests:
-  1. Causal Feature Engineering (15 columns, zero nulls)
-  2. Rolling Lookback Windowing [N, L=60, D=15]
+  1. Causal Feature Engineering (20 columns, zero nulls)
+  2. Rolling Lookback Windowing [N, L=60, D=20]
   3. Out-of-Sample Scaler Parameter Freezing
   4. PyTorch Dataset & DataLoader Iteration
   5. Zero-NaN & Zero-Inf Invariants
@@ -33,18 +33,18 @@ class TestTensorBuilder(unittest.TestCase):
         cls.val_path = os.path.join("data", "splits", "val.parquet")
 
     def test_01_feature_engineering_integrity(self):
-        """Verifies 15 causal features are engineered with 0 nulls."""
+        """Verifies 20 causal features are engineered with 0 nulls."""
         df = pl.read_parquet(self.train_path).head(1000)
         df_feat, fcols = compute_causal_features(df)
 
-        self.assertEqual(len(fcols), 15)
+        self.assertEqual(len(fcols), 20)
         self.assertEqual(fcols, FEATURE_COLUMNS)
 
         for col in fcols:
             self.assertEqual(df_feat[col].null_count(), 0, f"Nulls found in {col}")
 
     def test_02_pipeline_fit_and_sequence_shapes(self):
-        """Verifies 3D tensor slicing [N, 60, 15] and target alignment."""
+        """Verifies 3D tensor slicing [N, 60, 20] and target alignment."""
         df_train = pl.read_parquet(self.train_path).filter(pl.col("symbol") == "RELIANCE")
         pipeline = AlphaNitiDataPipeline(lookback=60, c_clip=4.5)
         
@@ -53,7 +53,7 @@ class TestTensorBuilder(unittest.TestCase):
         self.assertGreater(len(train_ds), 100)
 
         sample_X, sample_yr, sample_yc = train_ds[0]
-        self.assertEqual(sample_X.shape, torch.Size([60, 15]))
+        self.assertEqual(sample_X.shape, torch.Size([60, 20]))
         self.assertEqual(sample_yr.shape, torch.Size([1]))
         self.assertEqual(sample_yc.shape, torch.Size([1]))
 
@@ -92,12 +92,12 @@ class TestTensorBuilder(unittest.TestCase):
             batch_size=256
         )
 
-        self.assertEqual(len(fnames), 15)
+        self.assertEqual(len(fnames), 20)
         self.assertGreater(len(train_loader), 100)
         self.assertGreater(len(val_loader), 20)
 
         batch_X, batch_yr, batch_yc = next(iter(train_loader))
-        self.assertEqual(batch_X.shape, torch.Size([256, 60, 15]))
+        self.assertEqual(batch_X.shape, torch.Size([256, 60, 20]))
         self.assertEqual(batch_yr.shape, torch.Size([256, 1]))
         self.assertEqual(batch_yc.shape, torch.Size([256, 1]))
 

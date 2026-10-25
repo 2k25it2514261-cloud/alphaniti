@@ -103,11 +103,11 @@ class TestEvidentialModel(unittest.TestCase):
         train_path = os.path.join("data", "splits", "train.parquet")
         val_path = os.path.join("data", "splits", "val.parquet")
 
-        train_loader, val_loader, _, _, _ = create_dataloaders(
+        train_loader, val_loader, _, _, fnames = create_dataloaders(
             train_path, val_path, lookback=60, batch_size=256
         )
 
-        model = EvidentialGRUModel(in_features=15, hidden_dim=32, num_layers=1)
+        model = EvidentialGRUModel(in_features=len(fnames), hidden_dim=32, num_layers=1)
         trainer = EvidentialTrainer(model, lr=0.005)
 
         # Train 1 epoch

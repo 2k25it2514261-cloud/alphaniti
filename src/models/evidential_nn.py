@@ -32,7 +32,13 @@ class EvidentialHead(nn.Module):
     def __init__(self, in_features: int):
         super().__init__()
         self.fc_reg = nn.Linear(in_features, 4)
-        self.fc_clf = nn.Linear(in_features, 1)
+        self.fc_clf = nn.Sequential(
+            nn.Linear(in_features, 64),
+            nn.LayerNorm(64),
+            nn.GELU(),
+            nn.Dropout(0.15),
+            nn.Linear(64, 1),
+        )
 
     def forward(self, h: torch.Tensor) -> Tuple[torch.Tensor, torch.Tensor, torch.Tensor, torch.Tensor, torch.Tensor]:
         reg_out = self.fc_reg(h)
@@ -45,14 +51,36 @@ class EvidentialHead(nn.Module):
         return gamma, nu, alpha, beta, p_breach
 
 
+class TemporalAttention(nn.Module):
+    """
+    Temporal self-attention pooling across the sequence lookback dimension.
+    Learns to dynamically weight critical regime changes and volatility shocks.
+    """
+    def __init__(self, hidden_dim: int):
+        super().__init__()
+        self.attn = nn.Sequential(
+            nn.Linear(hidden_dim, 32),
+            nn.Tanh(),
+            nn.Linear(32, 1),
+        )
+
+    def forward(self, x: torch.Tensor) -> torch.Tensor:
+        # x: [B, L, H]
+        scores = self.attn(x)  # [B, L, 1]
+        weights = torch.softmax(scores, dim=1)
+        pooled = torch.sum(x * weights, dim=1)  # [B, H]
+        return pooled
+
+
 class EvidentialGRUModel(nn.Module):
     """
-    Recurrent Evidential Architecture:
-      Input Sequence X: [B, L=60, D=15]
+    Recurrent Evidential Architecture with Dual-State Temporal Attention:
+      Input Sequence X: [B, L=60, D=20]
       GRU Backbone: 2-layer GRU with layer normalization and dropout
-      Output Head: NIG 4-tuple + Downside risk probability
+      Context Fusion: Concatenates instantaneous last-step state with temporal attention context
+      Output Head: NIG 4-tuple + Deep MLP downside risk probability
     """
-    def __init__(self, in_features: int = 15, hidden_dim: int = 64, num_layers: int = 2, dropout: float = 0.2):
+    def __init__(self, in_features: int = 20, hidden_dim: int = 64, num_layers: int = 2, dropout: float = 0.2):
         super().__init__()
         self.hidden_dim = hidden_dim
         self.gru = nn.GRU(
@@ -62,13 +90,16 @@ class EvidentialGRUModel(nn.Module):
             batch_first=True,
             dropout=dropout if num_layers > 1 else 0.0,
         )
-        self.layer_norm = nn.LayerNorm(hidden_dim)
-        self.head = EvidentialHead(in_features=hidden_dim)
+        self.attention = TemporalAttention(hidden_dim)
+        self.layer_norm = nn.LayerNorm(hidden_dim * 2)
+        self.head = EvidentialHead(in_features=hidden_dim * 2)
 
     def forward(self, x: torch.Tensor) -> Tuple[torch.Tensor, torch.Tensor, torch.Tensor, torch.Tensor, torch.Tensor]:
         out, _ = self.gru(x)
-        last_step = out[:, -1, :] # final time step
-        normed = self.layer_norm(last_step)
+        last_step = out[:, -1, :]  # instantaneous final time step [B, H]
+        context = self.attention(out)  # temporal attention context [B, H]
+        combined = torch.cat([last_step, context], dim=-1)  # [B, 2*H]
+        normed = self.layer_norm(combined)
         return self.head(normed)
 
 
@@ -81,7 +112,7 @@ class EvidentialLoss(nn.Module):
       L_NLL: Student-t Negative Log-Likelihood
       L_reg: Adversarial Evidence Regularizer |r - gamma| * (2*nu + alpha)
     """
-    def __init__(self, lambda_reg: float = 0.05, lambda_clf: float = 1.0):
+    def __init__(self, lambda_reg: float = 0.05, lambda_clf: float = 2.5):
         super().__init__()
         self.lambda_reg = lambda_reg
         self.lambda_clf = lambda_clf
