@@ -76,10 +76,10 @@ class OrthogonalFactorModel:
         # Residuals: E = R_centered - F @ B^T  (T, N)
         E = R_centered - (F @ self.B.T)
 
-        # Check orthogonality between residuals and factors
-        corr_fe = np.abs(np.corrcoef(F.T, E.T)[: self.n_factors, self.n_factors :])
-        max_corr_fe = np.max(corr_fe)
-        assert max_corr_fe < 1e-4, f"Residuals and factors are not orthogonal: max corr={max_corr_fe}"
+        # Check orthogonality between residuals and factors via sample covariance: E[epsilon_t * f_t^T] = 0
+        cov_fe = np.abs(F.T @ E) / T
+        max_cov_fe = float(np.max(cov_fe))
+        assert max_cov_fe < 1e-4, f"Residuals and factors are not orthogonal: max cov={max_cov_fe}"
 
         # Estimate Ledoit-Wolf shrinkage residual covariance (Callout 2)
         lw = LedoitWolf(assume_centered=True)
@@ -87,7 +87,10 @@ class OrthogonalFactorModel:
         self.res_cov_full = lw.covariance_  # (N, N)
 
         # Evaluate empirical off-diagonal residual correlations
-        res_corr = np.corrcoef(E, rowvar=False)
+        std_E = np.std(E, axis=0, keepdims=True)
+        std_E = np.where(std_E > 1e-12, std_E, 1.0)
+        E_std = (E - np.mean(E, axis=0, keepdims=True)) / std_E
+        res_corr = (E_std.T @ E_std) / T
         off_diag_corr = np.abs(res_corr - np.eye(N))
         max_off_diag = float(np.max(off_diag_corr))
 

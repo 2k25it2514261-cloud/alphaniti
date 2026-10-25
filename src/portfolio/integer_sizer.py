@@ -35,12 +35,14 @@ class LatticeBranchAndBoundSolver:
         self,
         cost_model: Optional[IndianStatutoryCostModel] = None,
         alpha_cvar: float = 0.95,
+        risk_aversion: float = 0.1,
         max_asset_weight: float = 0.25,
         max_nodes: int = 2000,
         time_limit_sec: float = 30.0,
     ):
         self.cost_model = cost_model or IndianStatutoryCostModel()
         self.alpha = alpha_cvar
+        self.risk_aversion = risk_aversion
         self.max_weight = max_asset_weight
         self.max_nodes = max_nodes
         self.time_limit = time_limit_sec
@@ -54,7 +56,7 @@ class LatticeBranchAndBoundSolver:
     ) -> float:
         """
         Evaluate exact total objective J(q):
-            J(q) = CVaR_alpha(q) - mu^T (q * P) + sum(Cost_i(q_i))
+            J(q) = lambda_risk * CVaR_alpha(q) - mu^T (q * P) + sum(Cost_i(q_i))
         """
         q = np.array(q_integer, dtype=float)
         alloc_value = q * prices
@@ -76,7 +78,7 @@ class LatticeBranchAndBoundSolver:
             for i in range(len(q))
         )
 
-        return float(cvar - total_exp_ret + total_cost)
+        return float(self.risk_aversion * cvar - total_exp_ret + total_cost)
 
     def _solve_node_relaxation(
         self,
@@ -100,8 +102,8 @@ class LatticeBranchAndBoundSolver:
         c = np.zeros(n_vars)
         # - mu_i * P_i + c_i^cvx
         c[:N] = -expected_returns * prices + convex_cost_slopes
-        c[N] = 1.0  # gamma
-        c[N + 1 :] = 1.0 / (one_minus_alpha * S)  # sum(s_s) / ((1 - alpha)*S)
+        c[N] = self.risk_aversion  # lambda_risk * gamma
+        c[N + 1 :] = self.risk_aversion / (one_minus_alpha * S)  # lambda_risk * sum(s_s) / ((1 - alpha)*S)
 
         # Inequality constraints: A_ub * x <= b_ub
         # 1. Scenarios: -sum_i (r_{i,s} * P_i * q_i) - gamma - s_s <= 0
