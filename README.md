@@ -1,4 +1,4 @@
-# AlphaNiti v25.0 — Institutional Quantitative Trading System & Formal Architecture
+ AlphaNiti v25.0 — Institutional Quantitative Trading System & Formal Architecture
 **Distributionally Robust Risk Engine, Enclave-Isolated Safety Kernel & Conserved Double-Entry State Machine**  
 *The Certified 10.0 / 10 Institutional Standard: Theorem-Level Proofs, Executable TLA+ Invariants & NSE EMAPI Protocol Compliance*
 
@@ -293,11 +293,17 @@ THEOREM Spec => [](TypeOK /\ SolvencyInvariant)
 ### 4.1 Normal-Inverse-Gamma (NIG) Analytical Derivation
 Asset excess returns follow $r_t \sim \mathcal{N}(\mu, \sigma^2)$ with conjugate prior $\text{NIG}(m_0, \nu_0, \alpha_0, \beta_0)$. Given $T$ historical observations with sample mean $\bar{r} = \frac{1}{T}\sum r_t$ and sum of squared errors $\text{SS} = \sum (r_t - \bar{r})^2$:
 
-$$\nu_T = \nu_0 + T, \quad m_T = \frac{\nu_0 m_0 + T \bar{r}}{\nu_T}, \quad \alpha_T = \alpha_0 + \frac{T}{2}, \quad \beta_T = \beta_0 + \frac{1}{2}\text{SS} + \frac{T \nu_0 (\bar{r} - m_0)^2}{2 \nu_T}$$
+$
+\nu_T = \nu_0 + T, \quad m_T = \frac{\nu_0 m_0 + T \bar{r}}{\nu_T}, \quad \alpha_T = \alpha_0 + \frac{T}{2}, \quad \beta_T = \beta_0 + \frac{1}{2}\text{SS} + \frac{T \nu_0 (\bar{r} - m_0)^2}{2 \nu_T}
+
+$
 
 The marginal predictive distribution is Student-$t$ with exact analytical variance decomposition:
 
-$$\operatorname{Var}(r_{T+1} \mid \mathbf{r}) = \underbrace{\frac{\beta_T}{\alpha_T - 1}}_{\sigma_{\text{aleatoric}}^2 \text{ (Irreducible Market Noise)}} + \underbrace{\frac{\beta_T}{\nu_T (\alpha_T - 1)}}_{\sigma_{\text{epistemic}}^2 \text{ (Reducible Parameter Uncertainty)}} \quad (\text{for } \alpha_T > 1)$$
+$
+\operatorname{Var}(r_{T+1} \mid \mathbf{r}) = \underbrace{\frac{\beta_T}{\alpha_T - 1}}_{\sigma_{\text{aleatoric}}^2 \text{ (Irreducible Market Noise)}} + \underbrace{\frac{\beta_T}{\nu_T (\alpha_T - 1)}}_{\sigma_{\text{epistemic}}^2 \text{ (Reducible Parameter Uncertainty)}} \quad (\text{for } \alpha_T > 1)
+
+$
 
 ### 4.2 Four-Tiered Graduated Epistemic Response Framework
 
@@ -316,7 +322,7 @@ flowchart TD
    - **Custody Treatment**: **Strictly hold existing shares**. Zero liquidation impact; saves bid-ask spread.
 2. **Tier 2 (Elevated Uncertainty: $\gamma_{\text{hard}} < \sigma_{\text{epistemic}, i}^2 \le \gamma_{\text{crit}}$)**:
    - **Action**: Cancel open orders.
-   - **Custody Treatment**: De-gross position by $25\%$ using passive limit orders pegged to National Best Bid (NBB), bounded by $5\%$ of 20-day ADV.
+   - **Custody Treatment**: De-gross position by 25% using passive limit orders pegged to National Best Bid (NBB), bounded by 5% of 20-day ADV.
 3. **Tier 3 (Extreme Epistemic Breakdown: $\sigma_{\text{epistemic}, i}^2 > \gamma_{\text{crit}}$)**:
    - **Action**: Complete exit of asset $i$ only.
    - **Custody Treatment**: Orderly passive TWAP exit exclusively for symbol $i$. All other portfolio holdings remain untouched.
@@ -337,45 +343,69 @@ Commercial bank deposits exceeding DICGC insurance limits are prohibited.
 ### 5.1 Full Portfolio Factor-Residual Model
 Asset returns $\mathbf{r}_t \in \mathbb{R}^N$ are decomposed via orthogonal factor extraction ($k \le 5$):
 
-$$\mathbf{r}_t = \mathbf{B} \mathbf{f}_t + \boldsymbol{\epsilon}_t, \quad \mathbf{B}^T \mathbf{B} = \mathbf{I}_k, \quad \mathbb{E}[\boldsymbol{\epsilon}_t \mid \mathbf{f}_t] = \mathbf{0}$$
+$
+\mathbf{r}_t = \mathbf{B} \mathbf{f}_t + \boldsymbol{\epsilon}_t, \quad \mathbf{B}^T \mathbf{B} = \mathbf{I}_k, \quad \mathbb{E}[\boldsymbol{\epsilon}_t \mid \mathbf{f}_t] = \mathbf{0}
+
+$
 
 Portfolio loss for allocation $\mathbf{w} \in \mathbb{R}^N$:
 
-$$\mathcal{L}(\mathbf{w}, \mathbf{r}_t) = -\mathbf{w}^T \mathbf{r}_t = \underbrace{-\mathbf{v}^T \mathbf{f}_t}_{\text{Factor Loss } \mathcal{L}_f(\mathbf{v}, \mathbf{f}_t)} + \underbrace{(-\xi_t)}_{\text{Residual Loss } \mathcal{L}_\epsilon(\mathbf{w}, \boldsymbol{\epsilon}_t)}, \quad \mathbf{v} \equiv \mathbf{B}^T \mathbf{w} \in \mathbb{R}^k$$
+$
+\mathcal{L}(\mathbf{w}, \mathbf{r}_t) = -\mathbf{w}^T \mathbf{r}_t = \underbrace{-\mathbf{v}^T \mathbf{f}_t}_{\text{Factor Loss } \mathcal{L}_f(\mathbf{v}, \mathbf{f}_t)} + \underbrace{(-\xi_t)}_{\text{Residual Loss } \mathcal{L}_\epsilon(\mathbf{w}, \boldsymbol{\epsilon}_t)}, \quad \mathbf{v} \equiv \mathbf{B}^T \mathbf{w} \in \mathbb{R}^k
+
+$
 
 By sub-additivity of CVaR:
 
-$$\text{CVaR}_\alpha(\mathbf{w}) \le \text{CVaR}_\alpha(\mathbf{v}^T \mathbf{f}) + \text{CVaR}_\alpha(\xi)$$
+$
+\text{CVaR}_\alpha(\mathbf{w}) \le \text{CVaR}_\alpha(\mathbf{v}^T \mathbf{f}) + \text{CVaR}_\alpha(\xi)
+
+$
 
 **Lemma 1 (Residual Sub-Gaussian CVaR Bound)**:
 Since $\xi_t = \mathbf{w}^T \boldsymbol{\epsilon}_t$ is sub-Gaussian with parameter $\sigma_\xi^2(\mathbf{w}) = \mathbf{w}^T \boldsymbol{\Sigma}_\epsilon \mathbf{w}$:
 
-$$\text{CVaR}_\alpha(\xi) \le \frac{\sigma_\xi(\mathbf{w})}{(1 - \alpha)\sqrt{2\pi}} \exp\left( -\frac{(\Phi^{-1}(\alpha))^2}{2} \right) \equiv \Delta_\epsilon(\mathbf{w}, \alpha)$$
+$
+\text{CVaR}_\alpha(\xi) \le \frac{\sigma_\xi(\mathbf{w})}{(1 - \alpha)\sqrt{2\pi}} \exp\left( -\frac{(\Phi^{-1}(\alpha))^2}{2} \right) \equiv \Delta_\epsilon(\mathbf{w}, \alpha)
+
+$
 
 Under diversification cap $w_i \le 0.05$, $\sigma_\xi(\mathbf{w}) \le 0.001$, bounding residual risk to $\Delta_\epsilon \le 0.206\%$.
 
 ### 5.2 Theorem-Level Factor-Space Concentration Proof
 Under sub-Gaussian factor distribution $\mathbb{E}[\exp(\|\mathbf{f}\|_2^2 / \sigma_f^2)] \le 2$, Fournier & Guillin (2015, Theorem 2) proves that with probability at least $1 - \delta$:
 
-$$\mathcal{W}_1(\mu, \hat{\mu}_S) \le \epsilon_f(S, \delta) \equiv C_1 \sigma_f \left( \frac{\ln(C_2 / \delta)}{S} \right)^{1/k}$$
+$
+\mathcal{W}_1(\mu, \hat{\mu}_S) \le \epsilon_f(S, \delta) \equiv C_1 \sigma_f \left( \frac{\ln(C_2 / \delta)}{S} \right)^{1/k}
+
+$
 
 where $C_1 = 2 (1 + \sqrt{k/2})$ and $C_2 = 2$.
 For $k = 3$, $C_1 = 2(1 + \sqrt{1.5}) \approx 4.44949$.
 For $S = 1,000$, $\delta = 0.01$, $\sigma_f = 0.025$:
 
-$$\epsilon_f = 4.44949 \times 0.025 \times \left( \frac{\ln(200)}{1000} \right)^{1/3} = 0.111237 \times 0.174338 \approx \mathbf{0.0195}$$
+$
+\epsilon_f = 4.44949 \times 0.025 \times \left( \frac{\ln(200)}{1000} \right)^{1/3} = 0.111237 \times 0.174338 \approx \mathbf{0.0195}
+
+$
 
 **Full Portfolio Safety Guarantee**:
 
-$$\mathbb{P}\left( \text{CVaR}_\alpha^{\text{true}}(\mathbf{w}^*) \le \sup_{\mathbb{Q} \in \mathbb{B}_{\epsilon_f}} \text{CVaR}_\alpha^{\mathbb{Q}}(\mathbf{v}^T \mathbf{f}) + \Delta_\epsilon(\mathbf{w}^*, \alpha) \right) \ge 1 - \delta$$
+$
+\mathbb{P}\left( \text{CVaR}_\alpha^{\text{true}}(\mathbf{w}^*) \le \sup_{\mathbb{Q} \in \mathbb{B}_{\epsilon_f}} \text{CVaR}_\alpha^{\mathbb{Q}}(\mathbf{v}^T \mathbf{f}) + \Delta_\epsilon(\mathbf{w}^*, \alpha) \right) \ge 1 - \delta
+
+$
 
 The worst-case factor CVaR is solved via the exact Esfahani-Kuhn convex dual program:
 
-$$\begin{aligned}
+$
+\begin{aligned}
 \min_{\gamma \in \mathbb{R}, \lambda \ge 0, \mathbf{s} \in \mathbb{R}_{\ge 0}^S} \quad & \gamma + \lambda \epsilon_f + \frac{1}{(1 - \alpha)S} \sum_{s=1}^S s_s \\
 \text{subject to:} \quad & s_s \ge -\mathbf{v}^T \mathbf{f}_s - \gamma, \quad \forall s \in \{1, \dots, S\} \\
 & \|\mathbf{v}\|_2 \le \lambda (1 - \alpha)
-\end{aligned}$$
+\end{aligned}
+
+$
 
 ---
 
@@ -384,17 +414,30 @@ $$\begin{aligned}
 ### 6.1 Total-Objective Optimization
 The discrete solver minimizes the **complete** risk-adjusted objective:
 
-$$J(\mathbf{q}) \equiv \text{CVaR}_\alpha(\mathbf{q}) - \sum_{i=1}^N \mu_i q_i P_i^{\text{eval}} + \sum_{i=1}^N \text{Cost}_i(q_i)$$
+$
+J(\mathbf{q}) \equiv \text{CVaR}_\alpha(\mathbf{q}) - \sum_{i=1}^N \mu_i q_i P_i^{\text{eval}} + \sum_{i=1}^N \text{Cost}_i(q_i)
+
+$
 
 At search tree node $\mathcal{N}$ with bounds $\mathbf{l} \le \mathbf{q} \le \mathbf{u}$:
 
-$$z_{\text{LP}}(\mathcal{N}) \equiv \min_{\mathbf{q} \in [\mathbf{l}, \mathbf{u}], \gamma \in \mathbb{R}, \mathbf{s} \in \mathbb{R}_{\ge 0}^S} \left\lbrace \gamma + \frac{1}{(1-\alpha)S}\sum_{s=1}^S s_s - \sum_{i=1}^N \mu_i q_i P_i^{\text{eval}} + \sum_{i=1}^N \text{Cost}_i^{\text{cvx}}(q_i) \right\rbrace$$
-$$\text{subject to:} \quad s_s \ge -\sum_{i=1}^N q_i r_{i, s} P_i^{\text{eval}} - \gamma, \quad \forall s \in \{1, \dots, S\}$$
+$
+z_{\text{LP}}(\mathcal{N}) \equiv \min_{\mathbf{q} \in [\mathbf{l}, \mathbf{u}], \gamma \in \mathbb{R}, \mathbf{s} \in \mathbb{R}_{\ge 0}^S} \left\lbrace \gamma + \frac{1}{(1-\alpha)S}\sum_{s=1}^S s_s - \sum_{i=1}^N \mu_i q_i P_i^{\text{eval}} + \sum_{i=1}^N \text{Cost}_i^{\text{cvx}}(q_i) \right\rbrace
+
+$
+
+$
+\text{subject to:} \quad s_s \ge -\sum_{i=1}^N q_i r_{i, s} P_i^{\text{eval}} - \gamma, \quad \forall s \in \{1, \dots, S\}
+
+$
 
 **Theorem 2 (Valid Total-Objective Lower Bound)**:
 Because the lower convex envelope satisfies $\text{Cost}_i^{\text{cvx}}(q_i) \le \text{Cost}_i(q_i)$ and continuous LP CVaR matches discrete CVaR on integer points:
 
-$$z_{\text{LP}}(\mathcal{N}) \le \min_{\mathbf{q} \in \mathbb{Z}^N \cap [\mathbf{l}, \mathbf{u}]} J(\mathbf{q})$$
+$
+z_{\text{LP}}(\mathcal{N}) \le \min_{\mathbf{q} \in \mathbb{Z}^N \cap [\mathbf{l}, \mathbf{u}]} J(\mathbf{q})
+
+$
 
 Pruning node $\mathcal{N}$ when $z_{\text{LP}}(\mathcal{N}) \ge \text{UB}_{\text{incumbent}}$ cannot discard a globally superior integer point.
 
@@ -452,11 +495,17 @@ flowchart TD
 ### 7.1 Transition-by-Transition Mathematical Induction Proof
 Net Asset Value:
 
-$$W_k^{\text{NAV}} \equiv \left( W_k^{\text{settled}} + W_k^{\text{escrow}} + W_k^{\text{recv}} \right) - \left( W_k^{\text{lien}} + W_k^{\text{payable}} \right) + \sum_{i=1}^N q_{i, k} P_{i, k}^{\text{eval}}$$
+$
+W_k^{\text{NAV}} \equiv \left( W_k^{\text{settled}} + W_k^{\text{escrow}} + W_k^{\text{recv}} \right) - \left( W_k^{\text{lien}} + W_k^{\text{payable}} \right) + \sum_{i=1}^N q_{i, k} P_{i, k}^{\text{eval}}
+
+$
 
 By mathematical induction across all legal transitions:
 
-$$\Delta W_k^{\text{NAV}} = \Delta \text{UnrealizedPnL}_k + \text{RealizedPnL}_k - \text{Charges}_k + \Delta \text{ExternalCash}_k$$
+$
+\Delta W_k^{\text{NAV}} = \Delta \text{UnrealizedPnL}_k + \text{RealizedPnL}_k - \text{Charges}_k + \Delta \text{ExternalCash}_k
+
+$
 
 - **Buy Dispatch**: Cleared cash debited, escrow credited. $\Delta W^{\text{NAV}} = 0$.
 - **Buy Fill**: Escrow debited, shares credited, mark updated to fill price. $\Delta W^{\text{NAV}} = -\text{Charges}$.
@@ -469,7 +518,10 @@ Double-counting is mathematically impossible across the disjoint balance sheet a
 ### 7.2 Mandatory Limit-Price Collar Guard
 Every buy order enforces an exchange limit price:
 
-$$P_{\text{limit}, i} \le \frac{\text{EscrowAllocated}_i - \mathcal{C}_{\max}(q_i^*, \text{EscrowAllocated}_i)}{q_i^*}$$
+$
+P_{\text{limit}, i} \le \frac{\text{EscrowAllocated}_i - \mathcal{C}_{\max}(q_i^*, \text{EscrowAllocated}_i)}{q_i^*}
+
+$
 
 preventing actual fill outlay from ever exceeding pre-trade quarantined cash, guaranteeing $W^{\text{settled}} \ge 0$ unconditionally.
 
@@ -479,11 +531,17 @@ preventing actual fill outlay from ever exceeding pre-trade quarantined cash, gu
 
 Every datum preserves an immutable 5-tuple:
 
-$$\mathbf{X} = \big( \text{Entity}, \; \text{Field}, \; \text{Value}, \; \tau^{\text{event}}, \; \tau^{\text{pub}}, \; \tau^{\text{vendor}}, \; \tau^{\text{ingest}}, \; \text{Hash}_{\text{SHA256}} \big)$$
+$
+\mathbf{X} = \big( \text{Entity}, \; \text{Field}, \; \text{Value}, \; \tau^{\text{event}}, \; \tau^{\text{pub}}, \; \tau^{\text{vendor}}, \; \tau^{\text{ingest}}, \; \text{Hash}_{\text{SHA256}} \big)
+
+$
 
 **Causal Inclusion Operator**:
 
-$$\mathcal{F}_{t_{\text{decision}}} \equiv \left\lbrace \mathbf{X} \in \mathcal{D} \;\middle\vert\; \max\big(\tau^{\text{pub}}(\mathbf{X}), \; \tau^{\text{vendor}}(\mathbf{X}), \; \tau^{\text{ingest}}(\mathbf{X})\big) < t_{\text{decision}} \right\rbrace$$
+$
+\mathcal{F}_{t_{\text{decision}}} \equiv \left\lbrace \mathbf{X} \in \mathcal{D} \;\middle\vert\; \max\big(\tau^{\text{pub}}(\mathbf{X}), \; \tau^{\text{vendor}}(\mathbf{X}), \; \tau^{\text{ingest}}(\mathbf{X})\big) < t_{\text{decision}} \right\rbrace
+
+$
 
 - Strict inequality ($<$) prevents same-millisecond lookahead.
 - Distributed nodes synchronize via Precision Time Protocol (PTP IEEE 1588); clock skew $> 100\text{ms}$ raises critical alerts.
@@ -518,11 +576,17 @@ Candidate strategies must simultaneously pass:
 1. **Uniqueness Scope**: Enforced per `(TradingMemberID, TraderID, OrderDate, ClOrdID)`.
 2. **Duplicate Rejection Semantics**: Duplicate `ClOrdID` within a trading session triggers immediate matching engine rejection:
 
-$$\text{ExecutionReport (35=8)}: \quad \text{OrdStatus} = 8 \; (\text{Rejected}), \quad \text{OrdRejReason} = 104 \; (\text{Duplicate ClOrdID})$$
+$
+\text{ExecutionReport (35=8)}: \quad \text{OrdStatus} = 8 \; (\text{Rejected}), \quad \text{OrdRejReason} = 104 \; (\text{Duplicate ClOrdID})
+
+$
 
 3. **Canonical Format**:
 
-$$\text{ClOrdID} \equiv \text{YYYYMMDD-MEMBER-STRAT-} \parallel \text{HMAC-SHA256}(K, \text{Nonce})_{[:16]}$$
+$
+\text{ClOrdID} \equiv \text{YYYYMMDD-MEMBER-STRAT-} \parallel \text{HMAC-SHA256}(K, \text{Nonce})_{[:16]}
+
+$
 
 4. **Two-Phase Commit Protocol**: Local state is pre-committed to disk WAL before transmission. Socket drops transition orders to `SUBMITTED_UNCONFIRMED` and query the matching engine via `OrderStatusRequest (MsgType = H)` before any retry is permitted.
 
@@ -589,13 +653,13 @@ Pursuant to the Finance Act revisions effective **April 1, 2026** (applicable as
 ### Verified Test Evidence
 
 1. **TLC Model Checker Verification (v2.18)**:
-   - Explored: **$1,248,960$ states** (depth 28) with **0 invariant violations** (`TypeOK`, `SolvencyInvariant`, `ConservationInvariant`).
+   - Explored: **1,248,960 states** (depth 28) with **0 invariant violations** (`TypeOK`, `SolvencyInvariant`, `ConservationInvariant`).
 2. **CVaR LP vs Deterministic Algebraic Oracle Comparison**:
-   - Across 10,000 synthetic return matrices (including degenerate ties and Student-$t$ with $\nu = 2.5$), maximum error is bounded by **$4.8 \times 10^{-14} \ll 10^{-12}$**.
+   - Across 10,000 synthetic return matrices (including degenerate ties and Student-$t$ with $\nu = 2.5$), maximum error is bounded by $4.8 \times 10^{-14} \ll 10^{-12}$.
 3. **End-to-End Latency Benchmark ($N=100$ assets, $S=1,000$ scenarios)**:
-   - p50 Latency: **$2.9\text{ms}$**
-   - p95 Latency: **$7.2\text{ms}$**
-   - p99 Latency: **$10.3\text{ms}$** (Strictly within the sub-15ms SLA).
+   - p50 Latency: **2.9 ms**
+   - p95 Latency: **7.2 ms**
+   - p99 Latency: **10.3 ms** (Strictly within the sub-15ms SLA).
 
 ---
 

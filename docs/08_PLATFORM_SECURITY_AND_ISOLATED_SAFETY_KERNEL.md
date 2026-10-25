@@ -1,4 +1,4 @@
-# Pipeline Module 8: Platform Security, Enclave Architecture & Formal Safety Kernel
+ Pipeline Module 8: Platform Security, Enclave Architecture & Formal Safety Kernel
 **Process Isolation, VBS Trustlets, Linux seccomp-bpf Whitelisting, Frama-C ACSL Proofs & TLA+ Invariants**  
 *AlphaNiti v25.0 Institutional Architecture — Part 8 (Revised per Architectural Callout 7)*
 
@@ -60,7 +60,12 @@ To guarantee that safety contracts cannot be bypassed by an attacker with user-s
 
 ### 2.2 Linux Deployment Profile (Hardened seccomp-bpf Container)
 1. **Syscall Whitelisting via `seccomp-bpf`**: The safety kernel drops all Linux capabilities (`cap_setuid`, `cap_net_raw`) and installs a strict Berkeley Packet Filter (BPF) policy permitting only 8 deterministic syscalls:
-   $$\text{Allowed Syscalls} = \left\lbrace \texttt{read}, \; \texttt{write}, \; \texttt{clock\_gettime}, \; \texttt{nanosleep}, \; \texttt{exit\_group}, \; \texttt{rt\_sigreturn}, \; \texttt{futex}, \; \texttt{brk} \right\rbrace$$
+
+$
+\text{Allowed Syscalls} = \left\lbrace \texttt{read}, \; \texttt{write}, \; \texttt{clock\_gettime}, \; \texttt{nanosleep}, \; \texttt{exit\_group}, \; \texttt{rt\_sigreturn}, \; \texttt{futex}, \; \texttt{brk} \right\rbrace
+
+$
+
    Any attempt to execute `execve`, `fork`, `socket`, `open`, or `connect` triggers immediate process termination via `SECCOMP_RET_KILL_PROCESS`.
 2. **RAM Locking**: Invokes `mlockall(MCL_CURRENT | MCL_FUTURE)` to disable swap memory paging.
 3. **Memory Scrubbing**: Memory containing sensitive key material is wiped via `explicit_bzero()` to prevent compiler optimization dead-store elimination.
@@ -84,11 +89,25 @@ To guarantee that safety contracts cannot be bypassed by an attacker with user-s
 The formal state space of the safety kernel is certified using the TLC Model Checker (TLA+ v2.18) across $1,248,960$ states without a single invariant violation:
 
 1. **`TypeOK`**: Every balance sheet scalar remains strictly non-negative:
-   $$[](w_{\text{settled}} \ge 0 \;\land\; w_{\text{escrow}} \ge 0 \;\land\; w_{\text{recv}} \ge 0 \;\land\; w_{\text{lien}} \ge 0 \;\land\; w_{\text{payable}} \ge 0)$$
+
+$
+[](w_{\text{settled}} \ge 0 \;\land\; w_{\text{escrow}} \ge 0 \;\land\; w_{\text{recv}} \ge 0 \;\land\; w_{\text{lien}} \ge 0 \;\land\; w_{\text{payable}} \ge 0)
+
+$
+
 2. **`SolvencyInvariant`**: Cleared cash always strictly dominates all financial liens and payables:
-   $$[](w_{\text{settled}} \ge w_{\text{lien}} + w_{\text{payable}})$$
+
+$
+[](w_{\text{settled}} \ge w_{\text{lien}} + w_{\text{payable}})
+
+$
+
 3. **`ConservationInvariant`**: Net Asset Value changes strictly equal economic trading profits minus fees:
-   $$[](\Delta \text{NAV} = \Delta \text{UnrealizedPnL} + \text{RealizedPnL} - \text{Charges})$$
+
+$
+[](\Delta \text{NAV} = \Delta \text{UnrealizedPnL} + \text{RealizedPnL} - \text{Charges})
+
+$
 
 ### 3.2 ACSL Code Contracts Verified via Frama-C
 The core C implementation (`safety_kernel.c`) specifies ANSI/ISO C Specification Language (ACSL) function contracts proven via the Frama-C WP (Weakest Precondition) deductive theorem prover:

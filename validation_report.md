@@ -1,4 +1,4 @@
-# AlphaNiti Architecture & Feasibility Validation Report
+ AlphaNiti Architecture & Feasibility Validation Report
 **Target Reviewer:** External AI Evaluator (ChatGPT) / Senior Quantitative Researcher / Principal ML Engineer  
 **Project:** AlphaNiti — Indian Equity Research & Decision Workspace  
 **Document Evaluated:** *AlphaNiti Project Research Plan and Algorithm Specification (Planning Version 0.1)*  

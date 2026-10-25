@@ -1,4 +1,4 @@
-# AlphaNiti: Research Roadmap & Literature Anchoring Guide
+ AlphaNiti: Research Roadmap & Literature Anchoring Guide
 
 ## 1. The 10 Ranked Theoretical Upgrades
 
