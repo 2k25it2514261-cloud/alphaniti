@@ -10,6 +10,7 @@ Provides:
 """
 
 import os
+import re
 import sys
 import json
 import time
@@ -657,6 +658,534 @@ def simulate_institutional_order(req: SimulateOrderRequest):
             "solver_status": cert.get("status"),
         },
     }
+
+
+class AskBrainRequest(BaseModel):
+    query: str
+    capital_inr: float = 1_000_000.0
+    active_symbol: str = "RELIANCE"
+    crash_threshold: float = 0.35
+    force_risk_on: bool = False
+
+
+ALIAS_TO_SYMBOL = {
+    "RELIANCE": "RELIANCE",
+    "RIL": "RELIANCE",
+    "JIO": "RELIANCE",
+    "TCS": "TCS",
+    "TATA CONSULTANCY": "TCS",
+    "HDFCBANK": "HDFCBANK",
+    "HDFC BANK": "HDFCBANK",
+    "HDFC": "HDFCBANK",
+    "INFY": "INFY",
+    "INFOSYS": "INFY",
+    "ICICIBANK": "ICICIBANK",
+    "ICICI BANK": "ICICIBANK",
+    "ICICI": "ICICIBANK",
+    "SBIN": "SBIN",
+    "SBI": "SBIN",
+    "STATE BANK": "SBIN",
+    "BHARTIARTL": "BHARTIARTL",
+    "AIRTEL": "BHARTIARTL",
+    "BHARTI": "BHARTIARTL",
+    "ITC": "ITC",
+    "LT": "LT",
+    "L&T": "LT",
+    "LARSEN": "LT",
+    "KOTAKBANK": "KOTAKBANK",
+    "KOTAK": "KOTAKBANK",
+    "HINDUNILVR": "HINDUNILVR",
+    "HUL": "HINDUNILVR",
+    "HINDUSTAN UNILEVER": "HINDUNILVR",
+    "AXISBANK": "AXISBANK",
+    "AXIS": "AXISBANK",
+    "TATAMOTORS": "TATAMOTORS",
+    "TATA MOTORS": "TATAMOTORS",
+    "TATASTEEL": "TATASTEEL",
+    "TATA STEEL": "TATASTEEL",
+    "ZOMATO": "ZOMATO",
+    "ETERNAL": "ZOMATO",
+    "BAJFINANCE": "BAJFINANCE",
+    "BAJAJ FINANCE": "BAJFINANCE",
+    "WIPRO": "WIPRO",
+    "HCLTECH": "HCLTECH",
+    "HCL": "HCLTECH",
+    "SUNPHARMA": "SUNPHARMA",
+    "SUN PHARMA": "SUNPHARMA",
+    "MARUTI": "MARUTI",
+    "NTPC": "NTPC",
+    "ONGC": "ONGC",
+    "TITAN": "TITAN",
+    "ADANIENT": "ADANIENT",
+    "ADANI": "ADANIENT",
+    "ADANIPORTS": "ADANIPORTS",
+    "HAL": "HAL",
+    "BEL": "BEL",
+    "IRCTC": "IRCTC",
+    "TRENT": "TRENT",
+    "POWERGRID": "POWERGRID",
+    "COALINDIA": "COALINDIA",
+    "ULTRACEMCO": "ULTRACEMCO",
+    "M&M": "M&M",
+    "MAHINDRA": "M&M",
+}
+
+
+def _fetch_and_infer_custom_symbol(sym: str) -> Optional[Dict[str, Any]]:
+    """Dynamically fetches live Yahoo Finance NSE data for any custom ticker and runs the v25.0 ML Brain."""
+    sym = sym.upper().replace(".NS", "").strip()
+    existing = next((s for s in STATE["signals"] if s["symbol"] == sym), None)
+    if existing is not None:
+        return existing
+
+    ensemble: EvidentialEnsemble = STATE["model"]
+    scaler: RobustMADScaler = STATE["scaler"]
+    fcols: List[str] = STATE["fcols"]
+
+    try:
+        yf_tick = f"{sym}.NS"
+        sub = yf.download(
+            tickers=yf_tick,
+            period="6mo",
+            interval="1d",
+            auto_adjust=False,
+            progress=False,
+            timeout=8,
+        )
+        if sub is None or len(sub) < 65:
+            return None
+        if isinstance(sub.columns, pd.MultiIndex):
+            sub.columns = [c[0] for c in sub.columns]
+        sub = sub.dropna()
+        rows = []
+        for dt, row in sub.iterrows():
+            d_str = dt.strftime("%Y-%m-%d")
+            c = float(row["Close"])
+            v = float(row["Volume"])
+            rows.append({
+                "symbol": sym,
+                "date": d_str,
+                "open": float(row["Open"]),
+                "high": float(row["High"]),
+                "low": float(row["Low"]),
+                "close": c,
+                "volume": v,
+                "turnover_cr": (c * v) / 1e7,
+                "ret_1d": 0.0,
+                "has_corporate_action": False,
+                "cum_factor": 1.0,
+            })
+        df_new = pl.DataFrame(rows).sort("date")
+        df_new = df_new.with_columns([
+            (pl.col("close") / pl.col("close").shift(1) - 1.0).fill_null(0.0).alias("ret_1d")
+        ])
+
+        # Compute 20 causal features
+        df_feat, _ = compute_causal_features(df_new)
+        X_norm = scaler.transform(df_feat.select(fcols))
+        norm_cols = [f"{c}_norm" for c in fcols]
+        df_sym_scaled = df_feat.with_columns([
+            pl.Series(norm_cols[idx], X_norm[:, idx], dtype=pl.Float32) for idx in range(len(fcols))
+        ])
+
+        if len(df_sym_scaled) < 60:
+            return None
+
+        with torch.no_grad():
+            seq = df_sym_scaled.select(norm_cols).to_numpy()[-60:]
+            inp = torch.tensor(seq, dtype=torch.float32).unsqueeze(0)
+            gamma, aleatoric, epistemic, p_breach = ensemble.predict(inp)
+
+        last_row = df_sym_scaled.tail(1).to_dicts()[0]
+        c_price = float(last_row["close"])
+        ret_1d = float(last_row.get("ret_1d_clean", 0.0)) * 100.0
+        ret_20d = float(last_row.get("ret_20d", 0.0)) * 100.0
+        rsi_14 = float(last_row.get("rsi_14d", 0.0)) * 50.0 + 50.0
+        p_vol = float(last_row.get("parkinson_vol_20d", 0.015)) * 100.0
+
+        pred_ret = float(gamma[0][0])
+        ale_var = float(aleatoric[0][0])
+        epi_var = float(epistemic[0][0])
+        pb = float(p_breach[0][0])
+        sharpe_proxy = pred_ret / (np.sqrt(ale_var) + 1e-4)
+
+        med_epi = float(np.median([s["epistemic_uncertainty"] for s in STATE["signals"]])) if STATE["signals"] else 0.01
+        is_alpha = (pb < 0.38 and epi_var <= med_epi * 1.25 and pred_ret > 0.0)
+        regime = STATE["regime"]
+
+        sig_dict = {
+            "symbol": sym,
+            "exchange": "NSE",
+            "sector": SECTOR_MAP.get(sym, "NSE Dynamic Live Equity"),
+            "date": str(last_row["date"]),
+            "close_price": round(c_price, 2),
+            "open_price": round(float(last_row["open"]), 2),
+            "high_price": round(float(last_row["high"]), 2),
+            "low_price": round(float(last_row["low"]), 2),
+            "volume": int(last_row["volume"]),
+            "change_1d_pct": round(ret_1d, 2),
+            "change_20d_pct": round(ret_20d, 2),
+            "rsi_14": round(rsi_14, 1),
+            "parkinson_vol_pct": round(p_vol, 2),
+            "predicted_return_pct": round(pred_ret * 100, 2),
+            "aleatoric_vol_pct": round(float(np.sqrt(ale_var)) * 100, 2),
+            "epistemic_uncertainty": round(epi_var, 4),
+            "drawdown_crash_prob": round(pb, 4),
+            "sharpe_score": round(sharpe_proxy, 3),
+            "alpha_qualified": bool(is_alpha),
+            "recommended_action": (
+                "HOLD CASH (Regime Gate)" if regime == "CASH_PRESERVATION"
+                else ("BUY / ALLOCATE (Alpha)" if is_alpha else "AVOID (Elevated Risk)")
+            ),
+            "signal_badge": (
+                "CASH_GATE" if regime == "CASH_PRESERVATION"
+                else ("STRONG_BUY" if is_alpha else "VETOED")
+            ),
+        }
+
+        # Cache into STATE so chart endpoint also works for this dynamic symbol
+        STATE["signals"].append(sig_dict)
+        if STATE["df_scaled"] is not None:
+            common_cols = [c for c in STATE["df_scaled"].columns if c in df_sym_scaled.columns]
+            STATE["df_scaled"] = pl.concat([
+                STATE["df_scaled"].select(common_cols),
+                df_sym_scaled.select(common_cols),
+            ])
+        return sig_dict
+    except Exception as e:
+        print(f"Dynamic symbol inference failed for {sym}: {e}")
+        return None
+
+
+def _get_member_level_telemetry(sym: str) -> Dict[str, Any]:
+    """Extracts per-member neural network outputs and the 20-feature causal tensor for transparent ML Brain inspection."""
+    df_scaled: pl.DataFrame = STATE["df_scaled"]
+    fcols: List[str] = STATE["fcols"]
+    norm_cols = [f"{c}_norm" for c in fcols]
+    ensemble: EvidentialEnsemble = STATE["model"]
+
+    sub = df_scaled.filter(pl.col("symbol") == sym).sort("date")
+    if len(sub) < 60:
+        return {}
+
+    last_row = sub.tail(1).to_dicts()[0]
+    raw_features = {c: round(float(last_row.get(c, 0.0)), 4) for c in fcols}
+
+    seq = sub.select(norm_cols).to_numpy()[-60:]
+    inp = torch.tensor(seq, dtype=torch.float32).unsqueeze(0)
+
+    member_outputs = []
+    with torch.no_grad():
+        for idx, m in enumerate(ensemble.models):
+            gamma_m, nu_m, alpha_m, beta_m, p_b = m(inp)
+            ale_m = beta_m / (alpha_m - 1.0 + 1e-6)
+            epi_m = beta_m / (nu_m * (alpha_m - 1.0) + 1e-6)
+            member_outputs.append({
+                "member_id": f"GRU-Attention Head #{idx + 1}",
+                "predicted_20d_return_pct": round(float(gamma_m[0][0]) * 100.0, 2),
+                "aleatoric_sigma_pct": round(float(torch.sqrt(ale_m)[0][0]) * 100.0, 2),
+                "epistemic_var": round(float(epi_m[0][0]), 5),
+                "tail_breach_prob_pct": round(float(p_b[0][0]) * 100.0, 1),
+            })
+
+    return {
+        "ensemble_members": member_outputs,
+        "causal_features_20d": raw_features,
+    }
+
+
+def _parse_query_entities(query: str, default_sym: str, default_cap: float):
+    """Extracts symbols, capital in INR, share counts, and user intent from natural language query."""
+    q_upper = query.upper()
+    detected_syms = []
+
+    # Check explicit .NS tickers first (e.g., ZOMATO.NS, SBIN.NS)
+    for m in re.findall(r"\b([A-Z0-9&]{2,15})\.NS\b", q_upper):
+        if m not in detected_syms:
+            detected_syms.append(m)
+
+    # Check alias table (longest match first)
+    for alias in sorted(ALIAS_TO_SYMBOL.keys(), key=len, reverse=True):
+        pattern = r"(?<![A-Z0-9])" + re.escape(alias) + r"(?![A-Z0-9])"
+        if re.search(pattern, q_upper):
+            canon = ALIAS_TO_SYMBOL[alias]
+            if canon not in detected_syms:
+                detected_syms.append(canon)
+
+    # Parse capital amounts like "50000", "1,00,000", "2 lakh", "5L", "50k"
+    capital = default_cap
+    lakh_match = re.search(r"(\d+(?:\.\d+)?)\s*(?:LAKH|LAKHS|LAC|LACS|L\b)", q_upper)
+    cr_match = re.search(r"(\d+(?:\.\d+)?)\s*(?:CRORE|CRORES|CR\b)", q_upper)
+    k_match = re.search(r"(\d+(?:\.\d+)?)\s*K\b", q_upper)
+    inr_match = re.search(r"(?:INR|RS\.?|₹|\bWITH|\bFOR|\bINVEST|\bCAPITAL)\s*([0-9][0-9,]{3,})", q_upper)
+    raw_num_match = re.search(r"\b([1-9][0-9,]{3,})\b", q_upper)
+
+    if cr_match:
+        capital = float(cr_match.group(1)) * 1e7
+    elif lakh_match:
+        capital = float(lakh_match.group(1)) * 1e5
+    elif k_match:
+        capital = float(k_match.group(1)) * 1e3
+    elif inr_match:
+        capital = float(inr_match.group(1).replace(",", ""))
+    elif raw_num_match:
+        val = float(raw_num_match.group(1).replace(",", ""))
+        if val >= 2000:
+            capital = val
+
+    # Parse explicit share count
+    qty_match = re.search(r"(\d+)\s*(?:SHARES|SHARE|QTY|STOCKS\s+OF)", q_upper)
+    explicit_qty = int(qty_match.group(1)) if qty_match else None
+
+    # Determine primary intent
+    is_portfolio_query = any(w in q_upper for w in [
+        "PORTFOLIO", "ALLOCATE", "BEST STOCKS", "TOP STOCKS", "WHERE SHOULD I INVEST",
+        "WHICH STOCK", "BASKET", "DIVERSIF", "RECOMMEND", "ALL STOCKS", "UNIVERSE"
+    ]) and len(detected_syms) == 0
+
+    is_regime_query = any(w in q_upper for w in [
+        "REGIME", "MARKET CRASH", "NIFTY", "MACRO", "CASH PRESERVATION",
+        "HOLD CASH", "MARKET TODAY", "MARKET STATUS", "OVERALL MARKET"
+    ]) and len(detected_syms) == 0
+
+    is_comparison = len(detected_syms) >= 2 or ("COMPARE" in q_upper and len(detected_syms) >= 1)
+
+    return {
+        "symbols": detected_syms,
+        "capital_inr": capital,
+        "explicit_qty": explicit_qty,
+        "is_portfolio_query": is_portfolio_query,
+        "is_regime_query": is_regime_query,
+        "is_comparison": is_comparison,
+        "primary_symbol": detected_syms[0] if detected_syms else default_sym.upper().replace(".NS", ""),
+    }
+
+
+@app.post("/api/ask-brain")
+def ask_ml_brain(req: AskBrainRequest):
+    """
+    Conversational Live ML Brain Endpoint:
+    1. Parses user's natural language query.
+    2. Pulls live NSE data (including dynamic Yahoo Finance fetch for any custom NSE stock).
+    3. Runs the 3-member Dual-State Temporal Attention + Evidential NIG Deep Ensemble.
+    4. Checks the Regime Switch / Cash-Preservation Rule & 3-Gate Formal Safety Kernel.
+    5. Replies with full live telemetry, neural ensemble breakdown, and execution proof.
+    """
+    if not STATE["signals"]:
+        refresh_live_signals()
+
+    parsed = _parse_query_entities(req.query, req.active_symbol, req.capital_inr)
+    target_syms = parsed["symbols"]
+    cap_inr = parsed["capital_inr"]
+
+    # Ensure any requested symbol is loaded & inferred via live Yahoo Finance + ML Brain
+    resolved_signals = []
+    for sym in target_syms:
+        sig = _fetch_and_infer_custom_symbol(sym)
+        if sig is not None:
+            resolved_signals.append(sig)
+
+    signals = STATE["signals"]
+    mkt_drift_pct = round(STATE["mkt_drift"] * 100.0, 2)
+    mkt_crash_pct = round(STATE["mkt_crash_risk"] * 100.0, 1)
+    regime = STATE["regime"]
+    is_cash_gate = (STATE["mkt_drift"] < 0.0) or (STATE["mkt_crash_risk"] > req.crash_threshold)
+    q_hat = STATE["conformal_q_hat"]
+
+    # Sort all tracked signals by Sharpe score
+    ranked_signals = sorted(signals, key=lambda x: x["sharpe_score"], reverse=True)
+    top3 = ranked_signals[:3]
+
+    # CASE 1: Multi-Stock Comparison Query
+    if len(resolved_signals) >= 2:
+        focus_sym = resolved_signals[0]["symbol"]
+        comp_lines = []
+        best_sig = max(resolved_signals, key=lambda x: x["sharpe_score"])
+        member_map = {s["symbol"]: _get_member_level_telemetry(s["symbol"]) for s in resolved_signals}
+
+        for s in resolved_signals:
+            conf_lower = round(s["predicted_return_pct"] - q_hat * np.sqrt(s["aleatoric_vol_pct"]**2 + (s["epistemic_uncertainty"]*100)**2), 2)
+            comp_lines.append(
+                f"• **{s['symbol']}.NS** (`₹{s['close_price']:,.2f}`, 1D `{s['change_1d_pct']:+.2f}%`, RSI `{s['rsi_14']}`): "
+                f"ML 20D Drift **{_fmt_sign(s['predicted_return_pct'])}%** | Aleatoric Vol `{s['aleatoric_vol_pct']:.2f}%` | "
+                f"Epistemic `{s['epistemic_uncertainty']:.4f}` | Crash Risk `{s['drawdown_crash_prob']*100:.1f}%` | "
+                f"90% Conformal Floor `{conf_lower:+.2f}%` | Sharpe `{s['sharpe_score']:+.3f}` → **{s['recommended_action']}**"
+            )
+
+        reply_md = (
+            f"### 🧠 AlphaNiti v25.0 Live ML Brain — Multi-Stock Comparison\n"
+            f"**Data Feed:** `{STATE['data_source']}` (Updated `{STATE['last_updated']}`)\n\n"
+            f"#### 1. Live Evidential Ensemble Telemetry ({', '.join(s['symbol'] for s in resolved_signals)})\n"
+            + "\n".join(comp_lines) + "\n\n"
+            f"#### 2. Macro Regime Gate Check\n"
+            f"• **Cross-Sectional Market Drift ($\\gamma_{{\\text{{market}}}}$):** `{mkt_drift_pct:+.2f}%` | **Market Crash Probability ($p_{{\\text{{breach}}}}$):** `{mkt_crash_pct:.1f}%` (Threshold `{req.crash_threshold*100:.1f}%`)\n"
+            f"• **Regime Verdict:** **{regime}** — "
+            + (
+                f"Because market crash risk (`{mkt_crash_pct:.1f}%`) exceeds `{req.crash_threshold*100:.1f}%`, the **Cash-Preservation Rule** holds **100% in settled cash ($W_{{\\text{{settled}}}} = ₹{cap_inr:,.0f}$)** unless you enable Risk-On Override."
+                if is_cash_gate and not req.force_risk_on
+                else f"Equity deployment is active."
+            )
+            + f"\n\n#### 3. ML Brain Winner Verdict\n"
+            f"**{best_sig['symbol']}.NS** ranks highest on our risk-adjusted Evidential Sharpe metric (`{best_sig['sharpe_score']:+.3f}`) with predicted 20D return **{_fmt_sign(best_sig['predicted_return_pct'])}%** and crash risk **{best_sig['drawdown_crash_prob']*100:.1f}%**."
+        )
+
+        return {
+            "query": req.query,
+            "intent": "MULTI_STOCK_COMPARISON",
+            "focus_symbol": focus_sym,
+            "reply_markdown": reply_md,
+            "data_source": STATE["data_source"],
+            "last_updated": STATE["last_updated"],
+            "regime": regime,
+            "compared_signals": resolved_signals,
+            "brain_telemetry": member_map.get(focus_sym, {}),
+            "all_signals": ranked_signals,
+        }
+
+    # CASE 2: Portfolio Allocation / Best Stocks Query or Regime Query
+    if parsed["is_portfolio_query"] or parsed["is_regime_query"]:
+        sim_req = SimulateOrderRequest(
+            mode="PORTFOLIO",
+            symbol=parsed["primary_symbol"],
+            capital_inr=cap_inr,
+            crash_threshold=req.crash_threshold,
+            force_risk_on=req.force_risk_on or parsed["is_portfolio_query"],
+        )
+        port_res = simulate_institutional_order(sim_req)
+        focus_sym = top3[0]["symbol"] if top3 else "RELIANCE"
+        telemetry = _get_member_level_telemetry(focus_sym)
+
+        top_lines = [
+            f"1. **{s['symbol']}.NS** (`₹{s['close_price']:,.2f}`) — 20D Expected Return: **{_fmt_sign(s['predicted_return_pct'])}%**, Crash Prob: `{s['drawdown_crash_prob']*100:.1f}%`, RSI-14: `{s['rsi_14']}`, Evidential Sharpe: `{s['sharpe_score']:+.3f}`"
+            for s in top3
+        ]
+
+        alloc_lines = []
+        for a in port_res.get("allocations", []):
+            alloc_lines.append(
+                f"• **BUY {a['shares']} shares of {a['symbol']}.NS** @ `₹{a['price_inr']:,.2f}` = `₹{a['notional_inr']:,.2f}` (`{a['weight_pct']}%` weight | Statutory Tax `₹{a['statutory_tax_inr']:,.2f}`)"
+            )
+
+        reply_md = (
+            f"### 🧠 AlphaNiti v25.0 Live ML Brain — Macro Regime & Portfolio Synthesis\n"
+            f"**Live Feed:** `{STATE['data_source']}` | **Capital Analyzed:** `₹{cap_inr:,.2f}`\n\n"
+            f"#### 1. Live Cross-Sectional Market Regime (`12 NSE Large-Caps`)\n"
+            f"• **Market Expected 20D Drift ($\\gamma_{{\\text{{market}}}}$):** `{mkt_drift_pct:+.2f}%`\n"
+            f"• **Market Average Crash Probability ($p_{{\\text{{breach}}}}$):** `{mkt_crash_pct:.1f}%` (Gate Threshold: `{req.crash_threshold*100:.1f}%`)\n"
+            f"• **Regime Switch Rule Verdict:** **{regime}** — "
+            + (
+                f"Elevated tail crash risk (`{mkt_crash_pct:.1f}% > {req.crash_threshold*100:.1f}%`). Default institutional policy parks **100% in Risk-Free Settled Cash ($W_{{\\text{{settled}}}}$)** to protect against drawdown."
+                if is_cash_gate
+                else "Bullish/Neutral risk regime confirmed; full Branch-and-Bound equity allocation enabled."
+            )
+            + f"\n\n#### 2. Top 3 Stocks Ranked by Live Evidential Neural Ensemble\n"
+            + "\n".join(top_lines)
+            + f"\n\n#### 3. Branch-and-Bound Integer Portfolio Allocation (`₹{cap_inr:,.0f}`)\n"
+            + ("\n".join(alloc_lines) if alloc_lines else "• `0 shares allocated` (100% Settled Cash Preservation active).")
+            + f"\n• **Total Deployed:** `₹{port_res.get('total_allocated_inr', 0.0):,.2f}` | **Finance Act 2026 Taxes:** `₹{port_res.get('total_statutory_charges_inr', 0.0):,.2f}` | **Remaining Settled Cash ($W_{{\\text{{settled}}}}$):** `₹{port_res['ledger']['W_settled']:,.2f}`"
+        )
+
+        return {
+            "query": req.query,
+            "intent": "PORTFOLIO_AND_REGIME",
+            "focus_symbol": focus_sym,
+            "reply_markdown": reply_md,
+            "data_source": STATE["data_source"],
+            "last_updated": STATE["last_updated"],
+            "regime": regime,
+            "simulation": port_res,
+            "brain_telemetry": telemetry,
+            "all_signals": ranked_signals,
+        }
+
+    # CASE 3: Single-Stock Deep ML Brain Query (Default or Specific Ticker)
+    focus_sym = resolved_signals[0]["symbol"] if resolved_signals else parsed["primary_symbol"]
+    sig = _fetch_and_infer_custom_symbol(focus_sym)
+    if sig is None:
+        sig = ranked_signals[0]
+        focus_sym = sig["symbol"]
+
+    telemetry = _get_member_level_telemetry(focus_sym)
+    px = sig["close_price"]
+    qty = parsed["explicit_qty"] if parsed["explicit_qty"] else max(1, int((cap_inr * 0.20) // px))
+
+    sim_req = SimulateOrderRequest(
+        mode="SINGLE",
+        symbol=focus_sym,
+        side="BUY",
+        quantity=qty,
+        limit_price=px,
+        capital_inr=cap_inr,
+        crash_threshold=req.crash_threshold,
+        force_risk_on=req.force_risk_on,
+    )
+    order_res = simulate_institutional_order(sim_req)
+
+    # Format ensemble member lines
+    mem_lines = []
+    for m in telemetry.get("ensemble_members", []):
+        mem_lines.append(
+            f"• **{m['member_id']}:** Expected 20D Return `{m['predicted_20d_return_pct']:+.2f}%` | "
+            f"Aleatoric $\\sigma$ `{m['aleatoric_sigma_pct']:.2f}%` | Epistemic `{m['epistemic_var']:.5f}` | "
+            f"Breach Prob `{m['tail_breach_prob_pct']:.1f}%`"
+        )
+
+    feats = telemetry.get("causal_features_20d", {})
+    conf_floor = round(
+        sig["predicted_return_pct"] - q_hat * np.sqrt(sig["aleatoric_vol_pct"]**2 + (sig["epistemic_uncertainty"]*100)**2),
+        2,
+    )
+
+    verdict_banner = (
+        f"🟢 **ML BRAIN VERDICT: BUY / ACCUMULATE {focus_sym}.NS** (Positive Evidential Drift `{sig['predicted_return_pct']:+.2f}%` & Controlled Tail Risk `{sig['drawdown_crash_prob']*100:.1f}%`)"
+        if sig["predicted_return_pct"] > 0 and sig["drawdown_crash_prob"] < 0.38 and not is_cash_gate
+        else (
+            f"🛡️ **ML BRAIN VERDICT: HOLD SETTLED CASH ON {focus_sym}.NS** — Stock signal is `{sig['predicted_return_pct']:+.2f}%` (Crash prob `{sig['drawdown_crash_prob']*100:.1f}%`), and Macro Regime Gate is in **CASH_PRESERVATION** (`p_breach = {mkt_crash_pct:.1f}% > {req.crash_threshold*100:.1f}%`)."
+            if is_cash_gate
+            else f"🔴 **ML BRAIN VERDICT: AVOID / HOLD CASH ON {focus_sym}.NS** — Evidential 20D Drift is `{sig['predicted_return_pct']:+.2f}%` with `{sig['drawdown_crash_prob']*100:.1f}%` tail crash risk."
+        )
+    )
+
+    ord_info = order_res["order"]
+    fees = ord_info["fee_breakdown"]
+
+    reply_md = (
+        f"### 🧠 AlphaNiti v25.0 ML Brain Analysis — **{focus_sym}.NS** ({sig['sector']})\n"
+        f"{verdict_banner}\n\n"
+        f"#### 1. Live NSE Market & 20-Feature Causal Tensor (`as of {sig['date']}`)\n"
+        f"• **Live Spot Price:** `₹{sig['close_price']:,.2f}` (`{sig['change_1d_pct']:+.2f}%` 1D | `{sig['change_20d_pct']:+.2f}%` 20D) | **Volume:** `{sig['volume']:,}`\n"
+        f"• **Causal Technicals:** RSI-14 `{sig['rsi_14']}` | Parkinson Vol `{sig['parkinson_vol_pct']:.2f}%` | EMA Trend Ratio `{feats.get('trend_ema_ratio', 0.0):+.4f}` | Vol Squeeze `{feats.get('vol_squeeze_ratio', 1.0):.3f}` | 20D Rel Momentum vs Market `{feats.get('market_rel_mom_20d', 0.0):+.4f}`\n\n"
+        f"#### 2. 3-Member Evidential Deep Ensemble (`DualStateEvidentialNet`) Output\n"
+        + "\n".join(mem_lines)
+        + f"\n• **Combined NIG Posterior:** Expected 20D Return $\\mu = $ **{sig['predicted_return_pct']:+.2f}%** | Aleatoric $\\sigma_{{\\text{{alea}}}} = {sig['aleatoric_vol_pct']:.2f}\\%$ | Epistemic $\\sigma^2_{{\\text{{epis}}}} = {sig['epistemic_uncertainty']:.4f}$ | **Conformal 90% Lower Bound ($\\hat{{q}}={q_hat}$):** `{conf_floor:+.2f}%`\n\n"
+        f"#### 3. 3-Gate Formal Safety Kernel & Finance Act 2026 Order Simulation (`{qty} Shares`)\n"
+        f"• **Simulated Order:** `BUY {qty} × {focus_sym}.NS @ ₹{px:,.2f}` = Notional `₹{ord_info['notional_value_inr']:,.2f}`\n"
+        f"• **Finance Act 2026 Statutory Taxes:** Total `₹{ord_info['statutory_charges_inr']:,.2f}` (STT 0.1%: `₹{fees.get('stt', 0):,.2f}`, Stamp 0.015%: `₹{fees.get('stamp_duty', 0):,.2f}`, Exchange+SEBI+GST: `₹{round(ord_info['statutory_charges_inr'] - fees.get('stt', 0) - fees.get('stamp_duty', 0), 2):,.2f}`)\n"
+        f"• **Safety Kernel Status:** **{order_res['gate_status']}** | **Post-Trade Settled Cash ($W_{{\\text{{settled}}}}$):** `₹{order_res['ledger']['W_settled']:,.2f}`\n"
+        + (
+            f"• **Ed25519 Enclave Signature:** `{order_res['cryptographic_proof']['ed25519_signature'][:48]}...`"
+            if order_res["cryptographic_proof"].get("ed25519_signature")
+            else f"• **Safety Kernel Veto Reason:** `{order_res.get('veto_reason')}`"
+        )
+    )
+
+    return {
+        "query": req.query,
+        "intent": "SINGLE_STOCK_DEEP_ANALYSIS",
+        "focus_symbol": focus_sym,
+        "reply_markdown": reply_md,
+        "data_source": STATE["data_source"],
+        "last_updated": STATE["last_updated"],
+        "regime": regime,
+        "signal": sig,
+        "simulation": order_res,
+        "brain_telemetry": telemetry,
+        "all_signals": ranked_signals,
+    }
+
+
+def _fmt_sign(val: float) -> str:
+    return f"+{val:.2f}" if val >= 0 else f"{val:.2f}"
 
 
 @app.get("/snapshot.json")

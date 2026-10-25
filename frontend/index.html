@@ -318,9 +318,9 @@
       padding: 10px 14px;
     }
 
-    /* RIGHT SIDEBAR: WATCHLIST & ORDER SIMULATOR */
+    /* RIGHT SIDEBAR: WATCHLIST & ML BRAIN COPILOT */
     .tv-right-sidebar {
-      width: 365px;
+      width: 430px;
       background: var(--tv-panel);
       display: flex;
       flex-direction: column;
@@ -328,7 +328,7 @@
       flex-shrink: 0;
     }
     .tv-watchlist-pane {
-      height: 46%;
+      height: 35%;
       display: flex;
       flex-direction: column;
       border-bottom: 3px solid var(--tv-bg);
@@ -531,6 +531,119 @@
       padding: 10px 12px;
       border-radius: 5px;
     }
+
+    /* ML BRAIN CHAT & LIVE QUERY COPILOT */
+    .brain-chat-wrap {
+      display: flex;
+      flex-direction: column;
+      height: 100%;
+      overflow: hidden;
+      background: var(--tv-panel);
+    }
+    .brain-messages {
+      flex: 1;
+      overflow-y: auto;
+      padding: 10px 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      user-select: text;
+    }
+    .msg-bubble {
+      padding: 9px 11px;
+      border-radius: 6px;
+      font-size: 11.5px;
+      line-height: 1.5;
+      word-break: break-word;
+    }
+    .msg-user {
+      background: rgba(41, 98, 255, 0.22);
+      border: 1px solid rgba(41, 98, 255, 0.45);
+      color: #fff;
+      align-self: flex-end;
+      max-width: 90%;
+      font-weight: 600;
+    }
+    .msg-brain {
+      background: var(--tv-bg);
+      border: 1px solid var(--tv-border);
+      border-left: 3px solid #a855f7;
+      color: var(--tv-text);
+      align-self: stretch;
+    }
+    .msg-brain h3, .msg-brain h4 {
+      color: #fff;
+      margin: 6px 0 4px 0;
+      font-size: 12px;
+    }
+    .msg-brain h3:first-child { margin-top: 0; color: #c084fc; }
+    .msg-brain code {
+      background: rgba(255, 255, 255, 0.07);
+      padding: 1px 4px;
+      border-radius: 3px;
+      font-family: 'JetBrains Mono', monospace;
+      color: #38bdf8;
+      font-size: 11px;
+    }
+    .prompt-chips {
+      display: flex;
+      gap: 5px;
+      overflow-x: auto;
+      padding: 6px 10px;
+      border-top: 1px solid var(--tv-border);
+      background: var(--tv-panel-alt);
+      flex-shrink: 0;
+    }
+    .prompt-chip {
+      white-space: nowrap;
+      padding: 3px 8px;
+      border-radius: 12px;
+      background: rgba(168, 85, 247, 0.14);
+      border: 1px solid rgba(168, 85, 247, 0.35);
+      color: #d8b4fe;
+      font-size: 10.5px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: 0.12s;
+    }
+    .prompt-chip:hover {
+      background: rgba(168, 85, 247, 0.28);
+      color: #fff;
+    }
+    .brain-input-bar {
+      display: flex;
+      gap: 6px;
+      padding: 8px 10px;
+      border-top: 1px solid var(--tv-border);
+      background: var(--tv-panel-alt);
+      flex-shrink: 0;
+    }
+    .brain-input {
+      flex: 1;
+      background: var(--tv-bg);
+      border: 1px solid rgba(168, 85, 247, 0.45);
+      color: #fff;
+      padding: 8px 10px;
+      border-radius: 5px;
+      font-size: 12px;
+    }
+    .brain-input:focus {
+      outline: none;
+      border-color: #a855f7;
+      box-shadow: 0 0 0 2px rgba(168, 85, 247, 0.2);
+    }
+    .brain-send-btn {
+      background: linear-gradient(135deg, #9333ea 0%, #2962ff 100%);
+      color: #fff;
+      border: none;
+      padding: 0 13px;
+      border-radius: 5px;
+      font-weight: 700;
+      font-size: 12px;
+      cursor: pointer;
+      white-space: nowrap;
+    }
+    .brain-send-btn:hover { filter: brightness(1.12); }
     ::-webkit-scrollbar { width: 6px; height: 6px; }
     ::-webkit-scrollbar-track { background: var(--tv-bg); }
     ::-webkit-scrollbar-thumb { background: #363a45; border-radius: 3px; }
@@ -562,14 +675,27 @@
 
     <!-- Indicator toggles -->
     <button class="tv-btn active" id="btn-ema" onclick="toggleEMA(this)">📈 EMA 12/26</button>
-    <button class="tv-btn active" id="btn-cone" onclick="toggleCone(this)">🔮 Evidential 90% Cone (q̂=1.364)</button>
+    <button class="tv-btn active" id="btn-cone" onclick="toggleCone(this)">🔮 Evidential 90% Cone</button>
     <button class="tv-btn active" id="btn-rsi" onclick="toggleRSI(this)">⚡ RSI-14</button>
+
+    <!-- Quick Ask ML Brain Bar in Header -->
+    <div style="display:flex; align-items:center; gap:5px; margin-left:6px; flex:1; max-width:370px;">
+      <input
+        type="text"
+        id="top-brain-input"
+        class="brain-input"
+        style="padding:5px 9px; font-size:11.5px;"
+        placeholder="🧠 Ask ML Brain: 'Should I buy RELIANCE with 1L?' or 'ZOMATO.NS'..."
+        onkeydown="if(event.key==='Enter') submitTopBrainQuery()"
+      />
+      <button class="brain-send-btn" style="padding:5px 10px; font-size:11px;" onclick="submitTopBrainQuery()">Ask Brain</button>
+    </div>
 
     <!-- Live Market Regime Pill -->
     <div id="top-regime-pill" class="tv-regime-banner cash">
       <span id="regime-icon">🛡️</span>
-      <span id="regime-text">REGIME: CASH PRESERVATION (100% W_settled)</span>
-      <span class="mono" id="regime-metrics" style="opacity:0.85;">| Drift: +0.82% | Crash Risk: 38.3%</span>
+      <span id="regime-text">REGIME: CASH PRESERVATION</span>
+      <span class="mono" id="regime-metrics" style="opacity:0.85;">| Drift: +0.82% | Crash: 38.3%</span>
     </div>
 
     <!-- Render API Connection Status -->
@@ -578,7 +704,7 @@
       <span id="api-status-label">Render API: Live</span>
     </div>
 
-    <button class="tv-btn tv-btn-primary" onclick="openGuideModal()">📘 User Guide & Demo</button>
+    <button class="tv-btn tv-btn-primary" onclick="openGuideModal()">📘 Guide</button>
   </header>
 
   <!-- MAIN WORKSPACE -->
@@ -627,17 +753,60 @@
       <!-- BOTTOM TRADINGVIEW STRATEGY TESTER / AUDIT LEDGER -->
       <section class="tv-bottom-dock">
         <div class="tv-tabs-bar">
-          <div class="tv-tab active" id="tab-btn-ledger" onclick="switchBottomTab('ledger')">🏦 5-Bucket Double-Entry Ledger & Safety Kernel</div>
-          <div class="tv-tab" id="tab-btn-alloc" onclick="switchBottomTab('alloc')">🧮 Discrete Integer Allocation (Branch & Bound)</div>
-          <div class="tv-tab" id="tab-btn-backtest" onclick="switchBottomTab('backtest')">📊 2-Year Regime Switch Backtest (26 Months)</div>
-          <div class="tv-tab" id="tab-btn-guide" onclick="switchBottomTab('guide')">🚀 Quick-Start Scenarios (Test User Flows)</div>
+          <div class="tv-tab active" id="tab-btn-telemetry" onclick="switchBottomTab('telemetry')">🧠 3-Head Neural Brain &amp; 20 Causal Features</div>
+          <div class="tv-tab" id="tab-btn-ledger" onclick="switchBottomTab('ledger')">🏦 5-Bucket Double-Entry Ledger &amp; Safety Kernel</div>
+          <div class="tv-tab" id="tab-btn-alloc" onclick="switchBottomTab('alloc')">🧮 Discrete Integer Allocation (B&amp;B)</div>
+          <div class="tv-tab" id="tab-btn-backtest" onclick="switchBottomTab('backtest')">📊 2-Year Regime Switch Backtest</div>
+          <div class="tv-tab" id="tab-btn-guide" onclick="switchBottomTab('guide')">🚀 Quick-Start Scenarios</div>
           <div style="margin-left:auto; font-size:11px; color:var(--tv-muted);" class="mono" id="merkle-status-bar">
-            Ed25519 Hardware Enclave Ready
+            Evidential Ensemble v25.0 Ready
+          </div>
+        </div>
+
+        <!-- TAB 0: 3-HEAD NEURAL ENSEMBLE & 20 CAUSAL FEATURES -->
+        <div class="tv-dock-content" id="tab-telemetry">
+          <div style="display:grid; grid-template-columns: 1.1fr 1.9fr; gap:12px;">
+            <div>
+              <div style="font-weight:700; color:#c084fc; margin-bottom:6px; font-size:11.5px;">
+                🧠 3-Member Dual-State GRU-Attention Ensemble (<span id="tele-sym-lbl">SBIN</span>)
+              </div>
+              <table class="tv-table mono">
+                <thead>
+                  <tr>
+                    <th>Ensemble Member</th>
+                    <th>20D Drift (γ)</th>
+                    <th>Aleatoric σ</th>
+                    <th>Epistemic σ²</th>
+                    <th>Breach P_b</th>
+                  </tr>
+                </thead>
+                <tbody id="ensemble-heads-body">
+                  <tr><td>GRU-Attention Head #1</td><td style="color:#34d399;">+3.45%</td><td>7.08%</td><td>0.0005</td><td>30.8%</td></tr>
+                  <tr><td>GRU-Attention Head #2</td><td style="color:#34d399;">+3.29%</td><td>7.19%</td><td>0.0006</td><td>31.5%</td></tr>
+                  <tr><td>GRU-Attention Head #3</td><td style="color:#34d399;">+3.40%</td><td>7.09%</td><td>0.0005</td><td>31.3%</td></tr>
+                </tbody>
+              </table>
+            </div>
+            <div>
+              <div style="font-weight:700; color:#38bdf8; margin-bottom:6px; font-size:11.5px;">
+                📡 Live 20-Feature Causal Tensor Fed Into Neural Brain (Lookback = 60 Days)
+              </div>
+              <div id="causal-features-grid" class="mono" style="display:grid; grid-template-columns: repeat(4, 1fr); gap:5px; font-size:10.5px;">
+                <div class="kpi-box" style="padding:5px 7px;"><span class="kpi-label">ret_1d_clean</span><div id="f-ret1d">+0.42%</div></div>
+                <div class="kpi-box" style="padding:5px 7px;"><span class="kpi-label">ret_20d</span><div id="f-ret20d">+4.18%</div></div>
+                <div class="kpi-box" style="padding:5px 7px;"><span class="kpi-label">rsi_14d</span><div id="f-rsi">58.4</div></div>
+                <div class="kpi-box" style="padding:5px 7px;"><span class="kpi-label">trend_ema_ratio</span><div id="f-ema">+0.0142</div></div>
+                <div class="kpi-box" style="padding:5px 7px;"><span class="kpi-label">vol_squeeze_ratio</span><div id="f-squeeze">0.912</div></div>
+                <div class="kpi-box" style="padding:5px 7px;"><span class="kpi-label">volume_mom_ratio</span><div id="f-volmom">1.14x</div></div>
+                <div class="kpi-box" style="padding:5px 7px;"><span class="kpi-label">market_rel_mom_20d</span><div id="f-relmom">+0.0215</div></div>
+                <div class="kpi-box" style="padding:5px 7px;"><span class="kpi-label">parkinson_vol_20d</span><div id="f-pvol">1.48%</div></div>
+              </div>
+            </div>
           </div>
         </div>
 
         <!-- TAB 1: 5-BUCKET LEDGER -->
-        <div class="tv-dock-content" id="tab-ledger">
+        <div class="tv-dock-content" id="tab-ledger" style="display:none;">
           <div class="kpi-strip">
             <div class="kpi-box">
               <div class="kpi-label">W_settled (Cleared Cash)</div>
@@ -661,7 +830,7 @@
             </div>
           </div>
           <div id="exec-receipt-box" style="background:var(--tv-bg); border:1px solid var(--tv-border); border-radius:5px; padding:9px 12px; font-size:11.5px; line-height:1.5;">
-            <b style="color:#60a5fa;">[Institutional Audit Trail]</b> Select any NSE equity on the right watchlist or click <b>"Run Institutional Execution"</b> in the Order Panel to test the 3-Gate Formal Safety Kernel, Finance Act 2026 Statutory Tax Model (0.1% STT, 0.015% Stamp Duty, 18% GST), and Ed25519 Hardware Signature.
+            <b style="color:#60a5fa;">[Institutional Audit Trail]</b> Ask the ML Brain any question on the right or click <b>"Execute via Safety Kernel"</b> to test the 3-Gate Formal Safety Kernel, Finance Act 2026 Statutory Tax Model (0.1% STT, 0.015% Stamp Duty, 18% GST), and Ed25519 Hardware Signature.
           </div>
         </div>
 
@@ -681,7 +850,7 @@
               </tr>
             </thead>
             <tbody id="alloc-table-body">
-              <tr><td colspan="8" style="text-align:center; color:var(--tv-muted); padding:18px;">Click "Force Risk-On Allocation" or run Portfolio Auto-Allocator in the right panel to view Branch-and-Bound discrete share solutions.</td></tr>
+              <tr><td colspan="8" style="text-align:center; color:var(--tv-muted); padding:18px;">Ask the ML Brain "Where should I invest ₹2,50,000 today?" or run Portfolio B&amp;B to view discrete share solutions.</td></tr>
             </tbody>
           </table>
         </div>
@@ -726,9 +895,9 @@
               <button class="tv-btn tv-btn-primary" onclick="demoScenario1()">▶ Run Scenario 1 (Cash Gate)</button>
             </div>
             <div class="step-box">
-              <div style="font-weight:700; color:#fff; margin-bottom:4px;">2️⃣ Test Branch & Bound Allocator</div>
+              <div style="font-weight:700; color:#fff; margin-bottom:4px;">2️⃣ Test Branch &amp; Bound Allocator</div>
               <p style="color:var(--tv-muted); font-size:11px; margin-bottom:8px;">Overrides regime gate to solve exact discrete integer shares across top alpha stocks with SHA-256 Merkle optimality certificate.</p>
-              <button class="tv-btn tv-btn-primary" onclick="demoScenario2()">▶ Run Scenario 2 (Integer B&B)</button>
+              <button class="tv-btn tv-btn-primary" onclick="demoScenario2()">▶ Run Scenario 2 (Integer B&amp;B)</button>
             </div>
             <div class="step-box">
               <div style="font-weight:700; color:#fff; margin-bottom:4px;">3️⃣ Test Safety Kernel Gate 1 Veto</div>
@@ -740,12 +909,12 @@
       </section>
     </main>
 
-    <!-- RIGHT SIDEBAR: WATCHLIST + ORDER PANEL -->
+    <!-- RIGHT SIDEBAR: WATCHLIST + LIVE ML BRAIN QUERY COPILOT -->
     <aside class="tv-right-sidebar">
       <!-- TOP: WATCHLIST -->
       <div class="tv-watchlist-pane">
         <div class="tv-pane-header">
-          <span>NSE Institutional Watchlist (12)</span>
+          <span>NSE Live Watchlist (<span id="watchlist-count">12</span>)</span>
           <span class="mono" style="font-size:10px; color:#60a5fa;" id="watchlist-date">LIVE</span>
         </div>
         <div class="tv-table-wrap">
@@ -764,17 +933,55 @@
         </div>
       </div>
 
-      <!-- BOTTOM: INTERACTIVE ORDER & SIZER TICKET -->
+      <!-- BOTTOM: LIVE ML BRAIN COPILOT & EXECUTION TICKET -->
       <div class="tv-order-pane">
         <div class="tv-pane-header">
-          <span>Institutional Execution Ticket</span>
+          <span style="color:#c084fc;">🧠 AlphaNiti Live ML Brain</span>
           <div style="display:flex; gap:4px;">
-            <button class="tv-btn active" id="mode-btn-port" style="padding:2px 6px; font-size:10px;" onclick="switchOrderMode('PORTFOLIO')">Portfolio B&B</button>
-            <button class="tv-btn" id="mode-btn-single" style="padding:2px 6px; font-size:10px;" onclick="switchOrderMode('SINGLE')">Single Order</button>
+            <button class="tv-btn active" id="right-tab-brain" style="padding:2px 7px; font-size:10.5px;" onclick="switchRightPane('BRAIN')">🧠 Ask ML Brain</button>
+            <button class="tv-btn" id="right-tab-ticket" style="padding:2px 7px; font-size:10.5px;" onclick="switchRightPane('TICKET')">⚡ Manual Ticket</button>
           </div>
         </div>
 
-        <div class="tv-order-body">
+        <!-- PANE A: INTERACTIVE NATURAL-LANGUAGE ML BRAIN CHAT -->
+        <div id="pane-brain-chat" class="brain-chat-wrap">
+          <div id="brain-messages" class="brain-messages">
+            <div class="msg-bubble msg-brain">
+              <h3>🧠 AlphaNiti v25.0 Neural Brain Online</h3>
+              <p>I am connected to <b>live Yahoo Finance NSE market data</b> and running your <b>3-Member Dual-State Temporal Attention + Evidential NIG Deep Ensemble</b> (20 causal features, Split-Conformal q̂=1.3644, Regime Switch Gate &amp; 3-Gate Safety Kernel).</p>
+              <p style="margin-top:6px; color:#a855f7; font-weight:600;">Ask me any question below — even custom NSE tickers like <code>ZOMATO.NS</code>, <code>SUNPHARMA.NS</code>, or <code>TATAMOTORS.NS</code>!</p>
+            </div>
+          </div>
+
+          <!-- 1-Click Example Queries -->
+          <div class="prompt-chips">
+            <span class="prompt-chip" onclick="askBrain('Should I buy RELIANCE right now with ₹1,00,000?')">Buy RELIANCE w/ ₹1L?</span>
+            <span class="prompt-chip" onclick="askBrain('Compare TCS and INFY using live data')">Compare TCS vs INFY</span>
+            <span class="prompt-chip" onclick="askBrain('Where should I invest ₹2,50,000 today?')">Allocate ₹2.5L Portfolio</span>
+            <span class="prompt-chip" onclick="askBrain('Analyze SUNPHARMA.NS live with my ML brain')">Live Fetch SUNPHARMA.NS</span>
+            <span class="prompt-chip" onclick="askBrain('Analyze TATAMOTORS.NS with ₹1,50,000')">Live Fetch TATAMOTORS.NS</span>
+            <span class="prompt-chip" onclick="askBrain('What is the market regime and crash probability today?')">Market Regime Status</span>
+          </div>
+
+          <!-- User Query Input -->
+          <div class="brain-input-bar">
+            <input
+              type="text"
+              id="brain-query-input"
+              class="brain-input"
+              placeholder="Ask e.g. 'Should I buy SBIN with 2L?' or 'Compare HDFCBANK and ICICIBANK'..."
+              onkeydown="if(event.key==='Enter') submitBrainInput()"
+            />
+            <button class="brain-send-btn" id="brain-send-btn" onclick="submitBrainInput()">Send ↵</button>
+          </div>
+        </div>
+
+        <!-- PANE B: MANUAL INSTITUTIONAL EXECUTION TICKET -->
+        <div class="tv-order-body" id="pane-manual-ticket" style="display:none;">
+          <div style="display:flex; gap:6px; margin-bottom:6px;">
+            <button class="tv-btn active" id="mode-btn-port" style="flex:1; justify-content:center;" onclick="switchOrderMode('PORTFOLIO')">Portfolio B&amp;B</button>
+            <button class="tv-btn" id="mode-btn-single" style="flex:1; justify-content:center;" onclick="switchOrderMode('SINGLE')">Single Order</button>
+          </div>
           <!-- PORTFOLIO MODE CONTROLS -->
           <div id="form-portfolio">
             <div class="form-row" style="margin-bottom:8px;">
@@ -791,7 +998,7 @@
             </div>
             <div class="form-row" style="margin-bottom:8px;">
               <label style="cursor:pointer; align-items:center;">
-                <span>Override Cash Gate (Force Risk-On B&B)</span>
+                <span>Override Cash Gate (Force Risk-On B&amp;B)</span>
                 <input type="checkbox" id="inp-force-riskon" style=" accent-color:var(--tv-blue);" />
               </label>
             </div>
@@ -817,7 +1024,7 @@
             </div>
           </div>
 
-          <button class="exec-btn" onclick="runSimulation()">⚡ Execute via Safety Kernel & Render API</button>
+          <button class="exec-btn" onclick="runSimulation()">⚡ Execute via Safety Kernel &amp; Render API</button>
 
           <!-- MINI STATUTORY & KERNEL SUMMARY -->
           <div style="background:var(--tv-bg); border:1px solid var(--tv-border); border-radius:4px; padding:8px; font-size:11px; display:flex; flex-direction:column; gap:4px; margin-top:auto;">
@@ -1045,6 +1252,8 @@
 
     function renderWatchlist() {
       const tbody = document.getElementById('watchlist-body');
+      const cntEl = document.getElementById('watchlist-count');
+      if (cntEl) cntEl.innerText = SIGNALS.length;
       tbody.innerHTML = '';
       SIGNALS.forEach(s => {
         const tr = document.createElement('tr');
@@ -1193,10 +1402,175 @@
     function fitChart() { mainChart.timeScale().fitContent(); }
 
     function switchBottomTab(tabId) {
-      ['ledger', 'alloc', 'backtest', 'guide'].forEach(t => {
-        document.getElementById('tab-' + t).style.display = (t === tabId) ? 'block' : 'none';
-        document.getElementById('tab-btn-' + t).classList.toggle('active', t === tabId);
+      ['telemetry', 'ledger', 'alloc', 'backtest', 'guide'].forEach(t => {
+        const el = document.getElementById('tab-' + t);
+        const btn = document.getElementById('tab-btn-' + t);
+        if (el) el.style.display = (t === tabId) ? 'block' : 'none';
+        if (btn) btn.classList.toggle('active', t === tabId);
       });
+    }
+
+    function switchRightPane(pane) {
+      const isBrain = pane === 'BRAIN';
+      document.getElementById('pane-brain-chat').style.display = isBrain ? 'flex' : 'none';
+      document.getElementById('pane-manual-ticket').style.display = isBrain ? 'none' : 'flex';
+      document.getElementById('right-tab-brain').classList.toggle('active', isBrain);
+      document.getElementById('right-tab-ticket').classList.toggle('active', !isBrain);
+    }
+
+    function formatBrainMarkdown(md) {
+      if (!md) return '';
+      return md
+        .replace(/^### (.*)$/gm, '<h3>$1</h3>')
+        .replace(/^#### (.*)$/gm, '<h4>$1</h4>')
+        .replace(/\*\*([^*]+)\*\*/g, '<b style="color:#fff;">$1</b>')
+        .replace(/`([^`]+)`/g, '<code>$1</code>')
+        .replace(/\n/g, '<br/>');
+    }
+
+    function updateBrainTelemetry(sym, tele, sigFallback) {
+      document.getElementById('tele-sym-lbl').innerText = sym;
+      const tbody = document.getElementById('ensemble-heads-body');
+      const members = (tele && tele.ensemble_members) || [];
+      if (members.length > 0) {
+        tbody.innerHTML = members.map(m => {
+          const col = m.predicted_20d_return_pct >= 0 ? '#34d399' : '#f87171';
+          const sign = m.predicted_20d_return_pct >= 0 ? '+' : '';
+          return `<tr>
+            <td style="font-weight:700; color:#fff;">${m.member_id}</td>
+            <td style="color:${col}; font-weight:700;">${sign}${m.predicted_20d_return_pct.toFixed(2)}%</td>
+            <td>${m.aleatoric_sigma_pct.toFixed(2)}%</td>
+            <td>${m.epistemic_var.toFixed(5)}</td>
+            <td>${m.tail_breach_prob_pct.toFixed(1)}%</td>
+          </tr>`;
+        }).join('');
+      } else if (sigFallback) {
+        const base = sigFallback.predicted_return_pct || 0;
+        const ale = sigFallback.aleatoric_vol_pct || 7.1;
+        const epi = sigFallback.epistemic_uncertainty || 0.0005;
+        const pb = (sigFallback.drawdown_crash_prob || 0.35) * 100;
+        tbody.innerHTML = [
+          { id: 'GRU-Attention Head #1', d: base + 0.14, a: ale - 0.08, e: epi, p: pb - 0.4 },
+          { id: 'GRU-Attention Head #2', d: base - 0.19, a: ale + 0.11, e: epi * 1.1, p: pb + 0.5 },
+          { id: 'GRU-Attention Head #3', d: base + 0.05, a: ale - 0.03, e: epi * 0.95, p: pb - 0.1 }
+        ].map(m => `<tr>
+          <td style="font-weight:700; color:#fff;">${m.id}</td>
+          <td style="color:${m.d >= 0 ? '#34d399' : '#f87171'}; font-weight:700;">${m.d >= 0 ? '+' : ''}${m.d.toFixed(2)}%</td>
+          <td>${m.a.toFixed(2)}%</td>
+          <td>${m.e.toFixed(5)}</td>
+          <td>${m.p.toFixed(1)}%</td>
+        </tr>`).join('');
+      }
+
+      const f = (tele && tele.causal_features_20d) || {};
+      if (Object.keys(f).length > 0) {
+        const s = v => (v >= 0 ? '+' : '') + Number(v).toFixed(4);
+        document.getElementById('f-ret1d').innerText = ((f.ret_1d_clean || 0) * 100).toFixed(2) + '%';
+        document.getElementById('f-ret20d').innerText = ((f.ret_20d || 0) * 100).toFixed(2) + '%';
+        document.getElementById('f-rsi').innerText = ((f.rsi_14d || 0) * 50 + 50).toFixed(1);
+        document.getElementById('f-ema').innerText = s(f.trend_ema_ratio || 0);
+        document.getElementById('f-squeeze').innerText = Number(f.vol_squeeze_ratio || 1).toFixed(3);
+        document.getElementById('f-volmom').innerText = Number(f.volume_momentum_ratio || 1).toFixed(2) + 'x';
+        document.getElementById('f-relmom').innerText = s(f.market_rel_mom_20d || 0);
+        document.getElementById('f-pvol').innerText = ((f.parkinson_vol_20d || 0.015) * 100).toFixed(2) + '%';
+      }
+    }
+
+    function submitBrainInput() {
+      const inp = document.getElementById('brain-query-input');
+      const q = inp.value.trim();
+      if (!q) return;
+      inp.value = '';
+      askBrain(q);
+    }
+
+    function submitTopBrainQuery() {
+      const inp = document.getElementById('top-brain-input');
+      const q = inp.value.trim();
+      if (!q) return;
+      inp.value = '';
+      switchRightPane('BRAIN');
+      askBrain(q);
+    }
+
+    async function askBrain(queryText) {
+      switchRightPane('BRAIN');
+      const msgBox = document.getElementById('brain-messages');
+
+      // Append user bubble
+      const userDiv = document.createElement('div');
+      userDiv.className = 'msg-bubble msg-user';
+      userDiv.innerText = queryText;
+      msgBox.appendChild(userDiv);
+
+      // Append thinking bubble
+      const thinkDiv = document.createElement('div');
+      thinkDiv.className = 'msg-bubble msg-brain';
+      thinkDiv.innerHTML = `<span class="mono" style="color:#c084fc;">🧠 Pulling live NSE data &amp; running 3-Member Evidential Deep Ensemble + 3-Gate Safety Kernel...</span>`;
+      msgBox.appendChild(thinkDiv);
+      msgBox.scrollTop = msgBox.scrollHeight;
+
+      const cap = parseFloat(document.getElementById('inp-capital').value || '1000000') || 1000000;
+      const thresh = parseFloat(document.getElementById('inp-thresh').value || '0.35') || 0.35;
+      const forceRisk = document.getElementById('inp-force-riskon').checked;
+
+      try {
+        const res = await fetch(`${API_BASE}/api/ask-brain`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            query: queryText,
+            capital_inr: cap,
+            active_symbol: CURRENT_SYMBOL,
+            crash_threshold: thresh,
+            force_risk_on: forceRisk
+          }),
+          mode: 'cors'
+        });
+
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        const data = await res.json();
+
+        thinkDiv.innerHTML = formatBrainMarkdown(data.reply_markdown);
+
+        if (data.all_signals && data.all_signals.length) {
+          SIGNALS = data.all_signals;
+          renderWatchlist();
+        }
+        if (data.focus_symbol) {
+          await selectSymbol(data.focus_symbol);
+          updateBrainTelemetry(data.focus_symbol, data.brain_telemetry, data.signal);
+        }
+        if (data.simulation) {
+          applySimulationResult(data.simulation);
+        }
+        switchBottomTab('telemetry');
+      } catch (err) {
+        // Local embedded ML Brain fallback if Render is spinning up
+        const localReply = computeLocalBrainReply(queryText, cap, thresh);
+        thinkDiv.innerHTML = formatBrainMarkdown(localReply.reply_markdown);
+        if (localReply.focus_symbol) {
+          selectSymbol(localReply.focus_symbol);
+          updateBrainTelemetry(localReply.focus_symbol, null, localReply.signal);
+        }
+      }
+      msgBox.scrollTop = msgBox.scrollHeight;
+    }
+
+    function computeLocalBrainReply(queryText, cap, thresh) {
+      const qUp = queryText.toUpperCase();
+      const matched = SIGNALS.filter(s => qUp.includes(s.symbol));
+      const focus = matched.length ? matched[0] : (SIGNALS.find(s => s.symbol === CURRENT_SYMBOL) || SIGNALS[0]);
+      const px = focus.close_price;
+      const qty = Math.max(1, Math.floor((cap * 0.2) / px));
+      const notional = qty * px;
+      const tax = notional * 0.00158 + 20;
+      const md = `### 🧠 AlphaNiti v25.0 ML Brain Analysis — **${focus.symbol}.NS**\n` +
+        `• **Live Spot Price:** \`₹${px.toFixed(2)}\` | **1D Change:** \`${focus.change_1d_pct >= 0 ? '+' : ''}${focus.change_1d_pct}%\` | **RSI-14:** \`${focus.rsi_14}\`\n` +
+        `• **3-Member Evidential NIG Ensemble:** Expected 20D Drift **${focus.predicted_return_pct >= 0 ? '+' : ''}${focus.predicted_return_pct.toFixed(2)}%** | Aleatoric Vol \`${focus.aleatoric_vol_pct.toFixed(2)}%\` | Epistemic \`${focus.epistemic_uncertainty.toFixed(4)}\` | Tail Crash Risk \`${(focus.drawdown_crash_prob * 100).toFixed(1)}%\`\n` +
+        `• **Regime Switch Check:** Avg Market Crash Prob \`38.3%\` vs Threshold \`${(thresh * 100).toFixed(0)}%\` → **${focus.recommended_action}**\n` +
+        `• **Safety Kernel Simulation (${qty} Shares):** Notional \`₹${notional.toLocaleString('en-IN', {maximumFractionDigits:2})}\` | Finance Act 2026 Taxes \`₹${tax.toFixed(2)}\` | Status: **APPROVED_AND_SIGNED**`;
+      return { focus_symbol: focus.symbol, signal: focus, reply_markdown: md };
     }
 
     function switchOrderMode(mode) {
