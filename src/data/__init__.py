@@ -29,6 +29,18 @@ from src.data.dataset_splitter import (
     SplitManifest,
 )
 
+from src.data.feature_engineering import (
+    compute_causal_features,
+    FEATURE_COLUMNS,
+)
+
+from src.data.tensor_builder import (
+    AlphaNitiSequenceDataset,
+    AlphaNitiDataPipeline,
+    build_3d_sequences,
+    create_dataloaders,
+)
+
 __all__ = [
     "FiveTimestamp",
     "ObservationRecord",
@@ -45,4 +57,10 @@ __all__ = [
     "RobustMADScaler",
     "PurgedWalkForwardSplitter",
     "SplitManifest",
+    "compute_causal_features",
+    "FEATURE_COLUMNS",
+    "AlphaNitiSequenceDataset",
+    "AlphaNitiDataPipeline",
+    "build_3d_sequences",
+    "create_dataloaders",
 ]
