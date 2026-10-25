@@ -186,20 +186,28 @@ def main():
                     "charges": fee,
                 })
 
-        # Apply Institutional Guardrails:
-        # 1. Filter out crash-prone stocks: p_breach < 0.38
-        # 2. Filter out top epistemic uncertainty: epistemic < median
-        # 3. Require positive return drift: gamma > 0.0
+        # Apply Adaptive Regime Switch & Institutional Guardrails:
         cands = day_signals.to_dicts()
         med_epi = np.median([c["epistemic"] for c in cands])
-        
-        filtered = [
-            c for c in cands 
-            if c["p_breach"] < 0.38 and c["epistemic"] <= med_epi and c["gamma"] > 0.0
-        ]
-        # Rank by Sharpe ratio proxy
-        filtered.sort(key=lambda x: x["gamma"] / (np.sqrt(x["aleatoric"]) + 1e-4), reverse=True)
-        top_picks = filtered[:4] # Top 4 high-conviction stocks
+        mkt_gamma = float(np.mean([c["gamma"] for c in cands]))
+        mkt_breach = float(np.mean([c["p_breach"] for c in cands]))
+
+        # The "Regime Switch / Cash-Preservation" Rule:
+        # If expected market drift is below zero OR crash risk is elevated (> 35%), hold 100% Cash!
+        is_cash_preservation = (mkt_gamma < 0.0) or (mkt_breach > 0.35)
+
+        if is_cash_preservation:
+            print(f"  [{r_date}] Regime: CASH_PRESERVATION (mkt_drift={mkt_gamma:+.4f}, mkt_crash_risk={mkt_breach:.2%}) -> Holding 100% Cash")
+            top_picks = []
+        else:
+            print(f"  [{r_date}] Regime: RISK_ON (mkt_drift={mkt_gamma:+.4f}, mkt_crash_risk={mkt_breach:.2%}) -> Allocating to Alpha Stocks")
+            filtered = [
+                c for c in cands 
+                if c["p_breach"] < 0.38 and c["epistemic"] <= med_epi and c["gamma"] > 0.0
+            ]
+            # Rank by Sharpe ratio proxy
+            filtered.sort(key=lambda x: x["gamma"] / (np.sqrt(x["aleatoric"]) + 1e-4), reverse=True)
+            top_picks = filtered[:4] # Top 4 high-conviction stocks
 
         buying_power = ledger.get_buying_power() * 0.98
         if len(top_picks) > 0 and buying_power > 10_000:
