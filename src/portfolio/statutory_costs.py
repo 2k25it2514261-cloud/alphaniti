@@ -76,6 +76,49 @@ class IndianStatutoryCostModel:
         total_statutory = stt + stamp_duty + exchange_charges + sebi_charges + gst
         return float(spread_cost + impact_cost + brokerage + total_statutory)
 
+    def compute_detailed_breakdown(
+        self,
+        shares: float,
+        price: float,
+        spread: float = 0.05,
+        adv: float = 1_000_000.0,
+        volatility: float = 0.02,
+        is_buy: bool = True,
+    ) -> Dict[str, float]:
+        """Returns itemised Finance Act 2026 statutory tax & friction breakdown."""
+        if shares <= 0:
+            return {
+                "stt": 0.0,
+                "stamp_duty": 0.0,
+                "exchange_nse": 0.0,
+                "sebi_fee": 0.0,
+                "brokerage": 0.0,
+                "gst_18pct": 0.0,
+                "spread_and_impact": 0.0,
+                "total_charges": 0.0,
+            }
+        turnover = shares * price
+        spread_cost = shares * (spread / 2.0)
+        participation = np.sqrt(shares / max(1.0, adv))
+        impact_cost = self.impact_eta * volatility * participation * turnover
+        brokerage = max(self.brokerage_min_inr, self.brokerage_rate * turnover)
+        exchange_charges = self.nse_turnover_rate * turnover
+        sebi_charges = self.sebi_turnover_rate * turnover
+        gst = self.gst_rate * (brokerage + exchange_charges + sebi_charges)
+        stt = self.stt_rate * turnover
+        stamp_duty = self.stamp_duty_rate * turnover if is_buy else 0.0
+        total = spread_cost + impact_cost + brokerage + stt + stamp_duty + exchange_charges + sebi_charges + gst
+        return {
+            "stt": float(stt),
+            "stamp_duty": float(stamp_duty),
+            "exchange_nse": float(exchange_charges),
+            "sebi_fee": float(sebi_charges),
+            "brokerage": float(brokerage),
+            "gst_18pct": float(gst),
+            "spread_and_impact": float(spread_cost + impact_cost),
+            "total_charges": float(total),
+        }
+
     def lower_convex_envelope_slope(
         self,
         price: float,
