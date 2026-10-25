@@ -142,11 +142,11 @@ BrokerTimeout(id) ==
 
 Next ==
     \/ \E sym \in Symbols, q \in {1, 2}, px \in {PMin, PMin + 1}, c \in {1..MaxBudget} : SafetyKernelAuthorize(sym, q, px, c)
-    \/ \E id \in {1, 2}, sym \in Symbols, q \in {1, 2}, px \in {PMin, PMin + 1}, c \in {1..MaxBudget} : DispatchBuy(id, sym, q, px, c)
+    \/ \E id \in {1, 2}, sym \in Symbols, q \in {1, 2}, px \in {PMin, PMin + 1}, c \in 1..MaxBudget : DispatchBuy(id, sym, q, px, c)
     \/ \E id \in {1, 2}, px \in {PMin}, fee \in {0, 1} : FillBuy(id, px, fee)
     \/ \E id \in {1, 2}, sym \in Symbols, q \in {1} : DispatchSell(id, sym, q)
     \/ \E id \in {1, 2}, px \in {PMin}, fee \in {0} : FillSell(id, px, fee)
-    \/ \E a \in {1..MaxBudget} : SettleReceivables(a)
+    \/ \E a \in 1..MaxBudget : SettleReceivables(a)
     \/ \E id \in {1, 2} : BrokerTimeout(id)
 
 Spec == Init /\ [][Next]_vars /\ WF_vars(Next)
