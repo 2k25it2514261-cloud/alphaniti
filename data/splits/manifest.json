@@ -1,0 +1,46 @@
+{
+  "total_rows": 69663,
+  "train_rows": 45346,
+  "val_rows": 10559,
+  "test_rows": 12609,
+  "purged_rows": 1149,
+  "train_date_range": [
+    "2016-01-01",
+    "2023-05-30"
+  ],
+  "val_date_range": [
+    "2023-06-28",
+    "2025-01-02"
+  ],
+  "test_date_range": [
+    "2025-01-31",
+    "2026-09-10"
+  ],
+  "purge_gap_1_trading_days": 20,
+  "purge_gap_2_trading_days": 20,
+  "target_statistics": {
+    "train": {
+      "mean_return_net_pct": 1.426402707975043,
+      "volatility_net_pct": 11.146797239780426,
+      "median_return_net_pct": 1.180381327867508,
+      "breach_rate_pct": 48.54452432408592
+    },
+    "val": {
+      "mean_return_net_pct": 1.7836536532979717,
+      "volatility_net_pct": 9.97103601694107,
+      "median_return_net_pct": 1.0436184704303741,
+      "breach_rate_pct": 46.576380339047255
+    },
+    "test": {
+      "mean_return_net_pct": 0.5419517030930745,
+      "volatility_net_pct": 9.741813689470291,
+      "median_return_net_pct": 0.13927295804023743,
+      "breach_rate_pct": 49.27432786105163
+    }
+  },
+  "sha256_checksums": {
+    "train.parquet": "f3cbf1fe03fd2323007ad87f7dc63cd428458622493eb4c204004ab45589049b",
+    "val.parquet": "139b521d7a35cc3a8b4cc4e134feb119950621cdb5ecb36bb47cf808a8030a90",
+    "test.parquet": "533b1a5037e4ed1a2d2bd6579b20450827e3f9f30dbe3fb46fa5fc3b0791e597"
+  }
+}

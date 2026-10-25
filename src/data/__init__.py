@@ -24,6 +24,11 @@ from src.data.robust_scaler import (
     RobustMADScaler,
 )
 
+from src.data.dataset_splitter import (
+    PurgedWalkForwardSplitter,
+    SplitManifest,
+)
+
 __all__ = [
     "FiveTimestamp",
     "ObservationRecord",
@@ -38,4 +43,6 @@ __all__ = [
     "compute_cumulative_adjustment_factor",
     "apply_causal_corporate_actions",
     "RobustMADScaler",
+    "PurgedWalkForwardSplitter",
+    "SplitManifest",
 ]
