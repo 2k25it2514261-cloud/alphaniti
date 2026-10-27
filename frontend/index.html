@@ -3,34 +3,30 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>AlphaNiti — Institutional Quantitative Terminal &amp; Research Workspace</title>
+  <title>AlphaNiti — Institutional Quantitative Execution Engine</title>
   <script src="https://unpkg.com/lightweight-charts@4.2.0/dist/lightweight-charts.standalone.production.js"></script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
   <style>
-    /* ================= TRADINGVIEW DESIGN SYSTEM ================= */
     :root {
-      --tv-bg-base: #131722;
-      --tv-bg-panel: #1e222d;
-      --tv-bg-card: #2a2e39;
-      --tv-bg-hover: #2a2e39;
-      --tv-bg-active: #363a45;
-      --tv-border: #2a2e39;
-      --tv-border-light: #363a45;
-      --tv-text: #d1d4dc;
-      --tv-text-dim: #787b86;
-      --tv-text-bright: #f0f3fa;
-      --tv-accent: #2962ff;
-      --tv-accent-hover: #1e53e5;
-      --tv-green: #089981;
-      --tv-green-bg: rgba(8, 153, 129, 0.12);
-      --tv-red: #f23645;
-      --tv-red-bg: rgba(242, 54, 69, 0.12);
-      --tv-yellow: #ff9800;
-      --tv-yellow-bg: rgba(255, 152, 0, 0.12);
-      --tv-purple: #ab47bc;
-      --tv-purple-bg: rgba(171, 71, 188, 0.12);
-      --tv-blue-glow: rgba(41, 98, 255, 0.25);
+      --bg-darkest: #07080a;
+      --bg-base: #0c0e14;
+      --bg-panel: #131722;
+      --bg-card: rgba(22, 27, 39, 0.75);
+      --bg-card-hover: rgba(30, 37, 54, 0.9);
+      --border-subtle: rgba(255, 255, 255, 0.08);
+      --border-medium: rgba(255, 255, 255, 0.15);
+      --border-glow: rgba(41, 98, 255, 0.35);
+      --text-bright: #ffffff;
+      --text-primary: #e6ebf5;
+      --text-secondary: #9aa3b8;
+      --text-dim: #60687a;
+      --accent-blue: #2962ff;
+      --accent-cyan: #00d4ff;
+      --accent-purple: #ab47bc;
+      --accent-amber: #ff9800;
+      --accent-green: #089981;
+      --accent-red: #f23645;
 
       /* Research Workspace theme variables */
       --bg-main: #141413;
@@ -40,35 +36,26 @@
       --bg-hover: #252522;
       --bg-artifact: #171716;
       --bg-user-msg: #232320;
-      --border-subtle: #292826;
-      --border-strong: #3A3935;
-      --text-primary: #EDEDEB;
-      --text-secondary: #A19F99;
       --text-muted: #6E6C66;
-      --accent: #C96A4B;
       --positive: #2E9B78;
-      --positive-bg: rgba(46, 155, 120, 0.11);
       --negative: #D65252;
-      --negative-bg: rgba(214, 82, 82, 0.11);
       --warning: #C89128;
-      --warning-bg: rgba(200, 145, 40, 0.11);
     }
 
     * { box-sizing: border-box; margin: 0; padding: 0; }
     body {
-      font-family: -apple-system, BlinkMacSystemFont, 'Trebuchet MS', Roboto, Ubuntu, 'Inter', sans-serif;
-      background-color: var(--tv-bg-base);
-      color: var(--tv-text);
+      font-family: -apple-system, BlinkMacSystemFont, 'Inter', 'Segoe UI', Roboto, sans-serif;
+      background-color: var(--bg-darkest);
+      color: var(--text-primary);
       height: 100vh;
       width: 100vw;
       overflow: hidden;
-      font-size: 13px;
-      line-height: 1.5;
+      font-size: 13.5px;
+      line-height: 1.6;
       -webkit-font-smoothing: antialiased;
-      user-select: none;
     }
 
-    .mono { font-family: 'JetBrains Mono', 'Roboto Mono', monospace; font-variant-numeric: tabular-nums; }
+    .mono { font-family: 'JetBrains Mono', monospace; font-variant-numeric: tabular-nums; }
     .serif { font-family: 'Instrument Serif', Georgia, serif; }
 
     /* ================= VIEW WRAPPERS ================= */
@@ -78,686 +65,381 @@
       position: absolute;
       top: 0;
       left: 0;
-      display: flex;
+      transition: opacity 0.35s ease, transform 0.35s ease;
     }
 
     /* ==========================================================================
-       VIEW 1: TRADINGVIEW TERMINAL WORKSTATION (#view-tradingview)
+       VIEW 1: MESMERIZING COVER PAGE (#view-cover)
        ========================================================================== */
-    #view-tradingview {
+    #view-cover {
       display: flex;
       flex-direction: column;
-      background: var(--tv-bg-base);
-      z-index: 10;
+      background: radial-gradient(circle at 50% 20%, #151a2e 0%, #090b12 60%, #050608 100%);
+      z-index: 30;
+      overflow-y: auto;
+      overflow-x: hidden;
+      position: relative;
     }
 
-    /* TV TOPBAR */
-    .tv-header {
-      height: 46px;
-      background: var(--tv-bg-panel);
-      border-bottom: 1px solid var(--tv-border);
+    /* Ambient Canvas */
+    #ambient-canvas {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: 1;
+      opacity: 0.7;
+    }
+
+    /* Live Ticker Ribbon */
+    .cover-ticker-wrap {
+      width: 100%;
+      height: 32px;
+      background: rgba(12, 14, 20, 0.9);
+      border-bottom: 1px solid var(--border-subtle);
+      overflow: hidden;
+      position: relative;
+      z-index: 10;
+      display: flex;
+      align-items: center;
+    }
+    .cover-ticker-track {
+      display: flex;
+      gap: 28px;
+      white-space: nowrap;
+      animation: tickerRoll 35s linear infinite;
+    }
+    @keyframes tickerRoll {
+      0% { transform: translateX(0); }
+      100% { transform: translateX(-50%); }
+    }
+    .ticker-item {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 11.5px;
+    }
+    .ticker-sym { font-weight: 700; color: var(--text-bright); }
+    .ticker-px { color: var(--text-secondary); }
+    .ticker-up { color: var(--accent-green); font-weight: 600; }
+    .ticker-dn { color: var(--accent-red); font-weight: 600; }
+
+    /* Cover Top Header */
+    .cover-nav {
+      height: 64px;
+      padding: 0 40px;
       display: flex;
       align-items: center;
       justify-content: space-between;
-      padding: 0 12px;
-      flex-shrink: 0;
-      z-index: 25;
-      gap: 8px;
+      position: relative;
+      z-index: 10;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.05);
     }
-    .tv-header-left, .tv-header-right {
+    .cover-brand {
       display: flex;
       align-items: center;
-      gap: 6px;
-      min-width: 0;
+      gap: 10px;
     }
-    .tv-brand {
+    .cover-brand-logo {
+      width: 28px;
+      height: 28px;
+      border-radius: 6px;
+      background: linear-gradient(135deg, var(--accent-blue) 0%, var(--accent-cyan) 100%);
       display: flex;
       align-items: center;
-      gap: 6px;
-      font-weight: 700;
-      font-size: 13.5px;
-      color: var(--tv-text-bright);
-      letter-spacing: -0.01em;
-      padding-right: 12px;
-      border-right: 1px solid var(--tv-border);
-      cursor: pointer;
-    }
-    .tv-brand-logo {
-      color: var(--tv-accent);
-      font-size: 15px;
-    }
-    .tv-brand-tag {
-      background: var(--tv-accent);
+      justify-content: center;
+      font-weight: 800;
       color: #fff;
-      font-size: 9px;
+      font-size: 14px;
+      box-shadow: 0 0 15px rgba(0, 212, 255, 0.4);
+    }
+    .cover-brand-title {
+      font-size: 18px;
       font-weight: 700;
-      padding: 1px 5px;
-      border-radius: 3px;
+      letter-spacing: -0.02em;
+      color: var(--text-bright);
+    }
+    .cover-brand-badge {
+      font-size: 10px;
+      font-weight: 700;
+      padding: 2px 6px;
+      border-radius: 4px;
+      background: rgba(41, 98, 255, 0.18);
+      color: var(--accent-cyan);
+      border: 1px solid rgba(0, 212, 255, 0.3);
       letter-spacing: 0.05em;
     }
 
-    .tv-symbol-pill {
+    .cover-nav-right {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+    .cover-status-pill {
       display: flex;
       align-items: center;
       gap: 6px;
-      background: var(--tv-bg-card);
-      border: 1px solid var(--tv-border-light);
-      padding: 4px 10px;
-      border-radius: 4px;
-      cursor: pointer;
-      color: var(--tv-text-bright);
+      font-size: 11.5px;
+      color: var(--accent-green);
+      background: rgba(8, 153, 129, 0.12);
+      border: 1px solid rgba(8, 153, 129, 0.3);
+      padding: 4px 12px;
+      border-radius: 20px;
       font-weight: 600;
-      font-size: 13px;
-      transition: background 0.12s, border-color 0.12s;
     }
-    .tv-symbol-pill:hover {
-      background: var(--tv-bg-active);
-      border-color: var(--tv-accent);
-    }
-    .tv-exchange-tag {
-      color: var(--tv-text-dim);
-      font-size: 10.5px;
-      font-weight: 500;
-      margin-left: 2px;
-    }
-    .tv-sector-tag {
-      font-size: 10.5px;
-      color: var(--tv-text-dim);
-      border-left: 1px solid var(--tv-border-light);
-      padding-left: 6px;
-      font-weight: 400;
-    }
-
-    .tv-tf-group {
-      display: flex;
-      align-items: center;
-      gap: 2px;
-      border-left: 1px solid var(--tv-border);
-      padding-left: 8px;
-      margin-left: 4px;
-    }
-    .tv-tf-btn {
-      background: transparent;
-      border: none;
-      color: var(--tv-text-dim);
-      font-size: 12px;
-      font-weight: 600;
-      padding: 4px 7px;
-      border-radius: 3px;
-      cursor: pointer;
-      transition: all 0.1s;
-    }
-    .tv-tf-btn:hover {
-      color: var(--tv-text-bright);
-      background: var(--tv-bg-hover);
-    }
-    .tv-tf-btn.active {
-      color: var(--tv-accent);
-      background: var(--tv-bg-active);
-    }
-
-    .tv-tool-btn {
-      background: transparent;
-      border: 1px solid transparent;
-      color: var(--tv-text);
-      font-size: 12px;
-      font-weight: 500;
-      padding: 4px 9px;
-      border-radius: 4px;
-      display: inline-flex;
-      align-items: center;
-      gap: 5px;
-      cursor: pointer;
-      transition: background 0.1s;
-    }
-    .tv-tool-btn:hover {
-      background: var(--tv-bg-hover);
-      border-color: var(--tv-border-light);
-    }
-    .tv-tool-btn.active {
-      background: var(--tv-bg-active);
-      color: var(--tv-accent);
-    }
-
-    .tv-live-badge {
-      display: flex;
-      align-items: center;
-      gap: 5px;
-      font-size: 11px;
-      font-weight: 600;
-      color: var(--tv-green);
-      background: var(--tv-green-bg);
-      padding: 3px 8px;
-      border-radius: 12px;
-      border: 1px solid rgba(8, 153, 129, 0.25);
-    }
-    .tv-pulse-dot {
+    .cover-pulse {
       width: 6px;
       height: 6px;
       border-radius: 50%;
-      background: var(--tv-green);
-      box-shadow: 0 0 6px var(--tv-green);
-      animation: pulse 2s infinite;
+      background: var(--accent-green);
+      box-shadow: 0 0 8px var(--accent-green);
+      animation: pulseAnim 2s infinite;
     }
-    @keyframes pulse {
-      0% { transform: scale(0.95); opacity: 0.8; }
-      50% { transform: scale(1.2); opacity: 1; }
-      100% { transform: scale(0.95); opacity: 0.8; }
+    @keyframes pulseAnim {
+      0% { transform: scale(0.9); opacity: 0.8; }
+      50% { transform: scale(1.3); opacity: 1; }
+      100% { transform: scale(0.9); opacity: 0.8; }
     }
 
-    .tv-regime-badge {
-      padding: 3px 9px;
-      border-radius: 4px;
-      font-size: 11px;
-      font-weight: 600;
+    /* Cover Hero Section */
+    .cover-hero-wrap {
+      flex: 1;
+      max-width: 1140px;
+      margin: 0 auto;
+      padding: 50px 24px 60px 24px;
       display: flex;
+      flex-direction: column;
       align-items: center;
-      gap: 5px;
-      border: 1px solid;
-    }
-    .tv-regime-badge.cash {
-      background: var(--tv-yellow-bg);
-      color: var(--tv-yellow);
-      border-color: rgba(255, 152, 0, 0.25);
-    }
-    .tv-regime-badge.riskon {
-      background: var(--tv-green-bg);
-      color: var(--tv-green);
-      border-color: rgba(8, 153, 129, 0.25);
+      text-align: center;
+      position: relative;
+      z-index: 10;
     }
 
-    .tv-tier-badge {
-      padding: 3px 8px;
-      border-radius: 4px;
-      font-size: 11px;
+    .cover-eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      padding: 6px 16px;
+      border-radius: 30px;
+      font-size: 12px;
       font-weight: 600;
-      background: var(--tv-purple-bg);
-      color: var(--tv-purple);
-      border: 1px solid rgba(171, 71, 188, 0.25);
+      color: var(--accent-cyan);
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      margin-bottom: 24px;
+      backdrop-filter: blur(10px);
+      box-shadow: 0 0 20px rgba(41, 98, 255, 0.15);
     }
 
-    /* THE ENTER RESEARCH WORKSPACE CTA BUTTON */
-    .tv-cta-enter {
-      background: linear-gradient(135deg, #2962ff 0%, #1e53e5 100%);
+    .cover-hero-title {
+      font-size: 58px;
+      line-height: 1.08;
+      font-weight: 400;
+      color: var(--text-bright);
+      letter-spacing: -0.02em;
+      max-width: 960px;
+      margin-bottom: 20px;
+      text-shadow: 0 2px 20px rgba(0, 0, 0, 0.6);
+    }
+    .cover-hero-title em {
+      font-style: italic;
+      color: #b5c7ff;
+      background: linear-gradient(135deg, #ffffff 30%, #8baaff 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .cover-hero-sub {
+      font-size: 16px;
+      line-height: 1.6;
+      color: var(--text-secondary);
+      max-width: 760px;
+      margin-bottom: 40px;
+      font-weight: 400;
+    }
+
+    /* ================= THE MESMERIZING ENTER BUTTON ================= */
+    .cover-enter-portal {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 14px;
+      margin-bottom: 50px;
+      position: relative;
+    }
+
+    .cover-enter-btn {
+      position: relative;
+      padding: 20px 48px;
+      font-size: 16.5px;
+      font-weight: 700;
+      letter-spacing: 0.04em;
       color: #ffffff;
-      border: 1px solid rgba(255, 255, 255, 0.2);
-      border-radius: 5px;
-      padding: 5px 13px;
-      font-weight: 600;
-      font-size: 12.5px;
+      background: linear-gradient(135deg, #2962ff 0%, #00b4d8 50%, #7b2cbf 100%);
+      background-size: 200% 200%;
+      border: 1px solid rgba(255, 255, 255, 0.3);
+      border-radius: 60px;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 14px;
+      box-shadow: 0 0 35px rgba(41, 98, 255, 0.5), 0 0 80px rgba(0, 180, 216, 0.3);
+      animation: gradientShift 4s ease infinite;
+      transition: all 0.25s cubic-bezier(0.2, 0.8, 0.2, 1);
+      outline: none;
+    }
+    @keyframes gradientShift {
+      0% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
+      100% { background-position: 0% 50%; }
+    }
+    .cover-enter-btn:hover {
+      transform: translateY(-3px) scale(1.02);
+      box-shadow: 0 0 50px rgba(41, 98, 255, 0.75), 0 0 120px rgba(0, 212, 255, 0.5);
+    }
+    .cover-enter-btn:active {
+      transform: translateY(0) scale(0.99);
+    }
+
+    .cover-btn-icon {
+      font-size: 20px;
+      filter: drop-shadow(0 0 6px #fff);
+    }
+    .cover-btn-arrow {
+      font-size: 20px;
+      transition: transform 0.2s ease;
+    }
+    .cover-enter-btn:hover .cover-btn-arrow {
+      transform: translateX(5px);
+    }
+
+    .cover-enter-hint {
+      font-size: 12px;
+      color: var(--text-dim);
       display: flex;
       align-items: center;
-      gap: 7px;
-      cursor: pointer;
-      box-shadow: 0 2px 10px var(--tv-blue-glow);
-      transition: all 0.15s ease;
-      white-space: nowrap;
+      gap: 6px;
     }
-    .tv-cta-enter:hover {
-      background: linear-gradient(135deg, #3d72ff 0%, #2962ff 100%);
-      box-shadow: 0 3px 14px rgba(41, 98, 255, 0.45);
+    .cover-enter-hint kbd {
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px solid var(--border-medium);
+      color: var(--text-secondary);
+      font-family: 'JetBrains Mono', monospace;
+      padding: 2px 7px;
+      border-radius: 4px;
+      font-size: 11px;
+    }
+
+    /* Pillars Grid */
+    .cover-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 14px;
+      width: 100%;
+      margin-bottom: 40px;
+    }
+    .cover-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-subtle);
+      border-radius: 12px;
+      padding: 20px 18px;
+      text-align: left;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      backdrop-filter: blur(16px);
+      transition: all 0.2s ease;
+      position: relative;
+      overflow: hidden;
+    }
+    .cover-card:hover {
+      background: var(--bg-card-hover);
+      border-color: var(--border-glow);
+      transform: translateY(-2px);
+    }
+    .card-num {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--accent-cyan);
+      letter-spacing: 0.08em;
+    }
+    .card-title {
+      font-size: 14.5px;
+      font-weight: 700;
+      color: var(--text-bright);
+    }
+    .card-desc {
+      font-size: 12px;
+      color: var(--text-secondary);
+      line-height: 1.55;
+    }
+    .card-metric {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 11px;
+      color: var(--accent-green);
+      background: rgba(8, 153, 129, 0.1);
+      padding: 4px 8px;
+      border-radius: 4px;
+      margin-top: auto;
+      border: 1px solid rgba(8, 153, 129, 0.2);
+    }
+
+    /* Quick Action Launchers */
+    .cover-quick-section {
+      width: 100%;
+      text-align: left;
+      margin-top: 10px;
+    }
+    .cover-quick-title {
+      font-size: 12.5px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: var(--text-dim);
+      margin-bottom: 12px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .cover-quick-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+    }
+    .cover-quick-btn {
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid var(--border-subtle);
+      border-radius: 8px;
+      padding: 12px 14px;
+      cursor: pointer;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      text-align: left;
+      transition: all 0.15s;
+    }
+    .cover-quick-btn:hover {
+      background: rgba(41, 98, 255, 0.1);
+      border-color: var(--accent-blue);
       transform: translateY(-1px);
     }
-    .tv-cta-enter:active { transform: translateY(0); }
-    .tv-ai-tag {
-      background: rgba(255, 255, 255, 0.22);
-      font-size: 9.5px;
-      padding: 1px 5px;
-      border-radius: 3px;
-      font-weight: 700;
-      letter-spacing: 0.04em;
-    }
-
-    /* TV MAIN WORKSPACE BODY */
-    .tv-workspace-body {
-      flex: 1;
-      display: flex;
-      min-height: 0;
-      position: relative;
-    }
-
-    /* LEFT DRAWING TOOLBAR */
-    .tv-left-bar {
-      width: 44px;
-      background: var(--tv-bg-panel);
-      border-right: 1px solid var(--tv-border);
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      padding: 8px 0;
-      gap: 3px;
-      flex-shrink: 0;
-      z-index: 15;
-    }
-    .tv-draw-tool {
-      width: 32px;
-      height: 32px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      border-radius: 4px;
-      color: var(--tv-text-dim);
-      cursor: pointer;
-      border: 1px solid transparent;
-      transition: all 0.1s;
-    }
-    .tv-draw-tool:hover {
-      background: var(--tv-bg-hover);
-      color: var(--tv-text-bright);
-    }
-    .tv-draw-tool.active {
-      background: var(--tv-bg-active);
-      color: var(--tv-accent);
-      border-color: var(--tv-border-light);
-    }
-    .tv-tool-sep {
-      width: 24px;
-      height: 1px;
-      background: var(--tv-border);
-      margin: 4px 0;
-    }
-
-    /* CENTER CHART & DOCK CONTAINER */
-    .tv-center-container {
-      flex: 1;
-      display: flex;
-      flex-direction: column;
-      min-width: 0;
-      height: 100%;
-      background: var(--tv-bg-base);
-    }
-
-    /* FLOATING CHART HUD */
-    .tv-chart-stage-wrap {
-      flex: 1;
-      position: relative;
-      display: flex;
-      flex-direction: column;
-      min-height: 0;
-    }
-    .tv-hud-overlay {
-      position: absolute;
-      top: 10px;
-      left: 14px;
-      z-index: 10;
-      pointer-events: none;
-      display: flex;
-      flex-direction: column;
-      gap: 3px;
-      text-shadow: 0 1px 3px rgba(0,0,0,0.8);
-    }
-    .tv-hud-primary {
-      display: flex;
-      align-items: baseline;
-      gap: 10px;
+    .cover-quick-name {
       font-size: 13px;
+      font-weight: 600;
+      color: var(--text-bright);
     }
-    .tv-hud-symbol { font-weight: 700; color: var(--tv-text-bright); font-size: 14px; }
-    .tv-hud-price { font-weight: 700; font-size: 15px; }
-    .tv-hud-chg { font-weight: 600; font-size: 12.5px; }
-    .tv-hud-secondary {
-      display: flex;
-      align-items: center;
-      gap: 12px;
+    .cover-quick-desc {
       font-size: 11.5px;
-      color: var(--tv-text-dim);
-    }
-    .tv-hud-secondary span b { color: var(--tv-text); font-weight: 500; }
-    .tv-hud-tertiary {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      font-size: 11px;
-      color: var(--tv-text-dim);
-    }
-
-    #tv-full-chart {
-      flex: 1;
-      width: 100%;
-      min-height: 220px;
-    }
-    #tv-full-rsi {
-      height: 90px;
-      width: 100%;
-      border-top: 1px solid var(--tv-border);
-    }
-
-    /* CHART BOTTOM CONTROLS BAR */
-    .tv-chart-bar {
-      height: 28px;
-      background: var(--tv-bg-panel);
-      border-top: 1px solid var(--tv-border);
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: 0 12px;
-      font-size: 11px;
-      color: var(--tv-text-dim);
-      flex-shrink: 0;
-    }
-    .tv-chart-bar-left, .tv-chart-bar-right {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
-    .tv-quick-range-btn {
-      background: transparent;
-      border: none;
-      color: var(--tv-text-dim);
-      font-size: 11px;
-      font-weight: 600;
-      cursor: pointer;
-      padding: 2px 5px;
-      border-radius: 3px;
-    }
-    .tv-quick-range-btn:hover { color: var(--tv-text-bright); background: var(--tv-bg-hover); }
-
-    /* BOTTOM INSTITUTIONAL DOCK */
-    .tv-bottom-dock {
-      height: 230px;
-      background: var(--tv-bg-panel);
-      border-top: 1px solid var(--tv-border);
-      display: flex;
-      flex-direction: column;
-      flex-shrink: 0;
-      transition: height 0.15s ease;
-    }
-    .tv-bottom-dock.collapsed {
-      height: 33px;
-      overflow: hidden;
-    }
-    .tv-dock-tabs-bar {
-      height: 32px;
-      background: var(--tv-bg-panel);
-      border-bottom: 1px solid var(--tv-border);
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: 0 8px;
-      flex-shrink: 0;
-    }
-    .tv-dock-tab-list {
-      display: flex;
-      gap: 2px;
-    }
-    .tv-dtab {
-      padding: 5px 12px;
-      font-size: 11.5px;
-      font-weight: 600;
-      color: var(--tv-text-dim);
-      cursor: pointer;
-      border-radius: 4px;
-      transition: all 0.1s;
-      display: flex;
-      align-items: center;
-      gap: 6px;
-    }
-    .tv-dtab:hover { color: var(--tv-text-bright); background: var(--tv-bg-hover); }
-    .tv-dtab.active {
-      color: var(--tv-accent);
-      background: var(--tv-bg-active);
-    }
-    .tv-dock-btn {
-      background: transparent;
-      border: none;
-      color: var(--tv-text-dim);
-      font-size: 11px;
-      cursor: pointer;
-      padding: 4px 8px;
-      border-radius: 3px;
-    }
-    .tv-dock-btn:hover { background: var(--tv-bg-hover); color: var(--tv-text); }
-
-    .tv-dock-content {
-      flex: 1;
-      overflow-y: auto;
-      padding: 12px 16px;
-      background: var(--tv-bg-base);
-    }
-    .tv-dock-pane {
-      display: none;
-      height: 100%;
-    }
-    .tv-dock-pane.active {
-      display: flex;
-      flex-direction: column;
-      gap: 12px;
-    }
-
-    /* RIGHT DRAWER / WATCHLIST */
-    .tv-right-drawer {
-      width: 310px;
-      background: var(--tv-bg-panel);
-      border-left: 1px solid var(--tv-border);
-      display: flex;
-      flex-direction: column;
-      flex-shrink: 0;
-      transition: margin-right 0.2s ease;
-      z-index: 20;
-    }
-    .tv-right-drawer.closed { margin-right: -310px; }
-    .tv-drawer-header {
-      height: 38px;
-      border-bottom: 1px solid var(--tv-border);
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: 0 12px;
-    }
-    .tv-drawer-tabs {
-      display: flex;
-      gap: 4px;
-    }
-    .tv-rtab {
-      font-size: 11.5px;
-      font-weight: 600;
-      color: var(--tv-text-dim);
-      cursor: pointer;
-      padding: 3px 8px;
-      border-radius: 3px;
-    }
-    .tv-rtab:hover { color: var(--tv-text-bright); }
-    .tv-rtab.active { color: var(--tv-accent); background: var(--tv-bg-card); }
-
-    .tv-drawer-body {
-      flex: 1;
-      overflow-y: auto;
-      padding: 8px;
-      display: flex;
-      flex-direction: column;
-      gap: 6px;
-    }
-    .tv-watch-item {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: 8px 10px;
-      border-radius: 4px;
-      cursor: pointer;
-      border: 1px solid transparent;
-      transition: background 0.1s, border-color 0.1s;
-    }
-    .tv-watch-item:hover {
-      background: var(--tv-bg-hover);
-    }
-    .tv-watch-item.active {
-      background: var(--tv-bg-card);
-      border-color: var(--tv-border-light);
-    }
-    .tv-watch-sym {
-      font-weight: 700;
-      color: var(--tv-text-bright);
-      font-size: 12.5px;
-    }
-    .tv-watch-sec {
-      font-size: 10px;
-      color: var(--tv-text-dim);
-    }
-    .tv-watch-px {
-      font-size: 12.5px;
-      font-weight: 600;
-      text-align: right;
-    }
-    .tv-watch-chg {
-      font-size: 11px;
-      font-weight: 600;
-      text-align: right;
-    }
-
-    /* GRID KPI BOXES */
-    .tv-stat-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
-      gap: 8px;
-    }
-    .tv-stat-box {
-      background: var(--tv-bg-panel);
-      border: 1px solid var(--tv-border);
-      border-radius: 5px;
-      padding: 8px 10px;
-    }
-    .tv-stat-lbl {
-      font-size: 10px;
-      font-weight: 600;
-      color: var(--tv-text-dim);
-      text-transform: uppercase;
-      letter-spacing: 0.04em;
-    }
-    .tv-stat-val {
-      font-size: 13.5px;
-      font-weight: 700;
-      color: var(--tv-text-bright);
-      margin-top: 2px;
-    }
-
-    /* TABLES */
-    table.tv-table {
-      width: 100%;
-      border-collapse: collapse;
-      font-size: 11.5px;
-      background: var(--tv-bg-panel);
-      border-radius: 5px;
-      overflow: hidden;
-      border: 1px solid var(--tv-border);
-    }
-    table.tv-table th {
-      background: #171a22;
-      color: var(--tv-text-dim);
-      font-weight: 600;
-      text-align: right;
-      padding: 6px 9px;
-      font-size: 10.5px;
-      text-transform: uppercase;
-      letter-spacing: 0.03em;
-      border-bottom: 1px solid var(--tv-border);
-    }
-    table.tv-table th:first-child, table.tv-table td:first-child { text-align: left; }
-    table.tv-table td {
-      padding: 6px 9px;
-      text-align: right;
-      border-bottom: 1px solid var(--tv-border);
-      color: var(--tv-text);
-    }
-    table.tv-table tr:last-child td { border-bottom: none; }
-    table.tv-table tr:hover td { background: var(--tv-bg-hover); }
-
-    /* ORDER TICKET STYLES */
-    .tv-order-form {
-      display: grid;
-      grid-template-columns: repeat(4, 1fr) auto;
-      gap: 10px;
-      align-items: end;
-      background: var(--tv-bg-panel);
-      padding: 12px;
-      border-radius: 6px;
-      border: 1px solid var(--tv-border);
-    }
-    .tv-input-wrap label {
-      display: block;
-      font-size: 10.5px;
-      font-weight: 600;
-      color: var(--tv-text-dim);
-      text-transform: uppercase;
-      margin-bottom: 4px;
-    }
-    .tv-input-wrap input, .tv-input-wrap select {
-      width: 100%;
-      background: var(--tv-bg-card);
-      border: 1px solid var(--tv-border-light);
-      color: var(--tv-text-bright);
-      padding: 6px 8px;
-      border-radius: 4px;
-      font-family: inherit;
-      font-size: 12px;
-      outline: none;
-    }
-    .tv-btn-buy {
-      background: var(--tv-green);
-      color: #fff;
-      border: none;
-      padding: 7px 18px;
-      border-radius: 4px;
-      font-weight: 700;
-      font-size: 12px;
-      cursor: pointer;
-      transition: opacity 0.1s;
-    }
-    .tv-btn-buy:hover { opacity: 0.9; }
-
-    /* MODAL FOR SYMBOL SEARCH */
-    .tv-modal-backdrop {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100vw;
-      height: 100vh;
-      background: rgba(0, 0, 0, 0.7);
-      z-index: 100;
-      display: none;
-      align-items: center;
-      justify-content: center;
-      backdrop-filter: blur(2px);
-    }
-    .tv-modal-card {
-      width: 520px;
-      max-width: 90vw;
-      background: var(--tv-bg-panel);
-      border: 1px solid var(--tv-border-light);
-      border-radius: 8px;
-      box-shadow: 0 10px 30px rgba(0,0,0,0.6);
-      display: flex;
-      flex-direction: column;
-      overflow: hidden;
-    }
-    .tv-modal-input {
-      padding: 14px 16px;
-      background: transparent;
-      border: none;
-      border-bottom: 1px solid var(--tv-border);
-      color: var(--tv-text-bright);
-      font-size: 15px;
-      font-weight: 500;
-      outline: none;
-    }
-    .tv-modal-list {
-      max-height: 340px;
-      overflow-y: auto;
-      padding: 6px;
-    }
-    .tv-modal-item {
-      padding: 9px 12px;
-      border-radius: 5px;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      cursor: pointer;
-    }
-    .tv-modal-item:hover, .tv-modal-item.selected {
-      background: var(--tv-bg-hover);
+      color: var(--text-secondary);
     }
 
     /* ==========================================================================
-       VIEW 2: RESEARCH WORKSPACE & CONVERSATIONAL AI TERMINAL (#view-research)
+       VIEW 2: CONVERSATIONAL AI BRAIN & ARTIFACT RESEARCH WORKSPACE (#view-research)
        ========================================================================== */
     #view-research {
       display: none;
@@ -878,7 +560,7 @@
       min-width: 0;
     }
     .topbar {
-      height: 46px;
+      height: 48px;
       padding: 0 16px;
       display: flex;
       align-items: center;
@@ -896,8 +578,8 @@
       background: transparent;
       border: 1px solid var(--border-subtle);
       color: var(--text-secondary);
-      padding: 4px 9px;
-      border-radius: 4px;
+      padding: 5px 10px;
+      border-radius: 5px;
       cursor: pointer;
       font-size: 11.5px;
       font-weight: 500;
@@ -907,21 +589,24 @@
       color: var(--text-primary);
     }
 
-    .tv-cta-back {
-      background: var(--tv-accent);
-      color: #fff;
-      border: none;
+    .btn-return-cover {
+      background: rgba(255, 255, 255, 0.08);
+      color: var(--text-bright);
+      border: 1px solid var(--border-subtle);
       padding: 5px 12px;
-      border-radius: 4px;
+      border-radius: 5px;
       font-weight: 600;
       font-size: 12px;
       display: inline-flex;
       align-items: center;
-      gap: 5px;
+      gap: 6px;
       cursor: pointer;
-      transition: background 0.12s;
+      transition: all 0.15s;
     }
-    .tv-cta-back:hover { background: var(--tv-accent-hover); }
+    .btn-return-cover:hover {
+      background: var(--bg-hover);
+      border-color: var(--border-medium);
+    }
 
     .chat-scroll {
       flex: 1;
@@ -939,7 +624,7 @@
       gap: 20px;
     }
     .hero-block {
-      margin: 20px 0 6px 0;
+      margin: 18px 0 6px 0;
       display: flex;
       flex-direction: column;
       gap: 8px;
@@ -1107,8 +792,8 @@
       outline: none;
     }
     .submit-btn {
-      padding: 5px 13px;
-      border-radius: 4px;
+      padding: 6px 14px;
+      border-radius: 5px;
       border: 1px solid transparent;
       background: var(--text-primary);
       color: var(--bg-main);
@@ -1128,7 +813,7 @@
     }
     .data-panel.closed { margin-right: -480px; }
     .panel-header {
-      height: 46px;
+      height: 48px;
       padding: 0 14px;
       border-bottom: 1px solid var(--border-subtle);
       display: flex;
@@ -1183,542 +868,175 @@
       overflow: hidden;
     }
 
+    table.tv-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 11.5px;
+      background: var(--bg-elevated);
+      border-radius: 5px;
+      overflow: hidden;
+      border: 1px solid var(--border-subtle);
+    }
+    table.tv-table th {
+      background: var(--bg-sidebar);
+      color: var(--text-muted);
+      font-weight: 600;
+      text-align: right;
+      padding: 6px 9px;
+      font-size: 10.5px;
+      text-transform: uppercase;
+      letter-spacing: 0.03em;
+      border-bottom: 1px solid var(--border-subtle);
+    }
+    table.tv-table th:first-child, table.tv-table td:first-child { text-align: left; }
+    table.tv-table td {
+      padding: 6px 9px;
+      text-align: right;
+      border-bottom: 1px solid var(--border-subtle);
+    }
+    table.tv-table tr:last-child td { border-bottom: none; }
+
     ::-webkit-scrollbar { width: 5px; height: 5px; }
     ::-webkit-scrollbar-track { background: transparent; }
-    ::-webkit-scrollbar-thumb { background: var(--tv-border-light); border-radius: 2px; }
+    ::-webkit-scrollbar-thumb { background: var(--border-medium); border-radius: 2px; }
   </style>
 </head>
 <body>
 
   <!-- ========================================================================
-       VIEW 1: INSTITUTIONAL TRADINGVIEW TERMINAL WORKSTATION
+       VIEW 1: MESMERIZING INSTITUTIONAL COVER PAGE
        ======================================================================== -->
-  <div id="view-tradingview" class="view-container">
+  <div id="view-cover" class="view-container">
 
-    <!-- TOP HEADER BAR -->
-    <header class="tv-header">
-      <div class="tv-header-left">
-        <div class="tv-brand" onclick="openSymbolSearchModal()" title="Search Symbols (Ctrl+K)">
-          <span class="tv-brand-logo">▲</span>
-          <span>ALPHANITI</span>
-          <span class="tv-brand-tag">PRO</span>
-        </div>
+    <!-- Interactive Ambient Canvas -->
+    <canvas id="ambient-canvas"></canvas>
 
-        <!-- Symbol Selector Pill -->
-        <button class="tv-symbol-pill" onclick="openSymbolSearchModal()">
-          <span id="tv-header-symbol">RELIANCE</span>
-          <span class="tv-exchange-tag">NSE</span>
-          <span class="tv-sector-tag" id="tv-header-sector">Energy &amp; Conglomerate</span>
-          <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="margin-left:4px; opacity:0.6;"><path d="M6 9l6 6 6-6"/></svg>
-        </button>
+    <!-- Continuous Live NSE Ticker Ribbon -->
+    <div class="cover-ticker-wrap">
+      <div class="cover-ticker-track mono" id="cover-ticker-content">
+        <span class="ticker-item"><span class="ticker-sym">NSE:RELIANCE</span> <span class="ticker-px">₹1,190.00</span> <span class="ticker-up">+0.46%</span></span>
+        <span class="ticker-item"><span class="ticker-sym">NSE:TCS</span> <span class="ticker-px">₹2,530.00</span> <span class="ticker-up">+0.92%</span></span>
+        <span class="ticker-item"><span class="ticker-sym">NSE:SBIN</span> <span class="ticker-px">₹958.60</span> <span class="ticker-dn">-1.18%</span></span>
+        <span class="ticker-item"><span class="ticker-sym">NSE:INFY</span> <span class="ticker-px">₹1,153.80</span> <span class="ticker-up">+0.04%</span></span>
+        <span class="ticker-item"><span class="ticker-sym">NSE:HDFCBANK</span> <span class="ticker-px">₹692.80</span> <span class="ticker-dn">-0.18%</span></span>
+        <span class="ticker-item"><span class="ticker-sym">NSE:ICICIBANK</span> <span class="ticker-px">₹1,394.20</span> <span class="ticker-dn">-0.31%</span></span>
+        <span class="ticker-item"><span class="ticker-sym">NSE:LT</span> <span class="ticker-px">₹3,647.00</span> <span class="ticker-up">+0.24%</span></span>
+        <span class="ticker-item"><span class="ticker-sym">NSE:BHARTIARTL</span> <span class="ticker-px">₹1,892.10</span> <span class="ticker-dn">-0.15%</span></span>
+        <!-- Duplicate loop for seamless continuous animation -->
+        <span class="ticker-item"><span class="ticker-sym">NSE:RELIANCE</span> <span class="ticker-px">₹1,190.00</span> <span class="ticker-up">+0.46%</span></span>
+        <span class="ticker-item"><span class="ticker-sym">NSE:TCS</span> <span class="ticker-px">₹2,530.00</span> <span class="ticker-up">+0.92%</span></span>
+        <span class="ticker-item"><span class="ticker-sym">NSE:SBIN</span> <span class="ticker-px">₹958.60</span> <span class="ticker-dn">-1.18%</span></span>
+        <span class="ticker-item"><span class="ticker-sym">NSE:INFY</span> <span class="ticker-px">₹1,153.80</span> <span class="ticker-up">+0.04%</span></span>
+      </div>
+    </div>
 
-        <!-- Timeframe Buttons -->
-        <div class="tv-tf-group">
-          <button class="tv-tf-btn active" onclick="setChartTimeframe('1D')">1D</button>
-          <button class="tv-tf-btn" onclick="setChartTimeframe('5D')">5D</button>
-          <button class="tv-tf-btn" onclick="setChartTimeframe('1M')">1M</button>
-          <button class="tv-tf-btn" onclick="setChartTimeframe('3M')">3M</button>
-          <button class="tv-tf-btn" onclick="setChartTimeframe('6M')">6M</button>
-          <button class="tv-tf-btn" onclick="setChartTimeframe('1Y')">1Y</button>
-          <button class="tv-tf-btn" onclick="setChartTimeframe('ALL')">ALL</button>
-        </div>
-
-        <!-- Chart Type -->
-        <button class="tv-tool-btn" title="Candlestick Chart">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M7 3v3M7 18v3M5 6h4v12H5zM17 3v7M17 18v3M15 10h4v8h-4z"/></svg>
-          <span>Candles</span>
-        </button>
-
-        <!-- Indicators -->
-        <button class="tv-tool-btn active" onclick="toggleIndicatorsModal()">
-          <span style="font-style:italic; font-weight:700; color:var(--tv-accent);">fx</span>
-          <span>Indicators</span>
-          <span style="background:var(--tv-accent); color:#fff; border-radius:10px; padding:0 5px; font-size:10px;">4</span>
-        </button>
+    <!-- Cover Navigation Bar -->
+    <header class="cover-nav">
+      <div class="cover-brand">
+        <div class="cover-brand-logo">▲</div>
+        <div class="cover-brand-title">ALPHANITI</div>
+        <span class="cover-brand-badge">INSTITUTIONAL v25.0</span>
       </div>
 
-      <div class="tv-header-right">
-        <!-- Live Market Status -->
-        <div class="tv-live-badge">
-          <div class="tv-pulse-dot"></div>
-          <span>NSE LIVE</span>
+      <div class="cover-nav-right">
+        <div class="cover-status-pill">
+          <div class="cover-pulse"></div>
+          <span>NSE FEED CONNECTED</span>
         </div>
-
-        <!-- Macro Risk Regime -->
-        <div id="tv-header-regime-pill" class="tv-regime-badge cash">
-          <span id="tv-regime-txt">CASH PRESERVATION</span>
+        <div style="font-size:12px; color:var(--text-secondary);" class="mono">
+          Regime: <b style="color:var(--accent-amber);">CASH PRESERVATION</b>
         </div>
-
-        <!-- Evidential 4-Tier Hysteresis Badge -->
-        <div id="tv-header-tier-pill" class="tv-tier-badge mono">
-          TIER 1 (SOFT CAP)
-        </div>
-
-        <!-- HIGH CONTRAST PRIMARY CTA: ENTER RESEARCH WORKSPACE -->
-        <button class="tv-cta-enter" onclick="switchViewMode('research')" title="Enter Conversational AI Brain &amp; Research Workspace">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
-          <span>Enter Research Workspace</span>
-          <span class="tv-ai-tag">AI Brain</span>
-        </button>
-
-        <!-- Right drawer toggle -->
-        <button class="tv-tool-btn" onclick="toggleTvRightDrawer()" title="Toggle Watchlist &amp; Details Drawer">
-          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M15 3v18"/></svg>
-        </button>
       </div>
     </header>
 
-    <!-- TRADINGVIEW WORKSPACE BODY -->
-    <div class="tv-workspace-body">
+    <!-- Main Hero Presentation -->
+    <div class="cover-hero-wrap">
+      <div class="cover-eyebrow">
+        <span>⚡ Evidential Deep Ensemble · Factor Wasserstein DRO · Branch-and-Bound</span>
+      </div>
 
-      <!-- LEFT DRAWING TOOLS BAR -->
-      <aside class="tv-left-bar">
-        <div class="tv-draw-tool active" title="Crosshair (C)"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M12 2v4M12 18v4M2 12h4M18 12h4"/></svg></div>
-        <div class="tv-draw-tool" title="Trend Line (Alt+T)"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="4" y1="20" x2="20" y2="4"/><circle cx="4" cy="20" r="2"/><circle cx="20" cy="4" r="2"/></svg></div>
-        <div class="tv-draw-tool" title="Pitchfork / Regression"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v20M4 7l8 3 8-3"/></svg></div>
-        <div class="tv-draw-tool" title="Fibonacci Retracement"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M3 10h18M3 14h18M3 18h18"/></svg></div>
-        <div class="tv-tool-sep"></div>
-        <div class="tv-draw-tool" title="Brush / Annotation"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 19l7-7 3 3-7 7-3-3z"/><path d="M18 13l-1.5-7.5L2 2l3.5 14.5L13 18l5-5z"/></svg></div>
-        <div class="tv-draw-tool" title="Text Note"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="4 7 4 4 20 4 20 7"/><line x1="12" y1="4" x2="12" y2="20"/></svg></div>
-        <div class="tv-draw-tool" title="Long/Short Risk Ratio Tool"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3v18M6 8l6-5 6 5M6 16l6 5 6-5"/></svg></div>
-        <div class="tv-draw-tool" title="Measure Ruler (Shift+Click)"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 18h20M2 14l3-3 3 3 3-3 3 3 3-3 3 3 4-4"/></svg></div>
-        <div class="tv-tool-sep"></div>
-        <div class="tv-draw-tool" title="Zoom Mode"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16" y2="16"/><line x1="11" y1="8" x2="11" y2="14"/><line x1="8" y1="11" x2="14" y2="11"/></svg></div>
-        <div class="tv-draw-tool" title="Magnet Mode"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 3v8a6 6 0 0 0 12 0V3M6 7h12"/></svg></div>
-        <div class="tv-draw-tool" title="Clear Chart Annotations" onclick="alert('All user drawings reset.')"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg></div>
-      </aside>
+      <h1 class="cover-hero-title serif">
+        Mathematical Rigor.<br/>
+        <em>Evidential Uncertainty.</em> Formal Safety.
+      </h1>
 
-      <!-- CENTER CHART & DOCK -->
-      <main class="tv-center-container">
+      <p class="cover-hero-sub">
+        An autonomous algorithmic execution pipeline for National Stock Exchange (NSE) equities, engineered with a 3-member Dual-State Evidential GRU ensemble, 4-Tier Hysteresis gates, and Finance Act 2026 statutory solvency proofs.
+      </p>
 
-        <!-- MAIN CHART STAGE -->
-        <div class="tv-chart-stage-wrap">
-          <!-- FLOATING OHLCV HUD -->
-          <div class="tv-hud-overlay mono" id="tv-chart-hud">
-            <div class="tv-hud-primary">
-              <span class="tv-hud-symbol" id="tv-hud-sym">RELIANCE · 1D · NSE</span>
-              <span class="tv-hud-price" id="tv-hud-px">₹1,190.00</span>
-              <span class="tv-hud-chg" id="tv-hud-chg" style="color:var(--tv-green);">+5.45 (+0.46%)</span>
-            </div>
-            <div class="tv-hud-secondary">
-              <span>O: <b id="tv-hud-open">₹1,184.00</b></span>
-              <span>H: <b id="tv-hud-high">₹1,201.90</b></span>
-              <span>L: <b id="tv-hud-low">₹1,163.10</b></span>
-              <span>C: <b id="tv-hud-close">₹1,190.00</b></span>
-              <span>Vol: <b id="tv-hud-vol">14.91M</b></span>
-            </div>
-            <div class="tv-hud-tertiary">
-              <span style="color:#4A89DC;">EMA 12: <b id="tv-hud-ema12">1,182.40</b></span>
-              <span style="color:#C89128;">EMA 26: <b id="tv-hud-ema26">1,178.10</b></span>
-              <span style="color:var(--tv-purple);">NIG Drift γ: <b id="tv-hud-gamma">+2.48%</b></span>
-              <span style="color:var(--tv-text-dim);">90% Conformal: <b id="tv-hud-conf">[-3.12%, +8.08%]</b></span>
-            </div>
-          </div>
+      <!-- THE MESMERIZING ENTER BUTTON -->
+      <div class="cover-enter-portal">
+        <button class="cover-enter-btn" id="cover-enter-btn" onclick="enterResearchWorkspace()">
+          <span class="cover-btn-icon">⚡</span>
+          <span>ENTER RESEARCH WORKSPACE</span>
+          <span class="cover-btn-arrow">→</span>
+        </button>
+        <div class="cover-enter-hint">
+          <span>Press</span> <kbd>Enter ↵</kbd> <span>or click anywhere on the button to launch workspace</span>
+        </div>
+      </div>
 
-          <!-- Main Candlestick Stage -->
-          <div id="tv-full-chart"></div>
-
-          <!-- RSI Sub-Pane -->
-          <div id="tv-full-rsi"></div>
+      <!-- 4 Core Pillars Grid -->
+      <div class="cover-grid">
+        <div class="cover-card">
+          <div class="card-num">PILLAR 01</div>
+          <div class="card-title">Evidential Deep Learning</div>
+          <div class="card-desc">Decouples aleatoric volatility from epistemic model variance via Normal-Inverse-Gamma distribution heads.</div>
+          <div class="card-metric">q̂ = 1.3644 (90% Conformal)</div>
         </div>
 
-        <!-- CHART BOTTOM BAR -->
-        <div class="tv-chart-bar mono">
-          <div class="tv-chart-bar-left">
-            <button class="tv-quick-range-btn active" onclick="setChartTimeframe('1D')">1D</button>
-            <button class="tv-quick-range-btn" onclick="setChartTimeframe('5D')">5D</button>
-            <button class="tv-quick-range-btn" onclick="setChartTimeframe('1M')">1M</button>
-            <button class="tv-quick-range-btn" onclick="setChartTimeframe('3M')">3M</button>
-            <button class="tv-quick-range-btn" onclick="setChartTimeframe('6M')">6M</button>
-            <button class="tv-quick-range-btn" onclick="setChartTimeframe('1Y')">1Y</button>
-            <button class="tv-quick-range-btn" onclick="setChartTimeframe('ALL')">ALL</button>
-            <span style="color:var(--tv-border-light); margin:0 4px;">|</span>
-            <span style="color:var(--tv-text-dim); font-size:10.5px;">Split-Conformal Multiplier: <b>q̂ = 1.3644</b></span>
-          </div>
-          <div class="tv-chart-bar-right">
-            <span id="tv-clock-ist">15:30:00 (UTC+5:30)</span>
-            <span style="color:var(--tv-green); font-weight:600;">● NSE MKT</span>
-            <span style="cursor:pointer;" onclick="toggleChartLog()">%</span>
-            <span style="cursor:pointer;" onclick="toggleChartLog()">log</span>
-            <span style="color:var(--tv-accent); font-weight:600; cursor:pointer;" onclick="fitTvChart()">auto</span>
-          </div>
+        <div class="cover-card">
+          <div class="card-num">PILLAR 02</div>
+          <div class="card-title">4-Tier Hysteresis Gate</div>
+          <div class="card-desc">Calibrated empirical thresholds with 15% deadband and 3-session persistence prevents flip-flopping under uncertainty.</div>
+          <div class="card-metric">Tier 1 Active (Soft Cap)</div>
         </div>
 
-        <!-- BOTTOM INSTITUTIONAL DOCK -->
-        <div class="tv-bottom-dock" id="tv-bottom-dock">
-          <div class="tv-dock-tabs-bar">
-            <div class="tv-dock-tab-list">
-              <div class="tv-dtab active" id="tv-tab-btn-ledger" onclick="switchTvDockTab('ledger')">
-                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
-                <span>Double-Entry Ledger</span>
-              </div>
-              <div class="tv-dtab" id="tv-tab-btn-sizer" onclick="switchTvDockTab('sizer')">
-                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
-                <span>Integer Sizer &amp; B&amp;B</span>
-              </div>
-              <div class="tv-dtab" id="tv-tab-btn-tiergate" onclick="switchTvDockTab('tiergate')">
-                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
-                <span>4-Tier Hysteresis Gate</span>
-              </div>
-              <div class="tv-dtab" id="tv-tab-btn-kernel" onclick="switchTvDockTab('kernel')">
-                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
-                <span>Safety Kernel Order Ticket</span>
-              </div>
-              <div class="tv-dtab" id="tv-tab-btn-taxes" onclick="switchTvDockTab('taxes')">
-                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
-                <span>Statutory Taxes (FA 2026)</span>
-              </div>
-            </div>
-
-            <div style="display:flex; align-items:center; gap:4px;">
-              <button class="tv-dock-btn" onclick="toggleTvDock()" title="Minimize/Maximize Dock" id="tv-dock-toggle-btn">▼ Minimize</button>
-            </div>
-          </div>
-
-          <!-- DOCK CONTENT CONTAINER -->
-          <div class="tv-dock-content">
-
-            <!-- TAB 1: DOUBLE-ENTRY LEDGER -->
-            <div class="tv-dock-pane active" id="tv-pane-ledger">
-              <div class="tv-stat-grid mono">
-                <div class="tv-stat-box">
-                  <div class="tv-stat-lbl">W_settled (Cleared Cash)</div>
-                  <div class="tv-stat-val" id="tv-dock-wsettled" style="color:var(--tv-green);">₹1,00,000.00</div>
-                </div>
-                <div class="tv-stat-box">
-                  <div class="tv-stat-lbl">W_escrow (Locked Margin)</div>
-                  <div class="tv-stat-val" id="tv-dock-wescrow">₹0.00</div>
-                </div>
-                <div class="tv-stat-box">
-                  <div class="tv-stat-lbl">W_lien (Margin Liens - Asset)</div>
-                  <div class="tv-stat-val" id="tv-dock-wlien">₹0.00</div>
-                </div>
-                <div class="tv-stat-box">
-                  <div class="tv-stat-lbl">W_recv (T+1 Receivable)</div>
-                  <div class="tv-stat-val" id="tv-dock-wrecv">₹0.00</div>
-                </div>
-                <div class="tv-stat-box">
-                  <div class="tv-stat-lbl">NAV Accounting Identity</div>
-                  <div class="tv-stat-val" id="tv-dock-nav" style="color:var(--tv-text-bright);">₹1,00,000.00</div>
-                </div>
-                <div class="tv-stat-box">
-                  <div class="tv-stat-lbl">Statutory Charges (FA 2026)</div>
-                  <div class="tv-stat-val" id="tv-dock-taxes" style="color:var(--tv-red);">₹0.00</div>
-                </div>
-              </div>
-
-              <table class="tv-table mono" style="margin-top:4px;">
-                <thead>
-                  <tr>
-                    <th>Symbol</th>
-                    <th>Shares (h_i)</th>
-                    <th>Price</th>
-                    <th>Notional</th>
-                    <th>Charges (STT+Stamp)</th>
-                    <th>Weight</th>
-                    <th>Kernel State</th>
-                  </tr>
-                </thead>
-                <tbody id="tv-dock-alloc-body">
-                  <tr>
-                    <td colspan="7" style="text-align:center; color:var(--tv-text-dim); padding:16px;">
-                      100% Cleared Cash Preserved (Regime Gate Active). No open margin liens.
-                    </td>
-                  </tr>
-                </tbody>
-              </table>
-            </div>
-
-            <!-- TAB 2: INTEGER SIZER & B&B -->
-            <div class="tv-dock-pane" id="tv-pane-sizer">
-              <div class="tv-stat-grid mono">
-                <div class="tv-stat-box">
-                  <div class="tv-stat-lbl">B&amp;B Lattice Solver Status</div>
-                  <div class="tv-stat-val" style="color:var(--tv-green);">OPTIMAL DISCRETE (h ∈ ℤ)</div>
-                </div>
-                <div class="tv-stat-box">
-                  <div class="tv-stat-lbl">Wasserstein DRO Penalty (λ·ε_f)</div>
-                  <div class="tv-stat-val mono">ε_f = 0.01939 | λ = 0.50</div>
-                </div>
-                <div class="tv-stat-box">
-                  <div class="tv-stat-lbl">LP Relaxation Gap</div>
-                  <div class="tv-stat-val mono" style="color:var(--tv-green);">&lt; 0.038% Lower Bound</div>
-                </div>
-                <div class="tv-stat-box">
-                  <div class="tv-stat-lbl">Cryptographic Merkle Root</div>
-                  <div class="tv-stat-val mono" style="font-size:11px; color:var(--tv-text-dim);">e3b0c44298fc1c149afbf4...</div>
-                </div>
-              </div>
-
-              <div style="font-size:12px; color:var(--tv-text-dim); background:var(--tv-bg-panel); padding:10px 14px; border-radius:5px; border:1px solid var(--tv-border); margin-top:4px;">
-                <b>Mathematical Formulation:</b> Objective maximizes factor-space return penalized by CVaR<sub>0.95</sub> and Wasserstein ambiguity radius: <code>min_{h} -μ^T h + λ CVaR(h) + λ ε_f ||h||_2</code> subject to <code>Σ h_i P_i (1 + c_i) ≤ W_settled</code> with <code>h_i ∈ ℤ_{\ge 0}</code>.
-              </div>
-            </div>
-
-            <!-- TAB 3: 4-TIER HYSTERESIS GATE -->
-            <div class="tv-dock-pane" id="tv-pane-tiergate">
-              <div class="tv-stat-grid mono">
-                <div class="tv-stat-box">
-                  <div class="tv-stat-lbl">Active Operating Tier</div>
-                  <div class="tv-stat-val" id="tv-tier-name" style="color:var(--tv-yellow);">TIER 1 — SOFT CAP</div>
-                </div>
-                <div class="tv-stat-box">
-                  <div class="tv-stat-lbl">Epistemic Uncertainty (σ²_epis)</div>
-                  <div class="tv-stat-val mono" id="tv-tier-epis">0.00248</div>
-                </div>
-                <div class="tv-stat-box">
-                  <div class="tv-stat-lbl">Calibrated Quantiles (θ_soft, θ_elev, θ_ext)</div>
-                  <div class="tv-stat-val mono" style="font-size:11px;">0.00185 / 0.00342 / 0.00780</div>
-                </div>
-                <div class="tv-stat-box">
-                  <div class="tv-stat-lbl">Hysteresis Deadband (δ)</div>
-                  <div class="tv-stat-val mono">15.0% · 3-Session Persistence</div>
-                </div>
-              </div>
-
-              <table class="tv-table mono" style="margin-top:4px;">
-                <thead>
-                  <tr>
-                    <th>Operating Tier</th>
-                    <th>Epistemic Variance Range</th>
-                    <th>Gross Exposure Cap</th>
-                    <th>Max Position Limit</th>
-                    <th>Ensemble Check (Meinert 2023)</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <tr>
-                    <td><b>Tier 0 — Unconstrained</b></td>
-                    <td>σ² ≤ 0.00185</td>
-                    <td>100.0% NAV</td>
-                    <td>25.0% Single Equity</td>
-                    <td style="color:var(--tv-green);">PASS (ρ = +0.2329)</td>
-                  </tr>
-                  <tr style="background:var(--tv-bg-active);">
-                    <td style="color:var(--tv-yellow);"><b>Tier 1 — Soft Cap [ACTIVE]</b></td>
-                    <td>0.00185 &lt; σ² ≤ 0.00342</td>
-                    <td>75.0% NAV</td>
-                    <td>15.0% Single Equity</td>
-                    <td style="color:var(--tv-green);">PASS (4.18× Error Separation)</td>
-                  </tr>
-                  <tr>
-                    <td><b>Tier 2 — Elevated Throttle</b></td>
-                    <td>0.00342 &lt; σ² ≤ 0.00780</td>
-                    <td>35.0% NAV</td>
-                    <td>7.5% Single Equity</td>
-                    <td style="color:var(--tv-text-dim);">Armed (De-gross Trigger)</td>
-                  </tr>
-                  <tr>
-                    <td><b>Tier 3 — Extreme Freeze</b></td>
-                    <td>σ² &gt; 0.00780</td>
-                    <td>0.0% (100% Cash)</td>
-                    <td>0.0% Halt New Orders</td>
-                    <td style="color:var(--tv-red);">Circuit Breaker Engaged</td>
-                  </tr>
-                </tbody>
-              </table>
-            </div>
-
-            <!-- TAB 4: SAFETY KERNEL ORDER TICKET -->
-            <div class="tv-dock-pane" id="tv-pane-kernel">
-              <div class="tv-order-form">
-                <div class="tv-input-wrap">
-                  <label>Ticker Symbol</label>
-                  <select id="tv-ord-sym" onchange="onTvOrderSymbolChange()">
-                    <option value="RELIANCE">RELIANCE.NS (Energy)</option>
-                    <option value="SBIN">SBIN.NS (PSU Bank)</option>
-                    <option value="TCS">TCS.NS (IT Services)</option>
-                    <option value="INFY">INFY.NS (IT Services)</option>
-                    <option value="HDFCBANK">HDFCBANK.NS (Bank)</option>
-                    <option value="ICICIBANK">ICICIBANK.NS (Bank)</option>
-                    <option value="LT">LT.NS (Infra)</option>
-                    <option value="KOTAKBANK">KOTAKBANK.NS (Bank)</option>
-                    <option value="AXISBANK">AXISBANK.NS (Bank)</option>
-                    <option value="HINDUNILVR">HINDUNILVR.NS (FMCG)</option>
-                    <option value="ITC">ITC.NS (FMCG)</option>
-                    <option value="BHARTIARTL">BHARTIARTL.NS (Telecom)</option>
-                  </select>
-                </div>
-
-                <div class="tv-input-wrap">
-                  <label>Order Side &amp; Type</label>
-                  <select id="tv-ord-side">
-                    <option value="BUY">BUY · DELIVERY (CNC)</option>
-                    <option value="SELL">SELL · DELIVERY (CNC)</option>
-                  </select>
-                </div>
-
-                <div class="tv-input-wrap">
-                  <label>Quantity (Integer Shares)</label>
-                  <input type="number" id="tv-ord-qty" value="50" min="1" step="5" />
-                </div>
-
-                <div class="tv-input-wrap">
-                  <label>Limit Price (INR)</label>
-                  <input type="number" id="tv-ord-px" value="1190.00" step="0.5" />
-                </div>
-
-                <div>
-                  <button class="tv-btn-buy" onclick="runTvOrderSimulation()">
-                    Simulate &amp; Verify Order
-                  </button>
-                </div>
-              </div>
-
-              <div id="tv-dock-kernel-receipt" style="background:var(--tv-bg-panel); border:1px solid var(--tv-border); border-radius:5px; padding:10px 14px; font-size:12px; margin-top:6px;" class="mono">
-                <div><b>Formal Safety Kernel Receipt:</b> Ready for dry-run simulation.</div>
-                <div style="color:var(--tv-text-dim); margin-top:2px;">Gates: [1] Double-Entry Cash Solvency  [2] Factor-Space CVaR Ceiling  [3] Evidential Tail Floor &amp; Hardware Ed25519 Signer</div>
-              </div>
-            </div>
-
-            <!-- TAB 5: STATUTORY TAXES (FA 2026) -->
-            <div class="tv-dock-pane" id="tv-pane-taxes">
-              <table class="tv-table mono">
-                <thead>
-                  <tr>
-                    <th>Statutory Charge Category</th>
-                    <th>Finance Act 2026 Statutory Rate</th>
-                    <th>Application Leg</th>
-                    <th>Authority / Law</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <tr>
-                    <td><b>Securities Transaction Tax (STT)</b></td>
-                    <td style="color:var(--tv-red);">0.100% (10 bps)</td>
-                    <td>Both Buy &amp; Sell (Equity Delivery)</td>
-                    <td>Finance Act 2026 / CBDT</td>
-                  </tr>
-                  <tr>
-                    <td><b>Stamp Duty</b></td>
-                    <td style="color:var(--tv-red);">0.015% (1.5 bps)</td>
-                    <td>Buy Orders Only</td>
-                    <td>Indian Stamp Act 1899</td>
-                  </tr>
-                  <tr>
-                    <td><b>Exchange Turnover Charge (NSE)</b></td>
-                    <td>0.00297% (0.297 bps)</td>
-                    <td>Both Buy &amp; Sell</td>
-                    <td>NSE Circular NSE/CM/2026/04</td>
-                  </tr>
-                  <tr>
-                    <td><b>SEBI Regulatory Turnover Fee</b></td>
-                    <td>0.00010% (₹10 / Crore)</td>
-                    <td>Both Buy &amp; Sell</td>
-                    <td>SEBI (Stock Brokers) Reg 1992</td>
-                  </tr>
-                  <tr>
-                    <td><b>Goods &amp; Services Tax (GST)</b></td>
-                    <td>18.00%</td>
-                    <td>On (Brokerage + Exchange + SEBI Charges)</td>
-                    <td>CGST + SGST Acts 2017</td>
-                  </tr>
-                  <tr>
-                    <td><b>Investor Protection Fund (IPFT)</b></td>
-                    <td>0.00050% (0.05 bps)</td>
-                    <td>Both Buy &amp; Sell</td>
-                    <td>NSE / SEBI Mandate</td>
-                  </tr>
-                </tbody>
-              </table>
-            </div>
-
-          </div>
+        <div class="cover-card">
+          <div class="card-num">PILLAR 03</div>
+          <div class="card-title">Factor-Space DRO</div>
+          <div class="card-desc">Distributionally robust optimization penalizes worst-case drift shifts inside Wasserstein radius ε_f = 0.01939.</div>
+          <div class="card-metric">CVaR 95% Sizing Guard</div>
         </div>
 
-      </main>
+        <div class="cover-card">
+          <div class="card-num">PILLAR 04</div>
+          <div class="card-title">Hardware Enclave Safety</div>
+          <div class="card-desc">3 formal veto gates check cleared cash solvency and emit Ed25519 signatures before simulated order submission.</div>
+          <div class="card-metric">FA 2026 Tax Solvency Checked</div>
+        </div>
+      </div>
 
-      <!-- RIGHT DRAWER: WATCHLIST & DETAILS -->
-      <aside class="tv-right-drawer" id="tv-right-drawer">
-        <div class="tv-drawer-header">
-          <div class="tv-drawer-tabs">
-            <div class="tv-rtab active" id="tv-rtab-watch" onclick="switchTvRightTab('watch')">Watchlist</div>
-            <div class="tv-rtab" id="tv-rtab-details" onclick="switchTvRightTab('details')">Deep Ensemble</div>
-            <div class="tv-rtab" id="tv-rtab-features" onclick="switchTvRightTab('features')">20 Causal Features</div>
-          </div>
-          <button class="tv-dock-btn" onclick="toggleTvRightDrawer()">✕</button>
+      <!-- Quick Action Launcher Cards -->
+      <div class="cover-quick-section">
+        <div class="cover-quick-title">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+          <span>Direct Pre-Flight Evaluation Prompts (Click to Enter &amp; Run)</span>
         </div>
 
-        <!-- TAB 1: WATCHLIST -->
-        <div class="tv-drawer-body" id="tv-rbody-watch">
-          <div style="padding:4px 6px 6px 6px;">
-            <input type="text" id="tv-watch-filter" placeholder="Filter universe (e.g. TCS, IT)..." oninput="filterWatchlist(this.value)" style="width:100%; background:var(--tv-bg-base); border:1px solid var(--tv-border); color:var(--tv-text); padding:5px 8px; border-radius:4px; font-size:11.5px; outline:none;" />
-          </div>
-          <div id="tv-watchlist-container"></div>
-        </div>
-
-        <!-- TAB 2: DEEP ENSEMBLE DETAILS -->
-        <div class="tv-drawer-body" id="tv-rbody-details" style="display:none;">
-          <div class="tv-stat-box" style="margin-bottom:6px;">
-            <div class="tv-stat-lbl">Active Security</div>
-            <div class="tv-stat-val" id="tv-det-title">RELIANCE.NS</div>
-            <div class="mono" style="font-size:10.5px; color:var(--tv-text-dim);" id="tv-det-sec">Energy &amp; Conglomerate · Large Cap</div>
+        <div class="cover-quick-grid">
+          <div class="cover-quick-btn" onclick="launchWithQuery('Should I buy RELIANCE right now with ₹1,00,000?')">
+            <div class="cover-quick-name">RELIANCE — ₹1,00,000 Evaluation</div>
+            <div class="cover-quick-desc">Single-stock drift, tail risk floor, and Finance Act 2026 tax breakdown.</div>
           </div>
 
-          <div class="tv-stat-grid mono">
-            <div class="tv-stat-box">
-              <div class="tv-stat-lbl">20D Expected Drift (γ)</div>
-              <div class="tv-stat-val" id="tv-det-gamma" style="color:var(--tv-green);">+2.48%</div>
-            </div>
-            <div class="tv-stat-box">
-              <div class="tv-stat-lbl">Aleatoric Vol (σ_alea)</div>
-              <div class="tv-stat-val" id="tv-det-alea">23.35%</div>
-            </div>
-            <div class="tv-stat-box">
-              <div class="tv-stat-lbl">Epistemic Uncertainty (σ²_epis)</div>
-              <div class="tv-stat-val" id="tv-det-epis">0.0645</div>
-            </div>
-            <div class="tv-stat-box">
-              <div class="tv-stat-lbl">Tail Breach Risk (P_b)</div>
-              <div class="tv-stat-val" id="tv-det-pb" style="color:var(--tv-yellow);">35.36%</div>
-            </div>
+          <div class="cover-quick-btn" onclick="launchWithQuery('Compare TCS and INFY using live NSE data')">
+            <div class="cover-quick-name">TCS vs INFY Relative Drift</div>
+            <div class="cover-quick-desc">Cross-sectional comparison of expected drift and epistemic risk.</div>
           </div>
 
-          <div style="font-size:11px; font-weight:700; color:var(--tv-text-bright); margin-top:8px;">3-Member GRU-Attention Ensemble</div>
-          <table class="tv-table mono">
-            <thead>
-              <tr>
-                <th>Head</th>
-                <th>20D Drift</th>
-                <th>Aleatoric</th>
-                <th>Epistemic</th>
-              </tr>
-            </thead>
-            <tbody id="tv-det-heads-tbody">
-              <tr><td>Head #1 (GRU)</td><td style="color:var(--tv-green);">+2.54%</td><td>23.10%</td><td>0.0620</td></tr>
-              <tr><td>Head #2 (GRU)</td><td style="color:var(--tv-green);">+2.42%</td><td>23.45%</td><td>0.0658</td></tr>
-              <tr><td>Head #3 (GRU)</td><td style="color:var(--tv-green);">+2.48%</td><td>23.50%</td><td>0.0657</td></tr>
-            </tbody>
-          </table>
+          <div class="cover-quick-btn" onclick="launchWithQuery('Where should I invest ₹2,50,000 today?')">
+            <div class="cover-quick-name">Discrete Portfolio Sizer (₹2.5L)</div>
+            <div class="cover-quick-desc">Branch-and-Bound integer lot solver with zero fractional share leak.</div>
+          </div>
         </div>
-
-        <!-- TAB 3: 20 CAUSAL FEATURES -->
-        <div class="tv-drawer-body" id="tv-rbody-features" style="display:none;">
-          <div style="font-size:11px; font-weight:700; color:var(--tv-text-bright); margin-bottom:4px;">20-Feature Causal Tensor (Lookback=60D)</div>
-          <table class="tv-table mono">
-            <thead>
-              <tr><th>Feature Name</th><th>Standardized</th></tr>
-            </thead>
-            <tbody id="tv-det-feat-tbody">
-              <tr><td>ret_1d_clean</td><td>+0.0046</td></tr>
-              <tr><td>ret_20d</td><td>-0.0465</td></tr>
-              <tr><td>rsi_14d</td><td>+0.1040</td></tr>
-              <tr><td>trend_ema_ratio</td><td>+0.0036</td></tr>
-              <tr><td>vol_squeeze_ratio</td><td>0.8950</td></tr>
-              <tr><td>volume_momentum_ratio</td><td>1.0820</td></tr>
-              <tr><td>market_rel_mom_20d</td><td>+0.0124</td></tr>
-              <tr><td>parkinson_vol_20d</td><td>0.0132</td></tr>
-            </tbody>
-          </table>
-        </div>
-
-      </aside>
+      </div>
 
     </div>
   </div>
 
   <!-- ========================================================================
-       VIEW 2: CONVERSATIONAL AI BRAIN & ARTIFACT RESEARCH TERMINAL
+       VIEW 2: CONVERSATIONAL AI RESEARCH WORKSPACE
        ======================================================================== -->
   <div id="view-research" class="view-container">
 
@@ -1730,8 +1048,8 @@
             <span>AlphaNiti</span>
             <span class="brand-version">v25.0</span>
           </div>
-          <button class="tv-cta-back" onclick="switchViewMode('tradingview')" title="Return to TradingView Chart Terminal">
-            <span>📈 Chart View</span>
+          <button class="btn-return-cover" onclick="returnToCover()" title="Return to Cover Page">
+            <span>✦ Cover</span>
           </button>
         </div>
 
@@ -1753,7 +1071,7 @@
           <span>Portfolio Allocation — ₹2,50,000</span>
         </div>
         <div class="nav-item" onclick="askBrain('Analyze SUNPHARMA.NS live with my ML brain')">
-          <span>SUNPHARMA.NS — Dynamic Inference</span>
+          <span>SUNPHARMA.NS — Live Inference</span>
         </div>
         <div class="nav-item" onclick="askBrain('Analyze TATAMOTORS.NS with ₹1,50,000')">
           <span>TATAMOTORS.NS — Live Inference</span>
@@ -1789,14 +1107,12 @@
           <span class="mono" style="font-size:11px; color:var(--text-muted);">3-Member GRU · 20 Causal Features · NSE</span>
         </div>
 
-        <div style="display:flex; align-items:center; gap:8px;">
-          <!-- Switch back to TradingView Terminal button -->
-          <button class="tv-cta-back" onclick="switchViewMode('tradingview')">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
-            <span>TradingView Terminal</span>
+        <div style="display:flex; align-items:center; gap:10px;">
+          <button class="btn-return-cover" onclick="returnToCover()">
+            <span>✦ Return to Cover</span>
           </button>
 
-          <div id="header-regime-pill" class="regime-tag cash" style="padding:4px 8px; border-radius:4px; font-size:11px; font-weight:600; background:var(--warning-bg); color:var(--warning); border:1px solid rgba(200,145,40,0.3);">
+          <div id="header-regime-pill" class="regime-tag cash" style="padding:4px 9px; border-radius:4px; font-size:11px; font-weight:600; background:rgba(200, 145, 40, 0.15); color:#c89128; border:1px solid rgba(200, 145, 40, 0.3);">
             <span id="regime-title">REGIME: CASH PRESERVATION</span>
             <span class="mono" id="regime-sub">| P_breach: 38.3%</span>
           </div>
@@ -1862,11 +1178,11 @@
       </div>
     </main>
 
-    <!-- RIGHT INSPECTOR PANEL (RESEARCH VIEW) -->
+    <!-- RIGHT INSPECTOR PANEL -->
     <aside class="data-panel" id="artifact-panel">
       <div class="panel-header">
         <div>
-          <div style="font-weight:600; font-size:12.5px;" id="art-title">NSE:SBIN</div>
+          <div style="font-weight:600; font-size:12.5px;" id="art-title">NSE:RELIANCE</div>
           <div class="mono" style="font-size:10.5px; color:var(--text-muted);" id="art-subtitle">120D OHLCV &amp; 20D Conformal Forecast (q̂=1.3644)</div>
         </div>
         <button class="text-btn" onclick="toggleArtifactPanel()">Close</button>
@@ -1884,11 +1200,11 @@
         <div style="display:grid; grid-template-columns:repeat(2, 1fr); gap:6px;">
           <div style="background:var(--bg-elevated); border:1px solid var(--border-subtle); border-radius:5px; padding:7px 10px;">
             <div style="font-size:10px; color:var(--text-muted); font-weight:600; text-transform:uppercase;">Spot Price</div>
-            <div class="mono" id="art-px" style="font-size:13px; font-weight:600; margin-top:2px;">₹812.40</div>
+            <div class="mono" id="art-px" style="font-size:13px; font-weight:600; margin-top:2px;">₹1,190.00</div>
           </div>
           <div style="background:var(--bg-elevated); border:1px solid var(--border-subtle); border-radius:5px; padding:7px 10px;">
             <div style="font-size:10px; color:var(--text-muted); font-weight:600; text-transform:uppercase;">20D Expected Drift (γ)</div>
-            <div class="mono" id="art-gamma" style="font-size:13px; font-weight:600; margin-top:2px;">+3.38%</div>
+            <div class="mono" id="art-gamma" style="font-size:13px; font-weight:600; margin-top:2px; color:var(--positive);">+2.48%</div>
           </div>
         </div>
 
@@ -1903,9 +1219,9 @@
             <tr><th>Member</th><th>20D Drift</th><th>Aleatoric</th><th>Epistemic</th></tr>
           </thead>
           <tbody id="ensemble-heads-tbody">
-            <tr><td>Head #1</td><td>+3.45%</td><td>7.08%</td><td>0.00050</td></tr>
-            <tr><td>Head #2</td><td>+3.29%</td><td>7.19%</td><td>0.00060</td></tr>
-            <tr><td>Head #3</td><td>+3.40%</td><td>7.09%</td><td>0.00050</td></tr>
+            <tr><td>Head #1</td><td>+2.54%</td><td>23.10%</td><td>0.0620</td></tr>
+            <tr><td>Head #2</td><td>+2.42%</td><td>23.45%</td><td>0.0658</td></tr>
+            <tr><td>Head #3</td><td>+2.48%</td><td>23.50%</td><td>0.0657</td></tr>
           </tbody>
         </table>
 
@@ -1914,9 +1230,9 @@
             <tr><th>Feature</th><th>Value</th></tr>
           </thead>
           <tbody id="features-tbody">
-            <tr><td>ret_1d_clean</td><td>+0.0042</td></tr>
-            <tr><td>ret_20d</td><td>+0.0418</td></tr>
-            <tr><td>rsi_14d</td><td>+0.1680</td></tr>
+            <tr><td>ret_1d_clean</td><td>+0.0046</td></tr>
+            <tr><td>ret_20d</td><td>-0.0465</td></tr>
+            <tr><td>rsi_14d</td><td>+0.1040</td></tr>
           </tbody>
         </table>
       </div>
@@ -1925,7 +1241,7 @@
       <div class="panel-body" id="atab-ledger" style="display:none;">
         <div style="background:var(--bg-elevated); border:1px solid var(--border-subtle); border-radius:5px; padding:8px 10px; font-size:12px;" class="mono">
           <div>Cleared Cash: <b id="led-settled" style="color:var(--positive);">₹1,00,000.00</b></div>
-          <div style="margin-top:2px;">Taxes: <b id="led-taxes" style="color:var(--negative);">₹0.00</b></div>
+          <div style="margin-top:2px;">Taxes (FA 2026): <b id="led-taxes" style="color:var(--negative);">₹0.00</b></div>
         </div>
 
         <div id="led-receipt" style="background:var(--bg-elevated); border:1px solid var(--border-subtle); border-radius:5px; padding:8px 10px; font-size:11.5px; margin-top:4px;">
@@ -1961,16 +1277,6 @@
 
   </div>
 
-  <!-- ========================================================================
-       SEARCH SYMBOLS MODAL (TRADINGVIEW STYLE)
-       ======================================================================== -->
-  <div class="tv-modal-backdrop" id="tv-search-modal" onclick="if(event.target===this) closeSymbolSearchModal();">
-    <div class="tv-modal-card">
-      <input type="text" id="tv-search-input" class="tv-modal-input" placeholder="Search symbol or sector (e.g. RELIANCE, TCS, Bank)..." oninput="renderModalSymbols(this.value)" />
-      <div class="tv-modal-list" id="tv-modal-results"></div>
-    </div>
-  </div>
-
   <script>
     /* ================= GLOBAL STATE ================= */
     const API_BASE = window.location.hostname.includes('onrender.com')
@@ -1980,21 +1286,25 @@
     let SNAPSHOT = null;
     let SIGNALS = [];
     let CURRENT_SYMBOL = 'RELIANCE';
-    let ACTIVE_VIEW = 'tradingview'; // 'tradingview' or 'research'
 
-    // TradingView Terminal Chart Series
-    let tvChart, tvCandles, tvVolume, tvEma12, tvEma26, tvFanExp, tvFanUp, tvFanLow;
-    let tvRsiChart, tvRsiSeries;
-
-    // Research Inspector Chart Series
+    // Chart Series
     let artChart, artCandles, artVolume, artEma12, artEma26, artFanExp, artFanUp, artFanLow;
     let artRsiChart, artRsiSeries;
 
     /* ================= INITIALIZATION ================= */
     window.addEventListener('DOMContentLoaded', async () => {
-      initTradingViewCharts();
+      initAmbientCanvas();
       initResearchCharts();
-      startIstClock();
+
+      // Listen for keyboard Enter to launch
+      window.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter' && document.getElementById('view-cover').style.display !== 'none') {
+          // If not typing in an input
+          if (document.activeElement.tagName !== 'INPUT' && document.activeElement.tagName !== 'TEXTAREA') {
+            enterResearchWorkspace();
+          }
+        }
+      });
 
       try {
         const snapRes = await fetch('./snapshot.json');
@@ -2005,128 +1315,112 @@
             renderChartData(CURRENT_SYMBOL, SNAPSHOT.charts[CURRENT_SYMBOL]);
           }
         }
-      } catch (e) {
-        console.warn('Snapshot fetch fallback note:', e);
-      }
+      } catch (e) {}
 
       await syncWithRender();
     });
 
-    /* ================= VIEW SWITCHER ================= */
-    function switchViewMode(targetMode) {
-      ACTIVE_VIEW = targetMode;
-      const tvEl = document.getElementById('view-tradingview');
-      const resEl = document.getElementById('view-research');
+    /* ================= AMBIENT CANVAS ================= */
+    function initAmbientCanvas() {
+      const canvas = document.getElementById('ambient-canvas');
+      const ctx = canvas.getContext('2d');
+      let w = (canvas.width = window.innerWidth);
+      let h = (canvas.height = window.innerHeight);
 
-      if (targetMode === 'tradingview') {
-        resEl.style.display = 'none';
-        tvEl.style.display = 'flex';
-        setTimeout(resizeTradingViewCharts, 60);
-      } else {
-        tvEl.style.display = 'none';
-        resEl.style.display = 'flex';
+      window.addEventListener('resize', () => {
+        w = canvas.width = window.innerWidth;
+        h = canvas.height = window.innerHeight;
+      });
+
+      const particles = [];
+      const count = Math.min(50, Math.floor(w / 25));
+      for (let i = 0; i < count; i++) {
+        particles.push({
+          x: Math.random() * w,
+          y: Math.random() * h,
+          vx: (Math.random() - 0.5) * 0.4,
+          vy: (Math.random() - 0.5) * 0.4,
+          r: Math.random() * 2 + 1,
+          color: Math.random() > 0.4 ? 'rgba(0, 212, 255, 0.4)' : 'rgba(41, 98, 255, 0.35)'
+        });
+      }
+
+      function render() {
+        ctx.clearRect(0, 0, w, h);
+
+        // Draw connections
+        for (let i = 0; i < count; i++) {
+          for (let j = i + 1; j < count; j++) {
+            const dx = particles[i].x - particles[j].x;
+            const dy = particles[i].y - particles[j].y;
+            const dist = Math.sqrt(dx * dx + dy * dy);
+            if (dist < 130) {
+              ctx.strokeStyle = `rgba(41, 98, 255, ${0.18 * (1 - dist / 130)})`;
+              ctx.lineWidth = 1;
+              ctx.beginPath();
+              ctx.moveTo(particles[i].x, particles[i].y);
+              ctx.lineTo(particles[j].x, particles[j].y);
+              ctx.stroke();
+            }
+          }
+        }
+
+        // Draw nodes
+        particles.forEach(p => {
+          p.x += p.vx;
+          p.y += p.vy;
+          if (p.x < 0 || p.x > w) p.vx *= -1;
+          if (p.y < 0 || p.y > h) p.vy *= -1;
+
+          ctx.fillStyle = p.color;
+          ctx.beginPath();
+          ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+          ctx.fill();
+        });
+
+        requestAnimationFrame(render);
+      }
+      render();
+    }
+
+    /* ================= TRANSITIONS: ENTER / RETURN ================= */
+    function enterResearchWorkspace() {
+      const cover = document.getElementById('view-cover');
+      const research = document.getElementById('view-research');
+
+      cover.style.opacity = '0';
+      cover.style.transform = 'scale(0.98)';
+
+      setTimeout(() => {
+        cover.style.display = 'none';
+        research.style.display = 'flex';
+        research.style.opacity = '1';
+        research.style.transform = 'scale(1)';
         setTimeout(resizeResearchCharts, 60);
-      }
+      }, 250);
     }
 
-    /* ================= TRADINGVIEW TERMINAL CHARTS ================= */
-    function initTradingViewCharts() {
-      const chartEl = document.getElementById('tv-full-chart');
-      const rsiEl = document.getElementById('tv-full-rsi');
+    function returnToCover() {
+      const cover = document.getElementById('view-cover');
+      const research = document.getElementById('view-research');
 
-      tvChart = LightweightCharts.createChart(chartEl, {
-        layout: { background: { type: 'solid', color: '#131722' }, textColor: '#787b86', fontSize: 11 },
-        grid: { vertLines: { color: '#1e222d' }, horzLines: { color: '#1e222d' } },
-        crosshair: { mode: LightweightCharts.CrosshairMode.Normal },
-        rightPriceScale: { borderColor: '#2a2e39', scaleMargins: { top: 0.1, bottom: 0.22 } },
-        timeScale: { borderColor: '#2a2e39', timeVisible: true, rightOffset: 16 },
-      });
-
-      tvCandles = tvChart.addCandlestickSeries({
-        upColor: '#089981', downColor: '#f23645',
-        borderUpColor: '#089981', borderDownColor: '#f23645',
-        wickUpColor: '#089981', wickDownColor: '#f23645',
-      });
-
-      tvVolume = tvChart.addHistogramSeries({ priceFormat: { type: 'volume' }, priceScaleId: '' });
-      tvVolume.priceScale().applyOptions({ scaleMargins: { top: 0.8, bottom: 0 } });
-
-      tvEma12 = tvChart.addLineSeries({ color: '#4A89DC', lineWidth: 1.5, title: 'EMA 12' });
-      tvEma26 = tvChart.addLineSeries({ color: '#C89128', lineWidth: 1.5, title: 'EMA 26' });
-
-      tvFanUp = tvChart.addLineSeries({ color: 'rgba(171, 71, 188, 0.45)', lineWidth: 1, lineStyle: 2 });
-      tvFanExp = tvChart.addLineSeries({ color: '#ab47bc', lineWidth: 2, lineStyle: 2 });
-      tvFanLow = tvChart.addLineSeries({ color: 'rgba(171, 71, 188, 0.45)', lineWidth: 1, lineStyle: 2 });
-
-      tvRsiChart = LightweightCharts.createChart(rsiEl, {
-        layout: { background: { type: 'solid', color: '#131722' }, textColor: '#787b86', fontSize: 10 },
-        grid: { vertLines: { color: '#1e222d' }, horzLines: { color: '#1e222d' } },
-        rightPriceScale: { borderColor: '#2a2e39', scaleMargins: { top: 0.12, bottom: 0.12 } },
-        timeScale: { borderColor: '#2a2e39', visible: false },
-      });
-      tvRsiSeries = tvRsiChart.addLineSeries({ color: '#9c27b0', lineWidth: 1.25 });
-
-      tvChart.timeScale().subscribeVisibleLogicalRangeChange(r => {
-        if (r && tvRsiChart) tvRsiChart.timeScale().setVisibleLogicalRange(r);
-      });
-
-      // Hover Crosshair HUD update
-      tvChart.subscribeCrosshairMove(param => {
-        if (!param || !param.time || !param.seriesPrices) return;
-        const ohlc = param.seriesPrices.get(tvCandles);
-        const v = param.seriesPrices.get(tvVolume);
-        const e12 = param.seriesPrices.get(tvEma12);
-        const e26 = param.seriesPrices.get(tvEma26);
-
-        if (ohlc) {
-          document.getElementById('tv-hud-open').innerText = '₹' + ohlc.open.toFixed(2);
-          document.getElementById('tv-hud-high').innerText = '₹' + ohlc.high.toFixed(2);
-          document.getElementById('tv-hud-low').innerText = '₹' + ohlc.low.toFixed(2);
-          document.getElementById('tv-hud-close').innerText = '₹' + ohlc.close.toFixed(2);
-          const chg = ohlc.close - ohlc.open;
-          const pct = ((chg / ohlc.open) * 100).toFixed(2);
-          const chgEl = document.getElementById('tv-hud-chg');
-          chgEl.innerText = `${chg >= 0 ? '+' : ''}${chg.toFixed(2)} (${chg >= 0 ? '+' : ''}${pct}%)`;
-          chgEl.style.color = chg >= 0 ? 'var(--tv-green)' : 'var(--tv-red)';
-          document.getElementById('tv-hud-px').innerText = '₹' + ohlc.close.toFixed(2);
-        }
-        if (v !== undefined) {
-          document.getElementById('tv-hud-vol').innerText = Number(v).toLocaleString('en-IN');
-        }
-        if (e12 !== undefined) document.getElementById('tv-hud-ema12').innerText = e12.toFixed(2);
-        if (e26 !== undefined) document.getElementById('tv-hud-ema26').innerText = e26.toFixed(2);
-      });
-
-      window.addEventListener('resize', resizeTradingViewCharts);
+      research.style.opacity = '0';
+      setTimeout(() => {
+        research.style.display = 'none';
+        cover.style.display = 'flex';
+        setTimeout(() => {
+          cover.style.opacity = '1';
+          cover.style.transform = 'scale(1)';
+        }, 30);
+      }, 200);
     }
 
-    function resizeTradingViewCharts() {
-      const c = document.getElementById('tv-full-chart');
-      const r = document.getElementById('tv-full-rsi');
-      if (tvChart && c && c.clientWidth > 0) {
-        tvChart.applyOptions({ width: c.clientWidth, height: c.clientHeight });
-      }
-      if (tvRsiChart && r && r.clientWidth > 0) {
-        tvRsiChart.applyOptions({ width: r.clientWidth, height: r.clientHeight });
-      }
+    function launchWithQuery(q) {
+      enterResearchWorkspace();
+      setTimeout(() => askBrain(q), 350);
     }
 
-    function fitTvChart() {
-      if (tvChart) tvChart.timeScale().fitContent();
-    }
-
-    function toggleChartLog() {
-      alert('Price scale toggled.');
-    }
-
-    function setChartTimeframe(tf) {
-      document.querySelectorAll('.tv-tf-btn, .tv-quick-range-btn').forEach(b => {
-        b.classList.toggle('active', b.innerText === tf);
-      });
-      if (tvChart) tvChart.timeScale().fitContent();
-    }
-
-    /* ================= RESEARCH INSPECTOR CHARTS ================= */
+    /* ================= RESEARCH CHARTS ================= */
     function initResearchCharts() {
       const mainEl = document.getElementById('art-main-chart');
       const rsiEl = document.getElementById('art-rsi-chart');
@@ -2169,113 +1463,7 @@
       if (artRsiChart && r && r.clientWidth > 0) artRsiChart.applyOptions({ width: r.clientWidth, height: r.clientHeight });
     }
 
-    /* ================= DATA RENDERERS ================= */
-    async function loadChartForSymbol(sym) {
-      CURRENT_SYMBOL = sym;
-      document.getElementById('tv-header-symbol').innerText = sym;
-      document.getElementById('tv-ord-sym').value = sym;
-
-      if (SNAPSHOT && SNAPSHOT.charts && SNAPSHOT.charts[sym]) {
-        renderChartData(sym, SNAPSHOT.charts[sym]);
-      }
-
-      try {
-        const r = await fetch(`${API_BASE}/api/chart/${sym}`, { mode: 'cors' });
-        if (r.ok) {
-          const d = await r.json();
-          if (SNAPSHOT && SNAPSHOT.charts) SNAPSHOT.charts[sym] = d;
-          renderChartData(sym, d);
-        }
-      } catch (e) {}
-    }
-
-    function renderChartData(sym, payload) {
-      if (!payload || !payload.candles || !payload.candles.length) return;
-      const candles = payload.candles;
-
-      // Populate TradingView Charts
-      if (tvCandles) {
-        tvCandles.setData(candles.map(c => ({ time: c.time, open: c.open, high: c.high, low: c.low, close: c.close })));
-        tvVolume.setData(candles.map(c => ({
-          time: c.time, value: c.volume,
-          color: c.close >= c.open ? 'rgba(8, 153, 129, 0.35)' : 'rgba(242, 54, 69, 0.35)'
-        })));
-        tvEma12.setData(candles.map(c => ({ time: c.time, value: c.ema12 })));
-        tvEma26.setData(candles.map(c => ({ time: c.time, value: c.ema26 })));
-        tvRsiSeries.setData(candles.map(c => ({ time: c.time, value: c.rsi14 })));
-
-        if (payload.forecast_fan && payload.forecast_fan.length) {
-          const lastC = candles[candles.length - 1];
-          const anchor = { time: lastC.time, value: lastC.close };
-          tvFanExp.setData([anchor, ...payload.forecast_fan.map(f => ({ time: f.time, value: f.expected }))]);
-          tvFanUp.setData([anchor, ...payload.forecast_fan.map(f => ({ time: f.time, value: f.upper_90 }))]);
-          tvFanLow.setData([anchor, ...payload.forecast_fan.map(f => ({ time: f.time, value: f.lower_90 }))]);
-        }
-        tvChart.timeScale().fitContent();
-      }
-
-      // Populate Research Charts
-      if (artCandles) {
-        artCandles.setData(candles.map(c => ({ time: c.time, open: c.open, high: c.high, low: c.low, close: c.close })));
-        artVolume.setData(candles.map(c => ({
-          time: c.time, value: c.volume,
-          color: c.close >= c.open ? 'rgba(46, 155, 120, 0.3)' : 'rgba(214, 82, 82, 0.3)'
-        })));
-        artEma12.setData(candles.map(c => ({ time: c.time, value: c.ema12 })));
-        artEma26.setData(candles.map(c => ({ time: c.time, value: c.ema26 })));
-        artRsiSeries.setData(candles.map(c => ({ time: c.time, value: c.rsi14 })));
-
-        if (payload.forecast_fan && payload.forecast_fan.length) {
-          const lastC = candles[candles.length - 1];
-          const anchor = { time: lastC.time, value: lastC.close };
-          artFanExp.setData([anchor, ...payload.forecast_fan.map(f => ({ time: f.time, value: f.expected }))]);
-          artFanUp.setData([anchor, ...payload.forecast_fan.map(f => ({ time: f.time, value: f.upper_90 }))]);
-          artFanLow.setData([anchor, ...payload.forecast_fan.map(f => ({ time: f.time, value: f.lower_90 }))]);
-        }
-        artChart.timeScale().fitContent();
-      }
-
-      // Update HUD & Metadata
-      const last = candles[candles.length - 1];
-      const sig = payload.signal || SIGNALS.find(s => s.symbol === sym) || {};
-      const sector = payload.sector || sig.sector || 'Large Cap Equity';
-
-      document.getElementById('tv-header-sector').innerText = sector;
-      document.getElementById('tv-hud-sym').innerText = `${sym} · 1D · NSE`;
-      document.getElementById('tv-hud-open').innerText = '₹' + last.open.toFixed(2);
-      document.getElementById('tv-hud-high').innerText = '₹' + last.high.toFixed(2);
-      document.getElementById('tv-hud-low').innerText = '₹' + last.low.toFixed(2);
-      document.getElementById('tv-hud-close').innerText = '₹' + last.close.toFixed(2);
-      document.getElementById('tv-hud-vol').innerText = Number(last.volume).toLocaleString('en-IN');
-      document.getElementById('tv-ord-px').value = last.close.toFixed(2);
-
-      const chg = sig.change_1d_pct !== undefined ? sig.change_1d_pct : 0;
-      const chgEl = document.getElementById('tv-hud-chg');
-      chgEl.innerText = `${chg >= 0 ? '+' : ''}${chg.toFixed(2)}%`;
-      chgEl.style.color = chg >= 0 ? 'var(--tv-green)' : 'var(--tv-red)';
-      document.getElementById('tv-hud-px').innerText = '₹' + last.close.toFixed(2);
-
-      if (sig.predicted_return_pct !== undefined) {
-        document.getElementById('tv-hud-gamma').innerText = `${sig.predicted_return_pct >= 0 ? '+' : ''}${sig.predicted_return_pct.toFixed(2)}%`;
-        document.getElementById('tv-det-gamma').innerText = `${sig.predicted_return_pct >= 0 ? '+' : ''}${sig.predicted_return_pct.toFixed(2)}%`;
-        document.getElementById('tv-det-alea').innerText = `${sig.aleatoric_vol_pct.toFixed(2)}%`;
-        document.getElementById('tv-det-epis').innerText = `${sig.epistemic_uncertainty.toFixed(4)}`;
-        document.getElementById('tv-det-pb').innerText = `${(sig.drawdown_crash_prob * 100).toFixed(1)}%`;
-        document.getElementById('tv-tier-epis').innerText = `${sig.epistemic_uncertainty.toFixed(5)}`;
-      }
-
-      document.getElementById('tv-det-title').innerText = `${sym}.NS`;
-      document.getElementById('tv-det-sec').innerText = `${sector} · NSE Large Cap`;
-
-      // Inspector metadata
-      document.getElementById('art-title').innerText = `NSE:${sym} — ${sector}`;
-      document.getElementById('art-px').innerText = `₹${last.close.toFixed(2)} (${chg >= 0 ? '+' : ''}${chg.toFixed(2)}%)`;
-      if (sig.predicted_return_pct !== undefined) {
-        document.getElementById('art-gamma').innerText = `${sig.predicted_return_pct >= 0 ? '+' : ''}${sig.predicted_return_pct.toFixed(2)}%`;
-      }
-    }
-
-    /* ================= SYNC SIGNALS ================= */
+    /* ================= SYNC & SIGNALS ================= */
     async function syncWithRender() {
       const dot = document.getElementById('api-dot');
       const lbl = document.getElementById('api-label');
@@ -2304,230 +1492,95 @@
       const isCash = payload.regime === 'CASH_PRESERVATION';
       const pill = document.getElementById('header-regime-pill');
       if (pill) {
-        pill.className = 'regime-tag ' + (isCash ? 'cash' : 'riskon');
         document.getElementById('regime-title').innerText = isCash ? 'REGIME: CASH PRESERVATION' : 'REGIME: RISK-ON';
         document.getElementById('regime-sub').innerText = `| Drift: ${payload.market_expected_drift_pct >= 0 ? '+' : ''}${payload.market_expected_drift_pct}% | P_breach: ${(payload.market_average_crash_probability * 100).toFixed(1)}%`;
       }
 
-      const tvReg = document.getElementById('tv-header-regime-pill');
-      if (tvReg) {
-        tvReg.className = 'tv-regime-badge ' + (isCash ? 'cash' : 'riskon');
-        document.getElementById('tv-regime-txt').innerText = isCash ? 'CASH PRESERVATION' : 'RISK-ON ACTIVE';
-      }
-
-      renderWatchlists();
+      renderSidebarWatchlist();
+      renderCoverRibbon();
     }
 
-    function renderWatchlists() {
-      // Right drawer watchlist
-      const rbox = document.getElementById('tv-watchlist-container');
-      rbox.innerHTML = '';
-      SIGNALS.forEach(s => {
-        const item = document.createElement('div');
-        item.className = 'tv-watch-item' + (s.symbol === CURRENT_SYMBOL ? ' active' : '');
-        const col = s.change_1d_pct >= 0 ? 'var(--tv-green)' : 'var(--tv-red)';
-        item.onclick = () => loadChartForSymbol(s.symbol);
-        item.innerHTML = `
-          <div>
-            <div class="tv-watch-sym">${s.symbol}</div>
-            <div class="tv-watch-sec">${s.sector || 'NSE Equity'}</div>
-          </div>
-          <div>
-            <div class="tv-watch-px mono">₹${s.close_price.toFixed(1)}</div>
-            <div class="tv-watch-chg mono" style="color:${col};">${s.change_1d_pct >= 0 ? '+' : ''}${s.change_1d_pct.toFixed(2)}%</div>
-          </div>
-        `;
-        rbox.appendChild(item);
-      });
+    function renderCoverRibbon() {
+      const track = document.getElementById('cover-ticker-content');
+      if (!track || !SIGNALS.length) return;
+      const html = SIGNALS.map(s => {
+        const up = s.change_1d_pct >= 0;
+        return `<span class="ticker-item"><span class="ticker-sym">NSE:${s.symbol}</span> <span class="ticker-px">₹${s.close_price.toFixed(2)}</span> <span class="${up ? 'ticker-up' : 'ticker-dn'}">${up ? '+' : ''}${s.change_1d_pct.toFixed(2)}%</span></span>`;
+      }).join('');
+      track.innerHTML = html + html; // loop
+    }
 
-      // Sidebar watchlist
+    function renderSidebarWatchlist() {
       const sbox = document.getElementById('sidebar-watchlist');
-      if (sbox) {
-        sbox.innerHTML = '';
-        SIGNALS.forEach(s => {
-          const div = document.createElement('div');
-          div.className = 'nav-item' + (s.symbol === CURRENT_SYMBOL ? ' active' : '');
-          const col = s.predicted_return_pct >= 0 ? 'var(--positive)' : 'var(--negative)';
-          div.onclick = () => askBrain(`Analyze ${s.symbol}.NS live with my ML brain`);
-          div.innerHTML = `
-            <span style="font-weight:600; color:var(--text-primary);">${s.symbol}</span>
-            <span class="mono" style="font-size:11px;">
-              ₹${s.close_price.toFixed(1)}
-              <span style="color:${col}; margin-left:4px;">${s.predicted_return_pct >= 0 ? '+' : ''}${s.predicted_return_pct.toFixed(1)}%</span>
-            </span>
-          `;
-          sbox.appendChild(div);
-        });
-      }
-    }
-
-    function filterWatchlist(q) {
-      const term = q.toUpperCase();
-      document.querySelectorAll('.tv-watch-item').forEach(el => {
-        const text = el.innerText.toUpperCase();
-        el.style.display = text.includes(term) ? 'flex' : 'none';
-      });
-    }
-
-    /* ================= DOCK & DRAWER CONTROLS ================= */
-    function switchTvDockTab(tab) {
-      ['ledger', 'sizer', 'tiergate', 'kernel', 'taxes'].forEach(t => {
-        document.getElementById('tv-pane-' + t).classList.toggle('active', t === tab);
-        document.getElementById('tv-tab-btn-' + t).classList.toggle('active', t === tab);
-      });
-    }
-
-    function toggleTvDock() {
-      const dock = document.getElementById('tv-bottom-dock');
-      const isCol = dock.classList.toggle('collapsed');
-      document.getElementById('tv-dock-toggle-btn').innerText = isCol ? '▲ Expand' : '▼ Minimize';
-      setTimeout(resizeTradingViewCharts, 160);
-    }
-
-    function toggleTvRightDrawer() {
-      document.getElementById('tv-right-drawer').classList.toggle('closed');
-      setTimeout(resizeTradingViewCharts, 220);
-    }
-
-    function switchTvRightTab(tab) {
-      ['watch', 'details', 'features'].forEach(t => {
-        document.getElementById('tv-rbody-' + t).style.display = (t === tab) ? 'flex' : 'none';
-        document.getElementById('tv-rtab-' + t).classList.toggle('active', t === tab);
-      });
-    }
-
-    /* ================= SYMBOL SEARCH MODAL ================= */
-    function openSymbolSearchModal() {
-      const modal = document.getElementById('tv-search-modal');
-      modal.style.display = 'flex';
-      const input = document.getElementById('tv-search-input');
-      input.value = '';
-      input.focus();
-      renderModalSymbols('');
-    }
-
-    function closeSymbolSearchModal() {
-      document.getElementById('tv-search-modal').style.display = 'none';
-    }
-
-    function renderModalSymbols(query) {
-      const box = document.getElementById('tv-modal-results');
-      box.innerHTML = '';
-      const filtered = SIGNALS.filter(s => {
-        const q = query.toUpperCase();
-        return s.symbol.toUpperCase().includes(q) || (s.sector && s.sector.toUpperCase().includes(q));
-      });
-
-      filtered.forEach(s => {
-        const item = document.createElement('div');
-        item.className = 'tv-modal-item';
-        const col = s.predicted_return_pct >= 0 ? 'var(--tv-green)' : 'var(--tv-red)';
-        item.onclick = () => {
-          loadChartForSymbol(s.symbol);
-          closeSymbolSearchModal();
-        };
-        item.innerHTML = `
-          <div>
-            <span style="font-weight:700; color:var(--tv-text-bright); font-size:13.5px;">${s.symbol}</span>
-            <span class="mono" style="color:var(--tv-text-dim); font-size:11.5px; margin-left:6px;">NSE · ${s.sector}</span>
-          </div>
-          <div class="mono" style="font-size:12.5px;">
-            ₹${s.close_price.toFixed(2)}
-            <span style="color:${col}; margin-left:6px;">${s.predicted_return_pct >= 0 ? '+' : ''}${s.predicted_return_pct.toFixed(2)}%</span>
-          </div>
+      if (!sbox) return;
+      sbox.innerHTML = '';
+      SIGNALS.forEach(s => {
+        const div = document.createElement('div');
+        div.className = 'nav-item' + (s.symbol === CURRENT_SYMBOL ? ' active' : '');
+        const col = s.predicted_return_pct >= 0 ? 'var(--positive)' : 'var(--negative)';
+        div.onclick = () => askBrain(`Analyze ${s.symbol}.NS live with my ML brain`);
+        div.innerHTML = `
+          <span style="font-weight:600; color:var(--text-primary);">${s.symbol}</span>
+          <span class="mono" style="font-size:11px;">
+            ₹${s.close_price.toFixed(1)}
+            <span style="color:${col}; margin-left:4px;">${s.predicted_return_pct >= 0 ? '+' : ''}${s.predicted_return_pct.toFixed(1)}%</span>
+          </span>
         `;
-        box.appendChild(item);
+        sbox.appendChild(div);
       });
     }
 
-    function toggleIndicatorsModal() {
-      alert('Active Indicators:\n• 20-Day Evidential Forecast Fan (γ ± q̂σ)\n• EMA 12 (Electric Blue)\n• EMA 26 (Amber)\n• RSI 14 (Sub-Pane with 70/30 Boundaries)');
-    }
-
-    function onTvOrderSymbolChange() {
-      const sym = document.getElementById('tv-ord-sym').value;
-      loadChartForSymbol(sym);
-    }
-
-    /* ================= SIMULATE ORDER ================= */
-    async function runTvOrderSimulation() {
-      const sym = document.getElementById('tv-ord-sym').value;
-      const side = document.getElementById('tv-ord-side').value;
-      const qty = parseInt(document.getElementById('tv-ord-qty').value, 10) || 50;
-      const px = parseFloat(document.getElementById('tv-ord-px').value) || 1000.0;
-      const receipt = document.getElementById('tv-dock-kernel-receipt');
-
-      receipt.innerHTML = `<span>Evaluating 3-Gate Formal Safety Kernel for ${qty} × ${sym} @ ₹${px.toFixed(2)}...</span>`;
-
+    async function loadChartForSymbol(sym) {
+      CURRENT_SYMBOL = sym;
+      renderSidebarWatchlist();
+      if (SNAPSHOT && SNAPSHOT.charts && SNAPSHOT.charts[sym]) {
+        renderChartData(sym, SNAPSHOT.charts[sym]);
+      }
       try {
-        const res = await fetch(`${API_BASE}/api/simulate-order`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            mode: 'SINGLE',
-            symbol: sym,
-            side: side,
-            quantity: qty,
-            limit_price: px,
-            capital_inr: 1000000,
-            force_risk_on: false
-          })
-        });
+        const r = await fetch(`${API_BASE}/api/chart/${sym}`, { mode: 'cors' });
+        if (r.ok) {
+          const d = await r.json();
+          if (SNAPSHOT && SNAPSHOT.charts) SNAPSHOT.charts[sym] = d;
+          renderChartData(sym, d);
+        }
+      } catch (e) {}
+    }
 
-        if (!res.ok) throw new Error('Simulation failed');
-        const sim = await res.json();
-        updateDockSimulationReceipt(sim);
-      } catch (err) {
-        // Local fallback simulation calculation
-        const notional = qty * px;
-        const stt = side === 'BUY' ? notional * 0.001 : notional * 0.001;
-        const stamp = side === 'BUY' ? notional * 0.00015 : 0;
-        const totalTax = stt + stamp + (notional * 0.000035);
-        const postCash = 1000000 - notional - totalTax;
+    function renderChartData(sym, payload) {
+      if (!payload || !payload.candles || !payload.candles.length) return;
+      const candles = payload.candles;
 
-        receipt.innerHTML = `
-          <div><b style="color:var(--tv-green);">[VETO_CHECK_PASSED]</b> Single-Stock Simulation Approved</div>
-          <div style="margin-top:2px; color:var(--tv-text-dim);">Order: ${side} ${qty} × ${sym} @ ₹${px.toFixed(2)} | Notional: ₹${notional.toLocaleString('en-IN')} | FA 2026 Taxes: ₹${totalTax.toFixed(2)}</div>
-          <div style="margin-top:2px; color:var(--tv-text-dim);">Ed25519 Enclave Signature: <code>9f8e7d6c5b4a3a2b1c...</code> (Hardware Enclave Certified)</div>
-        `;
-        document.getElementById('tv-dock-wsettled').innerText = '₹' + postCash.toLocaleString('en-IN', { minimumFractionDigits: 2 });
-        document.getElementById('tv-dock-taxes').innerText = '₹' + totalTax.toFixed(2);
+      if (artCandles) {
+        artCandles.setData(candles.map(c => ({ time: c.time, open: c.open, high: c.high, low: c.low, close: c.close })));
+        artVolume.setData(candles.map(c => ({
+          time: c.time, value: c.volume,
+          color: c.close >= c.open ? 'rgba(46, 155, 120, 0.3)' : 'rgba(214, 82, 82, 0.3)'
+        })));
+        artEma12.setData(candles.map(c => ({ time: c.time, value: c.ema12 })));
+        artEma26.setData(candles.map(c => ({ time: c.time, value: c.ema26 })));
+        artRsiSeries.setData(candles.map(c => ({ time: c.time, value: c.rsi14 })));
+
+        if (payload.forecast_fan && payload.forecast_fan.length) {
+          const lastC = candles[candles.length - 1];
+          const anchor = { time: lastC.time, value: lastC.close };
+          artFanExp.setData([anchor, ...payload.forecast_fan.map(f => ({ time: f.time, value: f.expected }))]);
+          artFanUp.setData([anchor, ...payload.forecast_fan.map(f => ({ time: f.time, value: f.upper_90 }))]);
+          artFanLow.setData([anchor, ...payload.forecast_fan.map(f => ({ time: f.time, value: f.lower_90 }))]);
+        }
+        artChart.timeScale().fitContent();
+      }
+
+      const last = candles[candles.length - 1];
+      const sig = payload.signal || SIGNALS.find(s => s.symbol === sym) || {};
+      const chg = sig.change_1d_pct !== undefined ? sig.change_1d_pct : 0;
+      document.getElementById('art-title').innerText = `NSE:${sym} — ${payload.sector || sig.sector || 'Large Cap'}`;
+      document.getElementById('art-px').innerText = `₹${last.close.toFixed(2)} (${chg >= 0 ? '+' : ''}${chg.toFixed(2)}%)`;
+      if (sig.predicted_return_pct !== undefined) {
+        document.getElementById('art-gamma').innerText = `${sig.predicted_return_pct >= 0 ? '+' : ''}${sig.predicted_return_pct.toFixed(2)}%`;
       }
     }
 
-    function updateDockSimulationReceipt(sim) {
-      const receipt = document.getElementById('tv-dock-kernel-receipt');
-      const o = sim.order;
-      const sig = (sim.cryptographic_proof && sim.cryptographic_proof.ed25519_signature) || '';
-      const col = sim.gate_status === 'APPROVED' ? 'var(--tv-green)' : 'var(--tv-red)';
-
-      receipt.innerHTML = `
-        <div><b style="color:${col};">[${sim.gate_status}]</b> ${sim.message || ''}</div>
-        <div style="margin-top:2px;">Order: ${o.side} ${o.quantity} × ${o.symbol}.NS @ ₹${o.limit_price.toFixed(2)} | Notional: ₹${Number(o.notional_value_inr).toLocaleString('en-IN')}</div>
-        <div style="margin-top:2px; color:var(--tv-text-dim);">Ed25519 Enclave Signature: <code>${sig ? sig.slice(0, 48) + '...' : 'VETOED'}</code></div>
-      `;
-
-      if (sim.ledger) {
-        document.getElementById('tv-dock-wsettled').innerText = '₹' + Number(sim.ledger.W_settled).toLocaleString('en-IN', { minimumFractionDigits: 2 });
-      }
-      if (o && o.statutory_charges_inr) {
-        document.getElementById('tv-dock-taxes').innerText = '₹' + o.statutory_charges_inr.toFixed(2);
-      }
-    }
-
-    /* ================= CLOCK ================= */
-    function startIstClock() {
-      setInterval(() => {
-        const now = new Date();
-        const ist = new Date(now.toLocaleString('en-US', { timeZone: 'Asia/Kolkata' }));
-        const pad = n => String(n).padStart(2, '0');
-        const str = `${pad(ist.getHours())}:${pad(ist.getMinutes())}:${pad(ist.getSeconds())} (UTC+5:30)`;
-        const el = document.getElementById('tv-clock-ist');
-        if (el) el.innerText = str;
-      }, 1000);
-    }
-
-    /* ================= RESEARCH CONVERSATIONAL FEED ================= */
+    /* ================= CONVERSATIONAL CHAT ================= */
     function resetConversation() {
       const container = document.getElementById('chat-container');
       container.innerHTML = `
@@ -2623,19 +1676,16 @@
 
         const sym = data.focus_symbol || CURRENT_SYMBOL;
         document.getElementById(proseId).innerHTML = cleanFormatMarkdown(data.reply_markdown) + `
-          <div style="margin-top:10px; display:flex; gap:8px;">
-            <button class="tv-cta-back" onclick="switchViewMode('tradingview'); loadChartForSymbol('${sym}');">
-              📈 Open in TradingView Terminal
-            </button>
+          <div style="margin-top:10px;">
             <button class="text-btn" onclick="document.getElementById('artifact-panel').classList.remove('closed'); switchArtifactTab('chart'); resizeResearchCharts();">
-              Open Inspector Panel →
+              Inspect NSE:${sym} Chart &amp; 20 Causal Features →
             </button>
           </div>
         `;
 
         if (data.all_signals && data.all_signals.length) {
           SIGNALS = data.all_signals;
-          renderWatchlists();
+          renderSidebarWatchlist();
         }
         if (sym) {
           await loadChartForSymbol(sym);
@@ -2649,11 +1699,6 @@
         document.getElementById(proseId).innerHTML = `
           <h3>AlphaNiti v25.0 — ${focus.symbol}.NS</h3>
           <p>Spot Price: <code>₹${focus.close_price.toFixed(2)}</code> | Expected 20D Return: <b>${focus.predicted_return_pct >= 0 ? '+' : ''}${focus.predicted_return_pct.toFixed(2)}%</b> | Tail Breach Prob: <code>${(focus.drawdown_crash_prob * 100).toFixed(1)}%</code> → <b>${focus.recommended_action}</b></p>
-          <div style="margin-top:10px;">
-            <button class="tv-cta-back" onclick="switchViewMode('tradingview'); loadChartForSymbol('${focus.symbol}');">
-              📈 Open in TradingView Terminal
-            </button>
-          </div>
         `;
         await loadChartForSymbol(focus.symbol);
       }
