@@ -17,6 +17,7 @@ from pathlib import Path
 
 from src.risk.factor_model import OrthogonalFactorModel
 from src.risk.wasserstein_dro import EsfahaniKuhnWassersteinDRO
+from src.risk.tier_gate import HysteresisTierGate
 from src.portfolio.statutory_costs import IndianStatutoryCostModel
 from src.portfolio.integer_sizer import LatticeBranchAndBoundSolver
 from src.accounting.ledger import FiveBucketBalanceSheet
@@ -37,6 +38,7 @@ class AlphaNitiBacktestEngine:
         confidence_alpha: float = 0.95,
         max_asset_weight: float = 0.20,
         adaptive_cash_regime: bool = True,
+        tier_gate: Optional[HysteresisTierGate] = None,
     ):
         self.initial_capital = initial_capital_inr
         self.rebalance_interval = rebalance_interval_days
@@ -45,8 +47,9 @@ class AlphaNitiBacktestEngine:
         self.max_weight = max_asset_weight
         self.adaptive_cash_regime = adaptive_cash_regime
 
-        self.cost_model = IndianStatutoryCostModel()
+        self.cost_model = IndianStatutoryCostModel.from_config()
         self.ledger = FiveBucketBalanceSheet(initial_capital_inr=initial_capital_inr)
+        self.tier_gate = tier_gate or HysteresisTierGate()
         self.sizer = LatticeBranchAndBoundSolver(
             cost_model=self.cost_model,
             alpha_cvar=confidence_alpha,
@@ -123,13 +126,20 @@ class AlphaNitiBacktestEngine:
                             total_statutory_charges += cost
                             self.ledger.fill_sell_order(sym, current_qty, p, cost)
 
-                    # Adaptive Regime Switch Gate:
-                    # If expected market drift is negative, preserve 100% in settled cash W_settled
-                    is_bearish_regime = self.adaptive_cash_regime and (np.mean(mu_horizon) < 0.0 or np.median(mu_horizon) < 0.0)
+                    # Uncertainty evaluation and Hysteresis Tier Gate directive
+                    market_vol = float(np.mean(np.std(hist_returns.values, axis=0)))
+                    tier_directive = self.tier_gate.update(uncertainty=market_vol)
 
-                    if not is_bearish_regime:
+                    # Adaptive Regime Switch Gate:
+                    # If expected market drift is negative OR Tier 3 Systemic Freeze, preserve 100% in settled cash W_settled
+                    is_bearish_regime = self.adaptive_cash_regime and (
+                        np.mean(mu_horizon) < 0.0 or np.median(mu_horizon) < 0.0 or tier_directive["tier"] == 3
+                    )
+
+                    if not is_bearish_regime and tier_directive["allow_buys"]:
                         # Solve discrete integer portfolio with Branch-and-Bound
-                        budget_for_alloc = self.ledger.get_buying_power()
+                        raw_budget = self.ledger.get_buying_power()
+                        budget_for_alloc = raw_budget * tier_directive["position_multiplier"]
                         if budget_for_alloc > 10_000:
                             cert = self.sizer.solve(
                                 prices=price_vec,
@@ -212,5 +222,6 @@ class AlphaNitiBacktestEngine:
             "backtest_runtime_sec": round(elapsed, 2),
             "calibration_metrics": calib_results,
             "dsr_metrics": dsr_results,
+            "tier_gate_history": self.tier_gate.history,
             "nav_history": nav_df,
         }

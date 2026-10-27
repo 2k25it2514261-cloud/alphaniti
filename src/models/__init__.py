@@ -16,6 +16,8 @@ from src.models.evidential_nn import (
 from src.models.trainer import (
     EvidentialTrainer,
     train_evidential_ensemble,
+    GaussianTrainer,
+    train_plain_deep_ensemble,
 )
 
 __all__ = [
@@ -29,4 +31,6 @@ __all__ = [
     "PlainDeepEnsemble",
     "EvidentialTrainer",
     "train_evidential_ensemble",
+    "GaussianTrainer",
+    "train_plain_deep_ensemble",
 ]
