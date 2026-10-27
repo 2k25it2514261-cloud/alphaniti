@@ -88,9 +88,7 @@
       transition: opacity 0.22s ease, transform 0.22s ease;
     }
     #view-cover.hidden {
-      opacity: 0;
-      pointer-events: none;
-      transform: translateY(-6px);
+      display: none !important;
     }
 
     /* Top Masthead & Live Tape */
@@ -539,10 +537,13 @@
        VIEW 2: RESEARCH & EXECUTION WORKSPACE (#view-research)
        ========================================================================== */
     #view-research {
-      display: flex;
+      display: none;
       height: 100vh;
       width: 100vw;
       overflow: hidden;
+    }
+    #view-research.active {
+      display: flex;
     }
 
     /* LEFT SIDEBAR */
@@ -1632,11 +1633,13 @@
     function enterWorkspace() {
       const cover = document.getElementById('view-cover');
       cover.classList.add('hidden');
-      setTimeout(resizeCharts, 80);
+      document.getElementById('view-research').classList.add('active');
+      setTimeout(resizeCharts, 60);
     }
 
     function showCover() {
       const cover = document.getElementById('view-cover');
+      document.getElementById('view-research').classList.remove('active');
       cover.classList.remove('hidden');
       setTimeout(resizeCoverCharts, 60);
     }
