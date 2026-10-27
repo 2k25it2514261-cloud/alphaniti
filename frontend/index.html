@@ -3,32 +3,13 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>AlphaNiti — Institutional Quantitative Execution Engine</title>
+  <title>AlphaNiti — Quantitative Research &amp; Execution</title>
   <script src="https://unpkg.com/lightweight-charts@4.2.0/dist/lightweight-charts.standalone.production.js"></script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
   <style>
-    :root {
-      --bg-darkest: #07080a;
-      --bg-base: #0c0e14;
-      --bg-panel: #131722;
-      --bg-card: rgba(22, 27, 39, 0.75);
-      --bg-card-hover: rgba(30, 37, 54, 0.9);
-      --border-subtle: rgba(255, 255, 255, 0.08);
-      --border-medium: rgba(255, 255, 255, 0.15);
-      --border-glow: rgba(41, 98, 255, 0.35);
-      --text-bright: #ffffff;
-      --text-primary: #e6ebf5;
-      --text-secondary: #9aa3b8;
-      --text-dim: #60687a;
-      --accent-blue: #2962ff;
-      --accent-cyan: #00d4ff;
-      --accent-purple: #ab47bc;
-      --accent-amber: #ff9800;
-      --accent-green: #089981;
-      --accent-red: #f23645;
-
-      /* Research Workspace theme variables */
+    :root[data-theme="dark"] {
+      --bg-canvas: #0C0C0B;
       --bg-main: #141413;
       --bg-sidebar: #0F0F0E;
       --bg-elevated: #1C1C1A;
@@ -36,16 +17,49 @@
       --bg-hover: #252522;
       --bg-artifact: #171716;
       --bg-user-msg: #232320;
+      --border-subtle: #292826;
+      --border-strong: #3A3935;
+      --text-primary: #EDEDEB;
+      --text-secondary: #A19F99;
       --text-muted: #6E6C66;
+      --accent: #C96A4B;
+      --accent-hover: #B55B3D;
       --positive: #2E9B78;
+      --positive-bg: rgba(46, 155, 120, 0.11);
       --negative: #D65252;
+      --negative-bg: rgba(214, 82, 82, 0.11);
       --warning: #C89128;
+      --warning-bg: rgba(200, 145, 40, 0.11);
+    }
+
+    :root[data-theme="light"] {
+      --bg-canvas: #F5F3EE;
+      --bg-main: #FAF9F6;
+      --bg-sidebar: #F2F0EA;
+      --bg-elevated: #FFFFFF;
+      --bg-composer: #FFFFFF;
+      --bg-hover: #EAE7DF;
+      --bg-artifact: #F5F3EE;
+      --bg-user-msg: #EFECE5;
+      --border-subtle: #E3E0D8;
+      --border-strong: #C9C5B9;
+      --text-primary: #1A1918;
+      --text-secondary: #5A5852;
+      --text-muted: #8C8881;
+      --accent: #B85C3E;
+      --accent-hover: #A04D31;
+      --positive: #18794E;
+      --positive-bg: rgba(24, 121, 78, 0.09);
+      --negative: #C43B3B;
+      --negative-bg: rgba(196, 59, 59, 0.09);
+      --warning: #9F6B12;
+      --warning-bg: rgba(159, 107, 18, 0.09);
     }
 
     * { box-sizing: border-box; margin: 0; padding: 0; }
     body {
-      font-family: -apple-system, BlinkMacSystemFont, 'Inter', 'Segoe UI', Roboto, sans-serif;
-      background-color: var(--bg-darkest);
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      background-color: var(--bg-main);
       color: var(--text-primary);
       height: 100vh;
       width: 100vw;
@@ -55,399 +69,483 @@
       -webkit-font-smoothing: antialiased;
     }
 
+    .serif { font-family: 'Instrument Serif', Georgia, serif; font-weight: 400; }
     .mono { font-family: 'JetBrains Mono', monospace; font-variant-numeric: tabular-nums; }
-    .serif { font-family: 'Instrument Serif', Georgia, serif; }
-
-    /* ================= VIEW WRAPPERS ================= */
-    .view-container {
-      width: 100vw;
-      height: 100vh;
-      position: absolute;
-      top: 0;
-      left: 0;
-      transition: opacity 0.35s ease, transform 0.35s ease;
-    }
 
     /* ==========================================================================
-       VIEW 1: MESMERIZING COVER PAGE (#view-cover)
+       VIEW 1: ARCHITECTURAL COVER SHEET (#view-cover)
        ========================================================================== */
     #view-cover {
+      position: fixed;
+      inset: 0;
+      z-index: 60;
+      background-color: var(--bg-canvas);
+      color: var(--text-primary);
       display: flex;
       flex-direction: column;
-      background: radial-gradient(circle at 50% 20%, #151a2e 0%, #090b12 60%, #050608 100%);
-      z-index: 30;
       overflow-y: auto;
       overflow-x: hidden;
-      position: relative;
+      transition: opacity 0.22s ease, transform 0.22s ease;
     }
-
-    /* Ambient Canvas */
-    #ambient-canvas {
-      position: absolute;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
+    #view-cover.hidden {
+      opacity: 0;
       pointer-events: none;
-      z-index: 1;
-      opacity: 0.7;
+      transform: translateY(-6px);
     }
 
-    /* Live Ticker Ribbon */
-    .cover-ticker-wrap {
-      width: 100%;
-      height: 32px;
-      background: rgba(12, 14, 20, 0.9);
+    /* Top Masthead & Live Tape */
+    .cover-masthead {
+      height: 50px;
       border-bottom: 1px solid var(--border-subtle);
-      overflow: hidden;
-      position: relative;
-      z-index: 10;
-      display: flex;
-      align-items: center;
-    }
-    .cover-ticker-track {
-      display: flex;
-      gap: 28px;
-      white-space: nowrap;
-      animation: tickerRoll 35s linear infinite;
-    }
-    @keyframes tickerRoll {
-      0% { transform: translateX(0); }
-      100% { transform: translateX(-50%); }
-    }
-    .ticker-item {
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      font-size: 11.5px;
-    }
-    .ticker-sym { font-weight: 700; color: var(--text-bright); }
-    .ticker-px { color: var(--text-secondary); }
-    .ticker-up { color: var(--accent-green); font-weight: 600; }
-    .ticker-dn { color: var(--accent-red); font-weight: 600; }
-
-    /* Cover Top Header */
-    .cover-nav {
-      height: 64px;
-      padding: 0 40px;
+      background: var(--bg-sidebar);
       display: flex;
       align-items: center;
       justify-content: space-between;
-      position: relative;
-      z-index: 10;
-      border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+      padding: 0 28px;
+      flex-shrink: 0;
+      position: sticky;
+      top: 0;
+      z-index: 20;
     }
-    .cover-brand {
+    .cover-masthead-left {
       display: flex;
-      align-items: center;
-      gap: 10px;
+      align-items: baseline;
+      gap: 12px;
+      flex-shrink: 0;
     }
-    .cover-brand-logo {
-      width: 28px;
-      height: 28px;
-      border-radius: 6px;
-      background: linear-gradient(135deg, var(--accent-blue) 0%, var(--accent-cyan) 100%);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-weight: 800;
-      color: #fff;
-      font-size: 14px;
-      box-shadow: 0 0 15px rgba(0, 212, 255, 0.4);
+    .cover-wordmark {
+      font-size: 22px;
+      color: var(--text-primary);
+      letter-spacing: -0.015em;
     }
-    .cover-brand-title {
-      font-size: 18px;
-      font-weight: 700;
-      letter-spacing: -0.02em;
-      color: var(--text-bright);
-    }
-    .cover-brand-badge {
-      font-size: 10px;
-      font-weight: 700;
-      padding: 2px 6px;
-      border-radius: 4px;
-      background: rgba(41, 98, 255, 0.18);
-      color: var(--accent-cyan);
-      border: 1px solid rgba(0, 212, 255, 0.3);
-      letter-spacing: 0.05em;
+    .cover-edition {
+      font-size: 11px;
+      color: var(--text-muted);
+      letter-spacing: 0.03em;
     }
 
-    .cover-nav-right {
+    .cover-tape-viewport {
+      flex: 1;
+      max-width: 680px;
+      margin: 0 24px;
+      overflow: hidden;
+      border-left: 1px solid var(--border-subtle);
+      border-right: 1px solid var(--border-subtle);
+      padding: 4px 14px;
       display: flex;
       align-items: center;
-      gap: 16px;
+      gap: 18px;
+      white-space: nowrap;
     }
-    .cover-status-pill {
-      display: flex;
-      align-items: center;
+    .tape-quote {
+      display: inline-flex;
+      align-items: baseline;
       gap: 6px;
       font-size: 11.5px;
-      color: var(--accent-green);
-      background: rgba(8, 153, 129, 0.12);
-      border: 1px solid rgba(8, 153, 129, 0.3);
-      padding: 4px 12px;
-      border-radius: 20px;
-      font-weight: 600;
+      cursor: pointer;
+      color: var(--text-secondary);
+      transition: color 0.12s;
     }
-    .cover-pulse {
-      width: 6px;
-      height: 6px;
-      border-radius: 50%;
-      background: var(--accent-green);
-      box-shadow: 0 0 8px var(--accent-green);
-      animation: pulseAnim 2s infinite;
+    .tape-quote:hover {
+      color: var(--text-primary);
     }
-    @keyframes pulseAnim {
-      0% { transform: scale(0.9); opacity: 0.8; }
-      50% { transform: scale(1.3); opacity: 1; }
-      100% { transform: scale(0.9); opacity: 0.8; }
+    .tape-quote b {
+      color: var(--text-primary);
+      font-weight: 500;
     }
 
-    /* Cover Hero Section */
-    .cover-hero-wrap {
-      flex: 1;
-      max-width: 1140px;
+    .cover-masthead-right {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-shrink: 0;
+    }
+
+    /* Architectural Grid Frame */
+    .cover-sheet {
+      width: 100%;
+      max-width: 1380px;
       margin: 0 auto;
-      padding: 50px 24px 60px 24px;
+      border-left: 1px solid var(--border-subtle);
+      border-right: 1px solid var(--border-subtle);
+      flex: 1;
       display: flex;
       flex-direction: column;
-      align-items: center;
-      text-align: center;
-      position: relative;
-      z-index: 10;
+      background: var(--bg-main);
     }
 
-    .cover-eyebrow {
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      background: rgba(255, 255, 255, 0.04);
-      border: 1px solid rgba(255, 255, 255, 0.1);
-      padding: 6px 16px;
-      border-radius: 30px;
-      font-size: 12px;
-      font-weight: 600;
-      color: var(--accent-cyan);
-      letter-spacing: 0.04em;
-      text-transform: uppercase;
-      margin-bottom: 24px;
-      backdrop-filter: blur(10px);
-      box-shadow: 0 0 20px rgba(41, 98, 255, 0.15);
-    }
-
-    .cover-hero-title {
-      font-size: 58px;
-      line-height: 1.08;
-      font-weight: 400;
-      color: var(--text-bright);
-      letter-spacing: -0.02em;
-      max-width: 960px;
-      margin-bottom: 20px;
-      text-shadow: 0 2px 20px rgba(0, 0, 0, 0.6);
-    }
-    .cover-hero-title em {
-      font-style: italic;
-      color: #b5c7ff;
-      background: linear-gradient(135deg, #ffffff 30%, #8baaff 100%);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-    }
-
-    .cover-hero-sub {
-      font-size: 16px;
-      line-height: 1.6;
-      color: var(--text-secondary);
-      max-width: 760px;
-      margin-bottom: 40px;
-      font-weight: 400;
-    }
-
-    /* ================= THE MESMERIZING ENTER BUTTON ================= */
-    .cover-enter-portal {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 14px;
-      margin-bottom: 50px;
-      position: relative;
-    }
-
-    .cover-enter-btn {
-      position: relative;
-      padding: 20px 48px;
-      font-size: 16.5px;
-      font-weight: 700;
-      letter-spacing: 0.04em;
-      color: #ffffff;
-      background: linear-gradient(135deg, #2962ff 0%, #00b4d8 50%, #7b2cbf 100%);
-      background-size: 200% 200%;
-      border: 1px solid rgba(255, 255, 255, 0.3);
-      border-radius: 60px;
-      cursor: pointer;
-      display: inline-flex;
-      align-items: center;
-      gap: 14px;
-      box-shadow: 0 0 35px rgba(41, 98, 255, 0.5), 0 0 80px rgba(0, 180, 216, 0.3);
-      animation: gradientShift 4s ease infinite;
-      transition: all 0.25s cubic-bezier(0.2, 0.8, 0.2, 1);
-      outline: none;
-    }
-    @keyframes gradientShift {
-      0% { background-position: 0% 50%; }
-      50% { background-position: 100% 50%; }
-      100% { background-position: 0% 50%; }
-    }
-    .cover-enter-btn:hover {
-      transform: translateY(-3px) scale(1.02);
-      box-shadow: 0 0 50px rgba(41, 98, 255, 0.75), 0 0 120px rgba(0, 212, 255, 0.5);
-    }
-    .cover-enter-btn:active {
-      transform: translateY(0) scale(0.99);
-    }
-
-    .cover-btn-icon {
-      font-size: 20px;
-      filter: drop-shadow(0 0 6px #fff);
-    }
-    .cover-btn-arrow {
-      font-size: 20px;
-      transition: transform 0.2s ease;
-    }
-    .cover-enter-btn:hover .cover-btn-arrow {
-      transform: translateX(5px);
-    }
-
-    .cover-enter-hint {
-      font-size: 12px;
-      color: var(--text-dim);
-      display: flex;
-      align-items: center;
-      gap: 6px;
-    }
-    .cover-enter-hint kbd {
-      background: rgba(255, 255, 255, 0.08);
-      border: 1px solid var(--border-medium);
-      color: var(--text-secondary);
-      font-family: 'JetBrains Mono', monospace;
-      padding: 2px 7px;
-      border-radius: 4px;
-      font-size: 11px;
-    }
-
-    /* Pillars Grid */
-    .cover-grid {
+    /* Primary Split Hero */
+    .cover-hero-grid {
       display: grid;
-      grid-template-columns: repeat(4, 1fr);
-      gap: 14px;
-      width: 100%;
-      margin-bottom: 40px;
+      grid-template-columns: 5fr 7fr;
+      border-bottom: 1px solid var(--border-subtle);
+      min-height: 540px;
     }
-    .cover-card {
-      background: var(--bg-card);
-      border: 1px solid var(--border-subtle);
-      border-radius: 12px;
-      padding: 20px 18px;
-      text-align: left;
+
+    .cover-editorial-col {
+      padding: 44px 40px 36px 40px;
+      border-right: 1px solid var(--border-subtle);
       display: flex;
       flex-direction: column;
-      gap: 10px;
-      backdrop-filter: blur(16px);
-      transition: all 0.2s ease;
-      position: relative;
-      overflow: hidden;
+      justify-content: space-between;
+      gap: 28px;
     }
-    .cover-card:hover {
-      background: var(--bg-card-hover);
-      border-color: var(--border-glow);
-      transform: translateY(-2px);
-    }
-    .card-num {
-      font-family: 'JetBrains Mono', monospace;
+
+    .cover-kicker {
       font-size: 11px;
-      font-weight: 700;
-      color: var(--accent-cyan);
+      text-transform: uppercase;
       letter-spacing: 0.08em;
-    }
-    .card-title {
-      font-size: 14.5px;
-      font-weight: 700;
-      color: var(--text-bright);
-    }
-    .card-desc {
-      font-size: 12px;
-      color: var(--text-secondary);
-      line-height: 1.55;
-    }
-    .card-metric {
-      font-family: 'JetBrains Mono', monospace;
-      font-size: 11px;
-      color: var(--accent-green);
-      background: rgba(8, 153, 129, 0.1);
-      padding: 4px 8px;
-      border-radius: 4px;
-      margin-top: auto;
-      border: 1px solid rgba(8, 153, 129, 0.2);
-    }
-
-    /* Quick Action Launchers */
-    .cover-quick-section {
-      width: 100%;
-      text-align: left;
-      margin-top: 10px;
-    }
-    .cover-quick-title {
-      font-size: 12.5px;
-      font-weight: 700;
-      text-transform: uppercase;
-      letter-spacing: 0.06em;
-      color: var(--text-dim);
-      margin-bottom: 12px;
+      color: var(--text-muted);
       display: flex;
       align-items: center;
-      gap: 8px;
-    }
-    .cover-quick-grid {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
       gap: 10px;
     }
-    .cover-quick-btn {
-      background: rgba(255, 255, 255, 0.03);
-      border: 1px solid var(--border-subtle);
-      border-radius: 8px;
-      padding: 12px 14px;
-      cursor: pointer;
+    .cover-kicker-rule {
+      width: 22px;
+      height: 1px;
+      background: var(--accent);
+      display: inline-block;
+    }
+
+    .cover-headline {
+      font-size: 48px;
+      line-height: 1.07;
+      letter-spacing: -0.02em;
+      color: var(--text-primary);
+      margin-top: 14px;
+    }
+    .cover-headline i {
+      font-style: italic;
+      color: var(--text-secondary);
+    }
+
+    .cover-lead {
+      margin-top: 18px;
+      font-size: 14px;
+      line-height: 1.68;
+      color: var(--text-secondary);
+      max-width: 520px;
+    }
+
+    /* Tactile Institutional Entry Control */
+    .cover-action-block {
       display: flex;
       flex-direction: column;
-      gap: 4px;
-      text-align: left;
-      transition: all 0.15s;
+      gap: 12px;
+      margin-top: 6px;
     }
-    .cover-quick-btn:hover {
-      background: rgba(41, 98, 255, 0.1);
-      border-color: var(--accent-blue);
-      transform: translateY(-1px);
+    .cover-action-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
     }
-    .cover-quick-name {
+    .btn-enter-primary {
+      background: var(--text-primary);
+      color: var(--bg-main);
+      border: 1px solid var(--text-primary);
+      border-radius: 5px;
+      padding: 11px 20px;
+      font-family: 'Inter', sans-serif;
       font-size: 13px;
       font-weight: 600;
-      color: var(--text-bright);
+      letter-spacing: -0.005em;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 12px;
+      transition: opacity 0.12s, transform 0.1s;
     }
-    .cover-quick-desc {
+    .btn-enter-primary:hover {
+      opacity: 0.9;
+    }
+    .btn-enter-primary:active {
+      transform: translateY(1px);
+    }
+    .keycap {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 10.5px;
+      font-weight: 500;
+      padding: 1px 6px;
+      border-radius: 3px;
+      background: rgba(128, 128, 128, 0.22);
+      color: inherit;
+    }
+
+    .btn-enter-secondary {
+      background: var(--bg-elevated);
+      color: var(--text-primary);
+      border: 1px solid var(--border-strong);
+      border-radius: 5px;
+      padding: 11px 16px;
+      font-family: 'Inter', sans-serif;
+      font-size: 12.5px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: background 0.12s, border-color 0.12s;
+    }
+    .btn-enter-secondary:hover {
+      background: var(--bg-hover);
+      border-color: var(--text-muted);
+    }
+
+    .cover-shortcut-note {
+      font-size: 11.5px;
+      color: var(--text-muted);
+    }
+
+    /* 4-Cell Empirical Benchmark Matrix inside Left Column */
+    .cover-metrics-matrix {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      border-top: 1px solid var(--border-subtle);
+      border-left: 1px solid var(--border-subtle);
+      margin-top: 8px;
+    }
+    .matrix-cell {
+      padding: 12px 14px;
+      border-right: 1px solid var(--border-subtle);
+      border-bottom: 1px solid var(--border-subtle);
+      background: var(--bg-sidebar);
+    }
+    .matrix-lbl {
+      font-size: 10px;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--text-muted);
+      font-weight: 600;
+    }
+    .matrix-val {
+      font-size: 15px;
+      font-weight: 600;
+      color: var(--text-primary);
+      margin-top: 2px;
+    }
+    .matrix-sub {
+      font-size: 11px;
+      color: var(--text-secondary);
+      margin-top: 1px;
+    }
+
+    /* Right Column: Live Interactive Market & Conformal Workbench */
+    .cover-workbench-col {
+      display: flex;
+      flex-direction: column;
+      background: var(--bg-sidebar);
+      min-width: 0;
+    }
+
+    .workbench-bar {
+      height: 44px;
+      padding: 0 18px;
+      border-bottom: 1px solid var(--border-subtle);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      background: var(--bg-elevated);
+    }
+    .workbench-tickers {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      overflow-x: auto;
+    }
+    .wb-sym-btn {
+      background: transparent;
+      border: 1px solid transparent;
+      color: var(--text-secondary);
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 11.5px;
+      font-weight: 500;
+      padding: 4px 9px;
+      border-radius: 4px;
+      cursor: pointer;
+      transition: background 0.1s, color 0.1s;
+    }
+    .wb-sym-btn:hover {
+      color: var(--text-primary);
+      background: var(--bg-hover);
+    }
+    .wb-sym-btn.active {
+      background: var(--bg-main);
+      color: var(--text-primary);
+      border-color: var(--border-strong);
+    }
+
+    .workbench-telemetry-strip {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      border-bottom: 1px solid var(--border-subtle);
+      background: var(--bg-main);
+    }
+    .wb-stat {
+      padding: 10px 14px;
+      border-right: 1px solid var(--border-subtle);
+    }
+    .wb-stat:last-child { border-right: none; }
+    .wb-stat-lbl {
+      font-size: 10px;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      color: var(--text-muted);
+      font-weight: 600;
+    }
+    .wb-stat-val {
+      font-size: 13.5px;
+      font-weight: 600;
+      color: var(--text-primary);
+      margin-top: 2px;
+    }
+
+    .workbench-chart-wrap {
+      flex: 1;
+      position: relative;
+      min-height: 340px;
+      background: #131722;
+      display: flex;
+      flex-direction: column;
+    }
+    #cover-main-chart {
+      flex: 1;
+      width: 100%;
+      min-height: 265px;
+    }
+    #cover-rsi-chart {
+      height: 76px;
+      width: 100%;
+      border-top: 1px solid #23262F;
+    }
+    .workbench-chart-overlay {
+      position: absolute;
+      top: 10px;
+      left: 14px;
+      z-index: 5;
+      pointer-events: none;
+      font-size: 11.5px;
+      color: #A19F99;
+      background: rgba(19, 23, 34, 0.82);
+      border: 1px solid #2A2E39;
+      padding: 5px 10px;
+      border-radius: 4px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .workbench-footer {
+      height: 40px;
+      padding: 0 18px;
+      border-top: 1px solid var(--border-subtle);
+      background: var(--bg-elevated);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
       font-size: 11.5px;
       color: var(--text-secondary);
+    }
+    .wb-inspect-link {
+      background: transparent;
+      border: none;
+      color: var(--text-primary);
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 11.5px;
+      font-weight: 500;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .wb-inspect-link:hover {
+      color: var(--accent);
+    }
+
+    /* Architectural Specification Band (4 Columns) */
+    .cover-spec-band {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      border-bottom: 1px solid var(--border-subtle);
+    }
+    .spec-col {
+      padding: 24px 26px;
+      border-right: 1px solid var(--border-subtle);
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .spec-col:last-child { border-right: none; }
+    .spec-index {
+      font-size: 18px;
+      font-style: italic;
+      color: var(--text-muted);
+    }
+    .spec-title {
+      font-size: 13.5px;
+      font-weight: 600;
+      color: var(--text-primary);
+    }
+    .spec-body {
+      font-size: 12.5px;
+      color: var(--text-secondary);
+      line-height: 1.58;
+    }
+    .spec-formula {
+      margin-top: auto;
+      padding-top: 8px;
+      font-size: 11px;
+      color: var(--text-muted);
+      border-top: 1px solid var(--border-subtle);
+    }
+
+    /* Direct Dispatch Strip */
+    .cover-dispatch-bar {
+      padding: 20px 28px;
+      background: var(--bg-sidebar);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      flex-wrap: wrap;
+    }
+    .dispatch-label {
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: var(--text-muted);
+    }
+    .dispatch-Prompts {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+    .dispatch-chip {
+      background: var(--bg-elevated);
+      border: 1px solid var(--border-subtle);
+      color: var(--text-primary);
+      padding: 6px 12px;
+      border-radius: 4px;
+      font-size: 12px;
+      cursor: pointer;
+      transition: border-color 0.12s, background 0.12s;
+    }
+    .dispatch-chip:hover {
+      border-color: var(--border-strong);
+      background: var(--bg-hover);
     }
 
     /* ==========================================================================
-       VIEW 2: CONVERSATIONAL AI BRAIN & ARTIFACT RESEARCH WORKSPACE (#view-research)
+       VIEW 2: RESEARCH & EXECUTION WORKSPACE (#view-research)
        ========================================================================== */
     #view-research {
-      display: none;
-      background-color: var(--bg-main);
-      color: var(--text-primary);
-      z-index: 20;
+      display: flex;
+      height: 100vh;
+      width: 100vw;
+      overflow: hidden;
     }
 
+    /* LEFT SIDEBAR */
     .sidebar {
       width: 264px;
       background: var(--bg-sidebar);
@@ -459,11 +557,12 @@
       z-index: 30;
     }
     .sidebar.collapsed { margin-left: -264px; }
+
     .sidebar-top {
-      padding: 16px 16px 12px 16px;
+      padding: 18px 16px 12px 16px;
       display: flex;
       flex-direction: column;
-      gap: 12px;
+      gap: 14px;
     }
     .brand-row {
       display: flex;
@@ -477,12 +576,15 @@
       display: flex;
       align-items: baseline;
       gap: 8px;
+      cursor: pointer;
     }
     .brand-version {
       font-family: 'JetBrains Mono', monospace;
       font-size: 10.5px;
       color: var(--text-muted);
+      letter-spacing: 0.02em;
     }
+
     .new-session-btn {
       display: flex;
       align-items: center;
@@ -494,12 +596,18 @@
       background: var(--bg-elevated);
       color: var(--text-primary);
       font-weight: 500;
-      font-size: 12px;
+      font-size: 12.5px;
       cursor: pointer;
+      transition: background 0.12s, border-color 0.12s;
     }
+    .new-session-btn:hover {
+      border-color: var(--border-strong);
+      background: var(--bg-hover);
+    }
+
     .section-label {
-      padding: 10px 16px 4px 16px;
-      font-size: 10px;
+      padding: 12px 16px 6px 16px;
+      font-size: 10.5px;
       font-weight: 600;
       text-transform: uppercase;
       letter-spacing: 0.06em;
@@ -523,22 +631,27 @@
       align-items: center;
       justify-content: space-between;
       gap: 8px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      transition: background 0.1s, color 0.1s;
     }
     .nav-item:hover, .nav-item.active {
       background: var(--bg-hover);
       color: var(--text-primary);
     }
+
     .sidebar-footer {
-      padding: 10px 14px;
+      padding: 12px 14px;
       border-top: 1px solid var(--border-subtle);
-      font-size: 11px;
+      font-size: 11.5px;
     }
     .status-row {
       display: flex;
       align-items: center;
       justify-content: space-between;
-      padding: 6px 9px;
-      border-radius: 5px;
+      padding: 7px 10px;
+      border-radius: 6px;
       background: var(--bg-elevated);
       border: 1px solid var(--border-subtle);
       cursor: pointer;
@@ -551,6 +664,7 @@
     }
     .status-indicator.sync { background: var(--warning); }
 
+    /* CENTER WORKSPACE */
     .main-stage {
       flex: 1;
       display: flex;
@@ -559,20 +673,20 @@
       overflow: hidden;
       min-width: 0;
     }
+
     .topbar {
       height: 48px;
-      padding: 0 16px;
+      padding: 0 20px;
       display: flex;
       align-items: center;
       justify-content: space-between;
       border-bottom: 1px solid var(--border-subtle);
       flex-shrink: 0;
-      background: var(--bg-main);
     }
     .topbar-left {
       display: flex;
       align-items: center;
-      gap: 10px;
+      gap: 12px;
     }
     .text-btn {
       background: transparent;
@@ -581,65 +695,71 @@
       padding: 5px 10px;
       border-radius: 5px;
       cursor: pointer;
-      font-size: 11.5px;
+      font-size: 12px;
       font-weight: 500;
+      transition: background 0.12s, color 0.12s;
     }
     .text-btn:hover {
       background: var(--bg-hover);
       color: var(--text-primary);
     }
 
-    .btn-return-cover {
-      background: rgba(255, 255, 255, 0.08);
-      color: var(--text-bright);
-      border: 1px solid var(--border-subtle);
-      padding: 5px 12px;
-      border-radius: 5px;
-      font-weight: 600;
-      font-size: 12px;
+    .regime-tag {
+      padding: 3px 9px;
+      border-radius: 4px;
+      font-size: 11px;
+      font-weight: 500;
       display: inline-flex;
       align-items: center;
       gap: 6px;
-      cursor: pointer;
-      transition: all 0.15s;
     }
-    .btn-return-cover:hover {
-      background: var(--bg-hover);
-      border-color: var(--border-medium);
+    .regime-tag.cash {
+      background: var(--warning-bg);
+      color: var(--warning);
+      border: 1px solid rgba(200, 145, 40, 0.25);
+    }
+    .regime-tag.riskon {
+      background: var(--positive-bg);
+      color: var(--positive);
+      border: 1px solid rgba(46, 155, 120, 0.25);
     }
 
+    /* Conversation Feed */
     .chat-scroll {
       flex: 1;
       overflow-y: auto;
-      padding: 30px 20px 20px 20px;
+      padding: 36px 24px 24px 24px;
       display: flex;
       flex-direction: column;
       align-items: center;
     }
     .chat-container {
       width: 100%;
-      max-width: 740px;
+      max-width: 720px;
       display: flex;
       flex-direction: column;
-      gap: 20px;
+      gap: 24px;
     }
+
     .hero-block {
-      margin: 18px 0 6px 0;
+      margin: 28px 0 8px 0;
       display: flex;
       flex-direction: column;
       gap: 8px;
     }
     .hero-block h1 {
-      font-size: 32px;
-      line-height: 1.2;
+      font-size: 34px;
+      line-height: 1.18;
       color: var(--text-primary);
       font-weight: 400;
+      letter-spacing: -0.01em;
     }
     .hero-block p {
       color: var(--text-secondary);
       font-size: 13.5px;
       max-width: 620px;
     }
+
     .prompt-grid {
       display: grid;
       grid-template-columns: repeat(2, 1fr);
@@ -649,9 +769,10 @@
     .prompt-card {
       background: var(--bg-elevated);
       border: 1px solid var(--border-subtle);
-      border-radius: 7px;
-      padding: 12px 14px;
+      border-radius: 8px;
+      padding: 13px 15px;
       cursor: pointer;
+      transition: border-color 0.12s, background 0.12s;
       display: flex;
       flex-direction: column;
       gap: 4px;
@@ -667,10 +788,11 @@
       color: var(--text-primary);
     }
     .prompt-card-desc {
-      font-size: 11.5px;
+      font-size: 12px;
       color: var(--text-secondary);
     }
 
+    /* Messages */
     .msg-user-row {
       display: flex;
       justify-content: flex-end;
@@ -679,18 +801,21 @@
       background: var(--bg-user-msg);
       border: 1px solid var(--border-subtle);
       color: var(--text-primary);
-      padding: 9px 14px;
+      padding: 10px 15px;
       border-radius: 8px;
       max-width: 85%;
-      font-size: 13px;
+      font-size: 13.5px;
+      line-height: 1.55;
     }
+
     .msg-response-row {
       display: flex;
       flex-direction: column;
       gap: 10px;
-      padding-bottom: 16px;
+      padding-bottom: 18px;
       border-bottom: 1px solid var(--border-subtle);
     }
+
     .trace-bar {
       font-family: 'JetBrains Mono', monospace;
       font-size: 11px;
@@ -703,16 +828,18 @@
       border: 1px solid var(--border-subtle);
       border-radius: 5px;
     }
+
     .response-prose {
-      font-size: 13.5px;
-      line-height: 1.65;
+      font-size: 14px;
+      line-height: 1.68;
       color: var(--text-primary);
     }
     .response-prose h3 {
       font-family: 'Instrument Serif', Georgia, serif;
-      font-size: 21px;
+      font-size: 22px;
       font-weight: 400;
       margin: 4px 0 6px 0;
+      color: var(--text-primary);
     }
     .response-prose h4 {
       font-size: 11.5px;
@@ -720,7 +847,7 @@
       text-transform: uppercase;
       letter-spacing: 0.05em;
       color: var(--text-secondary);
-      margin: 12px 0 6px 0;
+      margin: 14px 0 6px 0;
     }
     .response-prose code {
       font-family: 'JetBrains Mono', monospace;
@@ -729,10 +856,29 @@
       border: 1px solid var(--border-subtle);
       padding: 1px 5px;
       border-radius: 4px;
+      color: var(--text-primary);
     }
 
+    .sheet-link-card {
+      margin-top: 8px;
+      background: var(--bg-elevated);
+      border: 1px solid var(--border-subtle);
+      border-radius: 6px;
+      padding: 10px 14px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      cursor: pointer;
+      transition: border-color 0.12s, background 0.12s;
+    }
+    .sheet-link-card:hover {
+      border-color: var(--border-strong);
+      background: var(--bg-hover);
+    }
+
+    /* COMPOSER */
     .composer-wrap {
-      padding: 8px 20px 16px 20px;
+      padding: 10px 24px 18px 24px;
       display: flex;
       flex-direction: column;
       align-items: center;
@@ -741,14 +887,18 @@
     }
     .composer-box {
       width: 100%;
-      max-width: 740px;
+      max-width: 720px;
       background: var(--bg-composer);
       border: 1px solid var(--border-strong);
-      border-radius: 9px;
-      padding: 10px 12px 8px 12px;
+      border-radius: 10px;
+      padding: 12px 14px 10px 14px;
       display: flex;
       flex-direction: column;
-      gap: 8px;
+      gap: 10px;
+      transition: border-color 0.12s;
+    }
+    .composer-box:focus-within {
+      border-color: var(--text-secondary);
     }
     .composer-input {
       width: 100%;
@@ -756,20 +906,29 @@
       border: none;
       color: var(--text-primary);
       font-family: inherit;
-      font-size: 13.5px;
+      font-size: 14px;
       line-height: 1.5;
       resize: none;
       outline: none;
-      min-height: 40px;
-      max-height: 120px;
+      min-height: 42px;
+      max-height: 130px;
     }
+    .composer-input::placeholder { color: var(--text-muted); }
+
     .composer-bar {
       display: flex;
       align-items: center;
       justify-content: space-between;
       gap: 8px;
+      flex-wrap: wrap;
       padding-top: 6px;
       border-top: 1px solid var(--border-subtle);
+    }
+    .composer-meta {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
     }
     .meta-field {
       display: inline-flex;
@@ -778,17 +937,18 @@
       background: var(--bg-elevated);
       border: 1px solid var(--border-subtle);
       color: var(--text-secondary);
-      padding: 3px 8px;
-      border-radius: 4px;
-      font-size: 11px;
+      padding: 3px 9px;
+      border-radius: 5px;
+      font-size: 11.5px;
     }
     .meta-field input[type="number"] {
       background: transparent;
       border: none;
       color: var(--text-primary);
       font-family: 'JetBrains Mono', monospace;
-      font-size: 11px;
-      width: 78px;
+      font-size: 11.5px;
+      font-weight: 500;
+      width: 82px;
       outline: none;
     }
     .submit-btn {
@@ -800,10 +960,13 @@
       font-size: 12px;
       font-weight: 600;
       cursor: pointer;
+      transition: opacity 0.12s;
     }
+    .submit-btn:hover { opacity: 0.88; }
 
+    /* RIGHT DATA PANEL */
     .data-panel {
-      width: 480px;
+      width: 500px;
       background: var(--bg-artifact);
       border-left: 1px solid var(--border-subtle);
       display: flex;
@@ -811,10 +974,11 @@
       flex-shrink: 0;
       transition: margin-right 0.2s ease;
     }
-    .data-panel.closed { margin-right: -480px; }
+    .data-panel.closed { margin-right: -500px; }
+
     .panel-header {
       height: 48px;
-      padding: 0 14px;
+      padding: 0 16px;
       border-bottom: 1px solid var(--border-subtle);
       display: flex;
       align-items: center;
@@ -824,233 +988,344 @@
     .panel-tabs {
       display: flex;
       gap: 4px;
-      padding: 6px 10px;
+      padding: 6px 12px;
       background: var(--bg-sidebar);
       border-bottom: 1px solid var(--border-subtle);
       overflow-x: auto;
     }
     .ptab {
-      padding: 4px 8px;
+      padding: 5px 10px;
       border-radius: 4px;
-      font-size: 11px;
+      font-size: 11.5px;
       font-weight: 500;
       color: var(--text-secondary);
       cursor: pointer;
       white-space: nowrap;
+      border: 1px solid transparent;
     }
+    .ptab:hover { color: var(--text-primary); }
     .ptab.active {
       background: var(--bg-elevated);
       color: var(--text-primary);
-      border: 1px solid var(--border-subtle);
+      border-color: var(--border-subtle);
     }
+
     .panel-body {
       flex: 1;
       overflow-y: auto;
-      padding: 12px;
+      padding: 14px;
       display: flex;
       flex-direction: column;
-      gap: 10px;
+      gap: 12px;
     }
+
     .chart-frame {
-      height: 260px;
+      height: 290px;
       width: 100%;
       background: #131722;
       border: 1px solid var(--border-subtle);
-      border-radius: 5px;
+      border-radius: 6px;
       overflow: hidden;
     }
     .rsi-frame {
-      height: 75px;
+      height: 82px;
       width: 100%;
       background: #131722;
       border: 1px solid var(--border-subtle);
-      border-radius: 5px;
+      border-radius: 6px;
       overflow: hidden;
     }
 
-    table.tv-table {
+    .kpi-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 8px;
+    }
+    .kpi-card {
+      background: var(--bg-elevated);
+      border: 1px solid var(--border-subtle);
+      border-radius: 6px;
+      padding: 9px 12px;
+    }
+    .kpi-lbl { font-size: 10.5px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.04em; font-weight: 600; }
+    .kpi-val { font-size: 14.5px; font-weight: 600; color: var(--text-primary); margin-top: 2px; }
+
+    table.data-table {
       width: 100%;
       border-collapse: collapse;
       font-size: 11.5px;
       background: var(--bg-elevated);
-      border-radius: 5px;
+      border-radius: 6px;
       overflow: hidden;
       border: 1px solid var(--border-subtle);
     }
-    table.tv-table th {
+    table.data-table th {
       background: var(--bg-sidebar);
       color: var(--text-muted);
       font-weight: 600;
       text-align: right;
-      padding: 6px 9px;
+      padding: 7px 10px;
       font-size: 10.5px;
       text-transform: uppercase;
       letter-spacing: 0.03em;
       border-bottom: 1px solid var(--border-subtle);
     }
-    table.tv-table th:first-child, table.tv-table td:first-child { text-align: left; }
-    table.tv-table td {
-      padding: 6px 9px;
+    table.data-table th:first-child, table.data-table td:first-child { text-align: left; }
+    table.data-table td {
+      padding: 7px 10px;
       text-align: right;
       border-bottom: 1px solid var(--border-subtle);
     }
-    table.tv-table tr:last-child td { border-bottom: none; }
+    table.data-table tr:last-child td { border-bottom: none; }
 
+    .status-pill {
+      padding: 2px 6px;
+      border-radius: 3px;
+      font-size: 10px;
+      font-weight: 600;
+      text-transform: uppercase;
+    }
+    .status-pill.pos { background: var(--positive-bg); color: var(--positive); }
+    .status-pill.warn { background: var(--warning-bg); color: var(--warning); }
+    .status-pill.neg { background: var(--negative-bg); color: var(--negative); }
+
+    @media (max-width: 1100px) {
+      .cover-hero-grid { grid-template-columns: 1fr; }
+      .cover-editorial-col { border-right: none; border-bottom: 1px solid var(--border-subtle); }
+      .cover-spec-band { grid-template-columns: repeat(2, 1fr); }
+      .cover-tape-viewport { display: none; }
+      .data-panel { position: fixed; right: 0; top: 0; bottom: 0; z-index: 50; }
+    }
     ::-webkit-scrollbar { width: 5px; height: 5px; }
     ::-webkit-scrollbar-track { background: transparent; }
-    ::-webkit-scrollbar-thumb { background: var(--border-medium); border-radius: 2px; }
+    ::-webkit-scrollbar-thumb { background: var(--border-strong); border-radius: 2px; }
   </style>
 </head>
 <body>
 
   <!-- ========================================================================
-       VIEW 1: MESMERIZING INSTITUTIONAL COVER PAGE
+       VIEW 1: ARCHITECTURAL & QUANTITATIVE COVER SHEET
        ======================================================================== -->
-  <div id="view-cover" class="view-container">
-
-    <!-- Interactive Ambient Canvas -->
-    <canvas id="ambient-canvas"></canvas>
-
-    <!-- Continuous Live NSE Ticker Ribbon -->
-    <div class="cover-ticker-wrap">
-      <div class="cover-ticker-track mono" id="cover-ticker-content">
-        <span class="ticker-item"><span class="ticker-sym">NSE:RELIANCE</span> <span class="ticker-px">₹1,190.00</span> <span class="ticker-up">+0.46%</span></span>
-        <span class="ticker-item"><span class="ticker-sym">NSE:TCS</span> <span class="ticker-px">₹2,530.00</span> <span class="ticker-up">+0.92%</span></span>
-        <span class="ticker-item"><span class="ticker-sym">NSE:SBIN</span> <span class="ticker-px">₹958.60</span> <span class="ticker-dn">-1.18%</span></span>
-        <span class="ticker-item"><span class="ticker-sym">NSE:INFY</span> <span class="ticker-px">₹1,153.80</span> <span class="ticker-up">+0.04%</span></span>
-        <span class="ticker-item"><span class="ticker-sym">NSE:HDFCBANK</span> <span class="ticker-px">₹692.80</span> <span class="ticker-dn">-0.18%</span></span>
-        <span class="ticker-item"><span class="ticker-sym">NSE:ICICIBANK</span> <span class="ticker-px">₹1,394.20</span> <span class="ticker-dn">-0.31%</span></span>
-        <span class="ticker-item"><span class="ticker-sym">NSE:LT</span> <span class="ticker-px">₹3,647.00</span> <span class="ticker-up">+0.24%</span></span>
-        <span class="ticker-item"><span class="ticker-sym">NSE:BHARTIARTL</span> <span class="ticker-px">₹1,892.10</span> <span class="ticker-dn">-0.15%</span></span>
-        <!-- Duplicate loop for seamless continuous animation -->
-        <span class="ticker-item"><span class="ticker-sym">NSE:RELIANCE</span> <span class="ticker-px">₹1,190.00</span> <span class="ticker-up">+0.46%</span></span>
-        <span class="ticker-item"><span class="ticker-sym">NSE:TCS</span> <span class="ticker-px">₹2,530.00</span> <span class="ticker-up">+0.92%</span></span>
-        <span class="ticker-item"><span class="ticker-sym">NSE:SBIN</span> <span class="ticker-px">₹958.60</span> <span class="ticker-dn">-1.18%</span></span>
-        <span class="ticker-item"><span class="ticker-sym">NSE:INFY</span> <span class="ticker-px">₹1,153.80</span> <span class="ticker-up">+0.04%</span></span>
-      </div>
-    </div>
-
-    <!-- Cover Navigation Bar -->
-    <header class="cover-nav">
-      <div class="cover-brand">
-        <div class="cover-brand-logo">▲</div>
-        <div class="cover-brand-title">ALPHANITI</div>
-        <span class="cover-brand-badge">INSTITUTIONAL v25.0</span>
+  <section id="view-cover">
+    <header class="cover-masthead">
+      <div class="cover-masthead-left">
+        <span class="cover-wordmark serif">AlphaNiti</span>
+        <span class="cover-edition mono">v25.0 · NSE EQUITY EXECUTION</span>
       </div>
 
-      <div class="cover-nav-right">
-        <div class="cover-status-pill">
-          <div class="cover-pulse"></div>
-          <span>NSE FEED CONNECTED</span>
-        </div>
-        <div style="font-size:12px; color:var(--text-secondary);" class="mono">
-          Regime: <b style="color:var(--accent-amber);">CASH PRESERVATION</b>
-        </div>
+      <div class="cover-tape-viewport mono" id="cover-tape">
+        <span class="tape-quote" onclick="selectCoverSymbol('SBIN')"><b>SBIN</b> ₹958.60 <span style="color:var(--negative);">-1.18%</span></span>
+        <span class="tape-quote" onclick="selectCoverSymbol('RELIANCE')"><b>RELIANCE</b> ₹1,190.00 <span style="color:var(--positive);">+0.46%</span></span>
+        <span class="tape-quote" onclick="selectCoverSymbol('TCS')"><b>TCS</b> ₹2,530.00 <span style="color:var(--positive);">+0.92%</span></span>
+        <span class="tape-quote" onclick="selectCoverSymbol('HDFCBANK')"><b>HDFCBANK</b> ₹692.80 <span style="color:var(--negative);">-0.18%</span></span>
+        <span class="tape-quote" onclick="selectCoverSymbol('ICICIBANK')"><b>ICICIBANK</b> ₹1,394.20 <span style="color:var(--negative);">-0.31%</span></span>
+        <span class="tape-quote" onclick="selectCoverSymbol('LT')"><b>LT</b> ₹3,647.00 <span style="color:var(--positive);">+0.24%</span></span>
+      </div>
+
+      <div class="cover-masthead-right">
+        <span id="cover-regime-badge" class="regime-tag cash mono">REGIME: CASH PRESERVATION</span>
+        <button class="text-btn" onclick="toggleTheme()" id="cover-theme-btn">Light</button>
+        <button class="btn-enter-primary" style="padding:6px 13px; font-size:12px;" onclick="enterWorkspace()">
+          <span>Enter Workspace</span>
+          <span class="keycap">↵</span>
+        </button>
       </div>
     </header>
 
-    <!-- Main Hero Presentation -->
-    <div class="cover-hero-wrap">
-      <div class="cover-eyebrow">
-        <span>⚡ Evidential Deep Ensemble · Factor Wasserstein DRO · Branch-and-Bound</span>
-      </div>
+    <div class="cover-sheet">
+      <!-- HERO SPLIT: EDITORIAL LEFT + LIVE CONFORMAL CHART RIGHT -->
+      <div class="cover-hero-grid">
+        <div class="cover-editorial-col">
+          <div>
+            <div class="cover-kicker mono">
+              <span class="cover-kicker-rule"></span>
+              <span>INSTITUTIONAL RESEARCH &amp; EXECUTION ARCHITECTURE</span>
+            </div>
 
-      <h1 class="cover-hero-title serif">
-        Mathematical Rigor.<br/>
-        <em>Evidential Uncertainty.</em> Formal Safety.
-      </h1>
+            <h1 class="cover-headline serif">
+              Discrete equity allocation under <i>evidential uncertainty</i>.
+            </h1>
 
-      <p class="cover-hero-sub">
-        An autonomous algorithmic execution pipeline for National Stock Exchange (NSE) equities, engineered with a 3-member Dual-State Evidential GRU ensemble, 4-Tier Hysteresis gates, and Finance Act 2026 statutory solvency proofs.
-      </p>
-
-      <!-- THE MESMERIZING ENTER BUTTON -->
-      <div class="cover-enter-portal">
-        <button class="cover-enter-btn" id="cover-enter-btn" onclick="enterResearchWorkspace()">
-          <span class="cover-btn-icon">⚡</span>
-          <span>ENTER RESEARCH WORKSPACE</span>
-          <span class="cover-btn-arrow">→</span>
-        </button>
-        <div class="cover-enter-hint">
-          <span>Press</span> <kbd>Enter ↵</kbd> <span>or click anywhere on the button to launch workspace</span>
-        </div>
-      </div>
-
-      <!-- 4 Core Pillars Grid -->
-      <div class="cover-grid">
-        <div class="cover-card">
-          <div class="card-num">PILLAR 01</div>
-          <div class="card-title">Evidential Deep Learning</div>
-          <div class="card-desc">Decouples aleatoric volatility from epistemic model variance via Normal-Inverse-Gamma distribution heads.</div>
-          <div class="card-metric">q̂ = 1.3644 (90% Conformal)</div>
-        </div>
-
-        <div class="cover-card">
-          <div class="card-num">PILLAR 02</div>
-          <div class="card-title">4-Tier Hysteresis Gate</div>
-          <div class="card-desc">Calibrated empirical thresholds with 15% deadband and 3-session persistence prevents flip-flopping under uncertainty.</div>
-          <div class="card-metric">Tier 1 Active (Soft Cap)</div>
-        </div>
-
-        <div class="cover-card">
-          <div class="card-num">PILLAR 03</div>
-          <div class="card-title">Factor-Space DRO</div>
-          <div class="card-desc">Distributionally robust optimization penalizes worst-case drift shifts inside Wasserstein radius ε_f = 0.01939.</div>
-          <div class="card-metric">CVaR 95% Sizing Guard</div>
-        </div>
-
-        <div class="cover-card">
-          <div class="card-num">PILLAR 04</div>
-          <div class="card-title">Hardware Enclave Safety</div>
-          <div class="card-desc">3 formal veto gates check cleared cash solvency and emit Ed25519 signatures before simulated order submission.</div>
-          <div class="card-metric">FA 2026 Tax Solvency Checked</div>
-        </div>
-      </div>
-
-      <!-- Quick Action Launcher Cards -->
-      <div class="cover-quick-section">
-        <div class="cover-quick-title">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
-          <span>Direct Pre-Flight Evaluation Prompts (Click to Enter &amp; Run)</span>
-        </div>
-
-        <div class="cover-quick-grid">
-          <div class="cover-quick-btn" onclick="launchWithQuery('Should I buy RELIANCE right now with ₹1,00,000?')">
-            <div class="cover-quick-name">RELIANCE — ₹1,00,000 Evaluation</div>
-            <div class="cover-quick-desc">Single-stock drift, tail risk floor, and Finance Act 2026 tax breakdown.</div>
+            <p class="cover-lead">
+              An end-to-end quantitative research and order-validation workstation for National Stock Exchange (NSE) equities. Integrates a 3-member Dual-State Evidential GRU ensemble, Split-Conformal prediction intervals, Factor-Space Wasserstein DRO, Branch-and-Bound integer lot sizing, and a model-checked 3-Gate Safety Kernel under Finance Act 2026 statutory schedules.
+            </p>
           </div>
 
-          <div class="cover-quick-btn" onclick="launchWithQuery('Compare TCS and INFY using live NSE data')">
-            <div class="cover-quick-name">TCS vs INFY Relative Drift</div>
-            <div class="cover-quick-desc">Cross-sectional comparison of expected drift and epistemic risk.</div>
+          <div class="cover-action-block">
+            <div class="cover-action-row">
+              <button class="btn-enter-primary" onclick="enterWorkspace()">
+                <span>Enter Research Workspace</span>
+                <span class="keycap">↵ Enter</span>
+              </button>
+              <button class="btn-enter-secondary" onclick="enterWithPrompt('Where should I invest ₹2,50,000 today?')">
+                Run Discrete Portfolio Sizer (₹2.5L)
+              </button>
+            </div>
+            <div class="cover-shortcut-note mono">
+              Press [Enter] anywhere to open the research terminal, or select an NSE security on the right to inspect its 20-day conformal cone.
+            </div>
           </div>
 
-          <div class="cover-quick-btn" onclick="launchWithQuery('Where should I invest ₹2,50,000 today?')">
-            <div class="cover-quick-name">Discrete Portfolio Sizer (₹2.5L)</div>
-            <div class="cover-quick-desc">Branch-and-Bound integer lot solver with zero fractional share leak.</div>
+          <div class="cover-metrics-matrix mono">
+            <div class="matrix-cell">
+              <div class="matrix-lbl">OOS Walk-Forward (500D)</div>
+              <div class="matrix-val" style="color:var(--positive);">-2.98% Max DD</div>
+              <div class="matrix-sub">vs -21.93% unguarded baseline</div>
+            </div>
+            <div class="matrix-cell">
+              <div class="matrix-lbl">Split-Conformal Bound</div>
+              <div class="matrix-val">q̂ = 1.3644</div>
+              <div class="matrix-sub">90.0% finite-sample coverage</div>
+            </div>
+            <div class="matrix-cell">
+              <div class="matrix-lbl">Meinert Epistemic Audit</div>
+              <div class="matrix-val">ρ = +0.2329</div>
+              <div class="matrix-sub">4.18× OOS error separation</div>
+            </div>
+            <div class="matrix-cell">
+              <div class="matrix-lbl">Ledger &amp; Safety Kernel</div>
+              <div class="matrix-val">5-Bucket NAV</div>
+              <div class="matrix-sub">Ed25519 + Finance Act 2026</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- RIGHT: INTERACTIVE LIVE NSE CHART & NIG POSTERIOR WORKBENCH -->
+        <div class="cover-workbench-col">
+          <div class="workbench-bar">
+            <div class="workbench-tickers" id="cover-sym-tabs">
+              <button class="wb-sym-btn active" onclick="selectCoverSymbol('SBIN')">SBIN</button>
+              <button class="wb-sym-btn" onclick="selectCoverSymbol('RELIANCE')">RELIANCE</button>
+              <button class="wb-sym-btn" onclick="selectCoverSymbol('TCS')">TCS</button>
+              <button class="wb-sym-btn" onclick="selectCoverSymbol('HDFCBANK')">HDFCBANK</button>
+              <button class="wb-sym-btn" onclick="selectCoverSymbol('ICICIBANK')">ICICIBANK</button>
+              <button class="wb-sym-btn" onclick="selectCoverSymbol('LT')">LT</button>
+              <button class="wb-sym-btn" onclick="selectCoverSymbol('INFY')">INFY</button>
+            </div>
+            <span class="mono" style="font-size:11px; color:var(--text-muted);" id="cover-wb-sector">NSE:SBIN · PSU Banking</span>
+          </div>
+
+          <div class="workbench-telemetry-strip mono">
+            <div class="wb-stat">
+              <div class="wb-stat-lbl">Spot Close (1D)</div>
+              <div class="wb-stat-val" id="c-stat-px">₹958.60 <span style="font-size:11px; color:var(--negative);">-1.18%</span></div>
+            </div>
+            <div class="wb-stat">
+              <div class="wb-stat-lbl">20D Expected Drift (γ)</div>
+              <div class="wb-stat-val" id="c-stat-gamma" style="color:var(--positive);">+3.24%</div>
+            </div>
+            <div class="wb-stat">
+              <div class="wb-stat-lbl">Aleatoric / Epistemic</div>
+              <div class="wb-stat-val" id="c-stat-unc" style="font-size:12px;">22.86% / 0.0617</div>
+            </div>
+            <div class="wb-stat">
+              <div class="wb-stat-lbl">Tail Breach (P_b)</div>
+              <div class="wb-stat-val" id="c-stat-pb">31.6%</div>
+            </div>
+            <div class="wb-stat">
+              <div class="wb-stat-lbl">Hysteresis Gate</div>
+              <div class="wb-stat-val" id="c-stat-gate" style="font-size:12px; color:var(--warning);">CASH GATE</div>
+            </div>
+          </div>
+
+          <div class="workbench-chart-wrap">
+            <div class="workbench-chart-overlay mono" id="cover-crosshair-hud">
+              <span id="c-hud-date">2026-10-23</span>
+              <span>O <b id="c-hud-o" style="color:#EDEDEB;">970.00</b></span>
+              <span>H <b id="c-hud-h" style="color:#EDEDEB;">971.40</b></span>
+              <span>L <b id="c-hud-l" style="color:#EDEDEB;">949.95</b></span>
+              <span>C <b id="c-hud-c" style="color:#EDEDEB;">958.60</b></span>
+              <span style="color:#C96A4B;">20D Conformal Fan (q̂ = 1.3644)</span>
+            </div>
+            <div id="cover-main-chart"></div>
+            <div id="cover-rsi-chart"></div>
+          </div>
+
+          <div class="workbench-footer">
+            <span class="mono" style="font-size:11px;">120D OHLCV · EMA 12/26 · RSI-14 · 20-Day Evidential Projection Cone</span>
+            <button class="wb-inspect-link" id="cover-open-sym-btn" onclick="enterWithSymbol(CURRENT_SYMBOL)">
+              <span>Open NSE:SBIN in Research Workspace →</span>
+            </button>
           </div>
         </div>
       </div>
 
+      <!-- ARCHITECTURAL SPECIFICATION BAND -->
+      <div class="cover-spec-band">
+        <div class="spec-col">
+          <div class="spec-index serif">I.</div>
+          <div class="spec-title">Evidential Deep Ensemble</div>
+          <div class="spec-body">
+            3-member Dual-State GRU-Attention network parameterizing a Normal-Inverse-Gamma conjugate prior over 20-day forward log-returns, benchmarked against a Plain Deep Ensemble under Meinert et al. (2023) diagnostics.
+          </div>
+          <div class="spec-formula mono">r_{t+1..t+20} ~ NIG(γ, ν, α, β) · 10D Purge Embargo</div>
+        </div>
+
+        <div class="spec-col">
+          <div class="spec-index serif">II.</div>
+          <div class="spec-title">4-Tier Hysteresis Gate</div>
+          <div class="spec-body">
+            Empirical validation quantiles govern transitions across Unconstrained, Soft Cap, Elevated Throttle, and Systemic Freeze regimes, stabilized by a 15% deadband and 3-session persistence counter.
+          </div>
+          <div class="spec-formula mono">θ = (0.00185, 0.00342, 0.00780) · δ_hys = 0.15</div>
+        </div>
+
+        <div class="spec-col">
+          <div class="spec-index serif">III.</div>
+          <div class="spec-title">Factor-Space Wasserstein DRO</div>
+          <div class="spec-body">
+            Branch-and-Bound integer solver allocates exact discrete lots while penalizing worst-case factor distribution shifts inside an empirical Fournier-Guillin Wasserstein ball.
+          </div>
+          <div class="spec-formula mono">min_h -μᵀh + λ·CVaR₀.₉₅(h) + λ·ε_f‖Bᵀh‖₂</div>
+        </div>
+
+        <div class="spec-col">
+          <div class="spec-index serif">IV.</div>
+          <div class="spec-title">Double-Entry Ledger &amp; Safety Kernel</div>
+          <div class="spec-body">
+            Five-bucket balance sheet tracks settled cash, escrow, margin liens as assets, receivables, and payables under Finance Act 2026 fees (STT 0.1%, Stamp 0.015%, GST 18%) with Ed25519 signing.
+          </div>
+          <div class="spec-formula mono">NAV = W_settled + W_escrow + W_lien + W_recv + Σh_iP_i - W_pay</div>
+        </div>
+      </div>
+
+      <!-- DIRECT RESEARCH DISPATCH BAR -->
+      <div class="cover-dispatch-bar">
+        <span class="dispatch-label mono">Direct Research Dispatch →</span>
+        <div class="dispatch-Prompts">
+          <button class="dispatch-chip" onclick="enterWithPrompt('Should I buy RELIANCE right now with ₹1,00,000?')">
+            RELIANCE.NS — ₹1,00,000 Single-Stock Evaluation
+          </button>
+          <button class="dispatch-chip" onclick="enterWithPrompt('Compare TCS and INFY using live NSE data')">
+            TCS vs INFY — Cross-Sectional Comparison
+          </button>
+          <button class="dispatch-chip" onclick="enterWithPrompt('Where should I invest ₹2,50,000 today?')">
+            Discrete B&amp;B Allocation — ₹2,50,000
+          </button>
+          <button class="dispatch-chip" onclick="enterWithPrompt('Analyze SUNPHARMA.NS live with my ML brain')">
+            SUNPHARMA.NS — Live 6M Inference
+          </button>
+        </div>
+      </div>
     </div>
-  </div>
+  </section>
 
   <!-- ========================================================================
-       VIEW 2: CONVERSATIONAL AI RESEARCH WORKSPACE
+       VIEW 2: RESEARCH & EXECUTION WORKSPACE (ORIGINAL INTERFACE)
        ======================================================================== -->
-  <div id="view-research" class="view-container">
-
+  <div id="view-research">
     <!-- LEFT SIDEBAR -->
     <aside class="sidebar" id="sidebar">
       <div class="sidebar-top">
         <div class="brand-row">
-          <div class="brand-title serif">
+          <div class="brand-title serif" onclick="showCover()" title="Return to Cover Sheet">
             <span>AlphaNiti</span>
             <span class="brand-version">v25.0</span>
           </div>
-          <button class="btn-return-cover" onclick="returnToCover()" title="Return to Cover Page">
-            <span>✦ Cover</span>
-          </button>
+          <div style="display:flex; align-items:center; gap:6px;">
+            <button class="text-btn" onclick="showCover()">Cover</button>
+            <button class="text-btn" onclick="toggleTheme()" id="theme-btn">Light</button>
+          </div>
         </div>
 
         <button class="new-session-btn" onclick="resetConversation()">
@@ -1059,7 +1334,7 @@
         </button>
       </div>
 
-      <div class="section-label">Pre-Flight Queries</div>
+      <div class="section-label">Queries</div>
       <div class="sidebar-scroll">
         <div class="nav-item" onclick="askBrain('Should I buy RELIANCE right now with ₹1,00,000?')">
           <span>RELIANCE — ₹1,00,000 Evaluation</span>
@@ -1075,6 +1350,9 @@
         </div>
         <div class="nav-item" onclick="askBrain('Analyze TATAMOTORS.NS with ₹1,50,000')">
           <span>TATAMOTORS.NS — Live Inference</span>
+        </div>
+        <div class="nav-item" onclick="askBrain('Analyze ZOMATO.NS live with my ML brain')">
+          <span>ZOMATO.NS — Live Inference</span>
         </div>
         <div class="nav-item" onclick="askBrain('What is the market regime and crash probability today?')">
           <span>Macro Regime &amp; Cash Gate</span>
@@ -1103,20 +1381,16 @@
       <header class="topbar">
         <div class="topbar-left">
           <button class="text-btn" onclick="document.getElementById('sidebar').classList.toggle('collapsed')">Menu</button>
-          <span style="font-weight:600; font-size:12.5px; color:var(--text-primary);">Evidential Deep Ensemble Workspace</span>
+          <button class="text-btn" onclick="showCover()">← Cover Sheet</button>
+          <span style="font-weight:500; font-size:12.5px; color:var(--text-primary);">Evidential Deep Ensemble</span>
           <span class="mono" style="font-size:11px; color:var(--text-muted);">3-Member GRU · 20 Causal Features · NSE</span>
         </div>
 
         <div style="display:flex; align-items:center; gap:10px;">
-          <button class="btn-return-cover" onclick="returnToCover()">
-            <span>✦ Return to Cover</span>
-          </button>
-
-          <div id="header-regime-pill" class="regime-tag cash" style="padding:4px 9px; border-radius:4px; font-size:11px; font-weight:600; background:rgba(200, 145, 40, 0.15); color:#c89128; border:1px solid rgba(200, 145, 40, 0.3);">
+          <div id="header-regime-pill" class="regime-tag cash">
             <span id="regime-title">REGIME: CASH PRESERVATION</span>
             <span class="mono" id="regime-sub">| P_breach: 38.3%</span>
           </div>
-
           <button class="text-btn" onclick="toggleArtifactPanel()">Inspector</button>
         </div>
       </header>
@@ -1125,7 +1399,7 @@
         <div class="chat-container" id="chat-container">
           <div class="hero-block" id="hero-welcome">
             <h1 class="serif">Institutional Equity Research &amp; Execution</h1>
-            <p>Enter any query below to evaluate an NSE security, compare relative drift, or construct an integer-sized portfolio against live market data, our 3-member Evidential Deep Ensemble, Split-Conformal bounds (q̂ = 1.3644), and the Finance Act 2026 safety kernel.</p>
+            <p>Enter a query below to evaluate any NSE security or construct an integer-sized portfolio against live market data, our 3-member Evidential Deep Ensemble, Split-Conformal bounds (q̂ = 1.3644), and the Finance Act 2026 safety kernel.</p>
           </div>
 
           <div class="prompt-grid" id="starter-grid">
@@ -1168,7 +1442,7 @@
 
               <label class="meta-field" style="cursor:pointer;">
                 <input type="checkbox" id="inp-force-riskon" />
-                <span>Override Cash Gate</span>
+                <span>Override Cash-Preservation Gate</span>
               </label>
             </div>
 
@@ -1182,7 +1456,7 @@
     <aside class="data-panel" id="artifact-panel">
       <div class="panel-header">
         <div>
-          <div style="font-weight:600; font-size:12.5px;" id="art-title">NSE:RELIANCE</div>
+          <div style="font-weight:600; font-size:12.5px;" id="art-title">NSE:SBIN</div>
           <div class="mono" style="font-size:10.5px; color:var(--text-muted);" id="art-subtitle">120D OHLCV &amp; 20D Conformal Forecast (q̂=1.3644)</div>
         </div>
         <button class="text-btn" onclick="toggleArtifactPanel()">Close</button>
@@ -1197,111 +1471,340 @@
 
       <!-- TAB 1: CHART -->
       <div class="panel-body" id="atab-chart">
-        <div style="display:grid; grid-template-columns:repeat(2, 1fr); gap:6px;">
-          <div style="background:var(--bg-elevated); border:1px solid var(--border-subtle); border-radius:5px; padding:7px 10px;">
-            <div style="font-size:10px; color:var(--text-muted); font-weight:600; text-transform:uppercase;">Spot Price</div>
-            <div class="mono" id="art-px" style="font-size:13px; font-weight:600; margin-top:2px;">₹1,190.00</div>
+        <div class="kpi-grid">
+          <div class="kpi-card">
+            <div class="kpi-lbl">Spot Price (1D)</div>
+            <div class="kpi-val mono" id="art-px">₹958.60 <span style="font-size:11.5px; color:var(--negative);">-1.18%</span></div>
           </div>
-          <div style="background:var(--bg-elevated); border:1px solid var(--border-subtle); border-radius:5px; padding:7px 10px;">
-            <div style="font-size:10px; color:var(--text-muted); font-weight:600; text-transform:uppercase;">20D Expected Drift (γ)</div>
-            <div class="mono" id="art-gamma" style="font-size:13px; font-weight:600; margin-top:2px; color:var(--positive);">+2.48%</div>
+          <div class="kpi-card">
+            <div class="kpi-lbl">20D Expected Drift (γ)</div>
+            <div class="kpi-val mono" id="art-gamma">+3.24%</div>
+          </div>
+          <div class="kpi-card">
+            <div class="kpi-lbl">Uncertainty (σ_a / σ²_e)</div>
+            <div class="kpi-val mono" id="art-unc" style="font-size:12.5px;">22.86% / 0.0617</div>
+          </div>
+          <div class="kpi-card">
+            <div class="kpi-lbl">Tail Breach Prob (P_b)</div>
+            <div class="kpi-val mono" id="art-pb">31.6%</div>
           </div>
         </div>
 
-        <div class="chart-frame" id="art-main-chart"></div>
-        <div class="rsi-frame" id="art-rsi-chart"></div>
+        <div class="chart-frame" id="tv-main-chart"></div>
+        <div class="rsi-frame" id="tv-rsi-chart"></div>
+
+        <div style="font-size:11.5px; color:var(--text-secondary); background:var(--bg-elevated); padding:9px 12px; border-radius:6px; border:1px solid var(--border-subtle);">
+          Dashed projection indicates the 20-trading-day forward evidential drift (γ) bounded by 90% split-conformal intervals (q̂ = 1.3644).
+        </div>
       </div>
 
-      <!-- TAB 2: ENSEMBLE & FEATURES -->
+      <!-- TAB 2: ENSEMBLE & 20 CAUSAL FEATURES -->
       <div class="panel-body" id="atab-brain" style="display:none;">
-        <table class="tv-table mono">
+        <div style="font-weight:600; font-size:12px; color:var(--text-primary);">
+          3-Member Evidential Ensemble (<span id="brain-sym-lbl" class="mono">SBIN</span>)
+        </div>
+        <table class="data-table mono">
           <thead>
-            <tr><th>Member</th><th>20D Drift</th><th>Aleatoric</th><th>Epistemic</th></tr>
+            <tr>
+              <th>Member</th>
+              <th>20D Drift</th>
+              <th>Aleatoric σ</th>
+              <th>Epistemic σ²</th>
+              <th>Breach P_b</th>
+            </tr>
           </thead>
           <tbody id="ensemble-heads-tbody">
-            <tr><td>Head #1</td><td>+2.54%</td><td>23.10%</td><td>0.0620</td></tr>
-            <tr><td>Head #2</td><td>+2.42%</td><td>23.45%</td><td>0.0658</td></tr>
-            <tr><td>Head #3</td><td>+2.48%</td><td>23.50%</td><td>0.0657</td></tr>
+            <tr><td>GRU-Attention Head #1</td><td style="color:var(--positive);">+3.45%</td><td>7.08%</td><td>0.00050</td><td>30.8%</td></tr>
+            <tr><td>GRU-Attention Head #2</td><td style="color:var(--positive);">+3.29%</td><td>7.19%</td><td>0.00060</td><td>31.5%</td></tr>
+            <tr><td>GRU-Attention Head #3</td><td style="color:var(--positive);">+3.40%</td><td>7.09%</td><td>0.00050</td><td>31.3%</td></tr>
           </tbody>
         </table>
 
-        <table class="tv-table mono" style="margin-top:6px;">
+        <div style="font-weight:600; font-size:12px; color:var(--text-primary); margin-top:4px;">
+          20-Feature Causal Tensor (60D Lookback)
+        </div>
+        <table class="data-table mono">
           <thead>
             <tr><th>Feature</th><th>Value</th></tr>
           </thead>
           <tbody id="features-tbody">
-            <tr><td>ret_1d_clean</td><td>+0.0046</td></tr>
-            <tr><td>ret_20d</td><td>-0.0465</td></tr>
-            <tr><td>rsi_14d</td><td>+0.1040</td></tr>
+            <tr><td>ret_1d_clean</td><td>+0.0042</td></tr>
+            <tr><td>ret_20d</td><td>+0.0418</td></tr>
+            <tr><td>rsi_14d</td><td>+0.1680</td></tr>
+            <tr><td>trend_ema_ratio</td><td>+0.0142</td></tr>
+            <tr><td>vol_squeeze_ratio</td><td>0.9120</td></tr>
+            <tr><td>volume_momentum_ratio</td><td>1.1400</td></tr>
+            <tr><td>market_rel_mom_20d</td><td>+0.0215</td></tr>
+            <tr><td>parkinson_vol_20d</td><td>0.0148</td></tr>
           </tbody>
         </table>
       </div>
 
       <!-- TAB 3: LEDGER & ALLOCATION -->
       <div class="panel-body" id="atab-ledger" style="display:none;">
-        <div style="background:var(--bg-elevated); border:1px solid var(--border-subtle); border-radius:5px; padding:8px 10px; font-size:12px;" class="mono">
-          <div>Cleared Cash: <b id="led-settled" style="color:var(--positive);">₹1,00,000.00</b></div>
-          <div style="margin-top:2px;">Taxes (FA 2026): <b id="led-taxes" style="color:var(--negative);">₹0.00</b></div>
+        <div class="kpi-grid">
+          <div class="kpi-card">
+            <div class="kpi-lbl">W_settled (Cleared Cash)</div>
+            <div class="kpi-val mono" id="led-settled" style="color:var(--positive);">₹1,00,000.00</div>
+          </div>
+          <div class="kpi-card">
+            <div class="kpi-lbl">Statutory Charges (FA 2026)</div>
+            <div class="kpi-val mono" id="led-taxes" style="color:var(--negative);">₹0.00</div>
+          </div>
         </div>
 
-        <div id="led-receipt" style="background:var(--bg-elevated); border:1px solid var(--border-subtle); border-radius:5px; padding:8px 10px; font-size:11.5px; margin-top:4px;">
-          Submit an order to inspect Safety Kernel receipt and Ed25519 signature.
+        <div id="led-receipt" style="background:var(--bg-elevated); border:1px solid var(--border-subtle); border-radius:6px; padding:10px 12px; font-size:12px;">
+          Submit an order or portfolio query to inspect the 3-Gate Safety Kernel receipt and Ed25519 signature.
         </div>
 
-        <table class="tv-table mono" style="margin-top:6px;">
+        <table class="data-table mono">
           <thead>
-            <tr><th>Symbol</th><th>Shares</th><th>Price</th><th>Notional</th><th>Charges</th></tr>
+            <tr>
+              <th>Symbol</th>
+              <th>Shares</th>
+              <th>Price</th>
+              <th>Notional</th>
+              <th>Charges</th>
+            </tr>
           </thead>
           <tbody id="alloc-tbody">
-            <tr><td colspan="5" style="text-align:center; color:var(--text-muted); padding:10px;">100% Cleared Cash</td></tr>
+            <tr><td colspan="5" style="text-align:center; color:var(--text-muted); padding:14px;">100% W_settled Cash</td></tr>
           </tbody>
         </table>
       </div>
 
-      <!-- TAB 4: AUDIT -->
+      <!-- TAB 4: 2-YEAR AUDIT -->
       <div class="panel-body" id="atab-audit" style="display:none;">
-        <table class="tv-table mono">
+        <div style="font-size:12px; color:var(--text-secondary);">
+          <b>2-Year Out-of-Sample Walk-Forward Audit (500 Trading Days)</b><br/>
+          Max drawdown reduced from <span class="mono" style="color:var(--negative);">-21.93%</span> to <span class="mono" style="color:var(--positive);">-2.98%</span>.
+        </div>
+        <table class="data-table mono">
           <thead>
-            <tr><th>Period</th><th>Regime</th><th>Always-In</th><th>Regime Gate</th><th>Alpha Spread</th></tr>
+            <tr>
+              <th>Period</th>
+              <th>Regime</th>
+              <th>Always-In</th>
+              <th>Regime Gate</th>
+              <th>Spread</th>
+            </tr>
           </thead>
           <tbody>
-            <tr><td>2024-10..11</td><td>Cash</td><td style="color:var(--negative);">-2.91%</td><td>0.00%</td><td style="color:var(--positive);">+2.91%</td></tr>
-            <tr><td>2025-07..08</td><td>Cash</td><td style="color:var(--negative);">-7.96%</td><td>0.00%</td><td style="color:var(--positive);">+7.96%</td></tr>
-            <tr><td>2025-10</td><td>Invested</td><td style="color:var(--positive);">+2.36%</td><td style="color:var(--positive);">+2.96%</td><td style="color:var(--positive);">+0.61%</td></tr>
-            <tr><td>2026-03</td><td>Cash</td><td style="color:var(--negative);">-5.43%</td><td>0.00%</td><td style="color:var(--positive);">+5.43%</td></tr>
-            <tr><td>2026-08..10</td><td>Cash</td><td style="color:var(--negative);">-5.62%</td><td style="color:var(--negative);">-3.38%</td><td style="color:var(--positive);">+2.24%</td></tr>
+            <tr><td>2024-10..11</td><td><span class="status-pill warn">Cash</span></td><td style="color:var(--negative);">-2.91%</td><td>0.00%</td><td style="color:var(--positive);">+2.91%</td></tr>
+            <tr><td>2025-07..08</td><td><span class="status-pill warn">Cash</span></td><td style="color:var(--negative);">-7.96%</td><td>0.00%</td><td style="color:var(--positive);">+7.96%</td></tr>
+            <tr><td>2025-10</td><td><span class="status-pill pos">Invested</span></td><td style="color:var(--positive);">+2.36%</td><td style="color:var(--positive);">+2.96%</td><td style="color:var(--positive);">+0.61%</td></tr>
+            <tr><td>2026-03</td><td><span class="status-pill warn">Cash</span></td><td style="color:var(--negative);">-5.43%</td><td>0.00%</td><td style="color:var(--positive);">+5.43%</td></tr>
+            <tr><td>2026-08..10</td><td><span class="status-pill warn">Cash</span></td><td style="color:var(--negative);">-5.62%</td><td style="color:var(--negative);">-3.38%</td><td style="color:var(--positive);">+2.24%</td></tr>
           </tbody>
         </table>
       </div>
     </aside>
-
   </div>
 
   <script>
-    /* ================= GLOBAL STATE ================= */
     const API_BASE = window.location.hostname.includes('onrender.com')
       ? window.location.origin
       : (localStorage.getItem('ALPHANITI_API_URL') || 'https://alphaniti-v25-api.onrender.com');
 
     let SNAPSHOT = null;
     let SIGNALS = [];
-    let CURRENT_SYMBOL = 'RELIANCE';
+    let CURRENT_SYMBOL = 'SBIN';
 
-    // Chart Series
-    let artChart, artCandles, artVolume, artEma12, artEma26, artFanExp, artFanUp, artFanLow;
-    let artRsiChart, artRsiSeries;
+    // Cover Workbench Chart instances
+    let coverChart, coverCandles, coverVolume, coverEma12, coverEma26, coverFanExp, coverFanUp, coverFanLow;
+    let coverRsiChart, coverRsiSeries;
 
-    /* ================= INITIALIZATION ================= */
-    window.addEventListener('DOMContentLoaded', async () => {
-      initAmbientCanvas();
-      initResearchCharts();
+    // Inspector Chart instances
+    let mainChart, candleSeries, volumeSeries, ema12Series, ema26Series, fanExpSeries, fanUpSeries, fanLowSeries;
+    let rsiChart, rsiSeries;
 
-      // Listen for keyboard Enter to launch
+    function toggleTheme() {
+      const root = document.documentElement;
+      const next = root.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+      root.setAttribute('data-theme', next);
+      const label = next === 'dark' ? 'Light' : 'Dark';
+      const b1 = document.getElementById('theme-btn');
+      const b2 = document.getElementById('cover-theme-btn');
+      if (b1) b1.innerText = label;
+      if (b2) b2.innerText = label;
+    }
+
+    function enterWorkspace() {
+      const cover = document.getElementById('view-cover');
+      cover.classList.add('hidden');
+      setTimeout(resizeCharts, 80);
+    }
+
+    function showCover() {
+      const cover = document.getElementById('view-cover');
+      cover.classList.remove('hidden');
+      setTimeout(resizeCoverCharts, 60);
+    }
+
+    function enterWithSymbol(sym) {
+      enterWorkspace();
+      loadChartForSymbol(sym);
+      document.getElementById('artifact-panel').classList.remove('closed');
+      switchArtifactTab('chart');
+    }
+
+    function enterWithPrompt(q) {
+      enterWorkspace();
+      setTimeout(() => askBrain(q), 120);
+    }
+
+    function selectCoverSymbol(sym) {
+      CURRENT_SYMBOL = sym;
+      document.querySelectorAll('.wb-sym-btn').forEach(btn => {
+        btn.classList.toggle('active', btn.innerText.trim() === sym);
+      });
+      loadChartForSymbol(sym);
+    }
+
+    function toggleArtifactPanel() {
+      const panel = document.getElementById('artifact-panel');
+      panel.classList.toggle('closed');
+      setTimeout(resizeCharts, 220);
+    }
+
+    function switchArtifactTab(tab) {
+      ['chart', 'brain', 'ledger', 'audit'].forEach(t => {
+        document.getElementById('atab-' + t).style.display = (t === tab) ? 'flex' : 'none';
+        document.getElementById('atab-btn-' + t).classList.toggle('active', t === tab);
+      });
+      if (tab === 'chart') setTimeout(resizeCharts, 40);
+    }
+
+    function initCoverCharts() {
+      const cMain = document.getElementById('cover-main-chart');
+      const cRsi = document.getElementById('cover-rsi-chart');
+
+      coverChart = LightweightCharts.createChart(cMain, {
+        layout: { background: { type: 'solid', color: '#131722' }, textColor: '#A19F99', fontSize: 11 },
+        grid: { vertLines: { color: '#1C1F2B' }, horzLines: { color: '#1C1F2B' } },
+        rightPriceScale: { borderColor: '#2A2E39', scaleMargins: { top: 0.12, bottom: 0.2 } },
+        timeScale: { borderColor: '#2A2E39', timeVisible: true, rightOffset: 18 },
+      });
+
+      coverCandles = coverChart.addCandlestickSeries({
+        upColor: '#2E9B78', downColor: '#D65252',
+        borderUpColor: '#2E9B78', borderDownColor: '#D65252',
+        wickUpColor: '#2E9B78', wickDownColor: '#D65252',
+      });
+
+      coverVolume = coverChart.addHistogramSeries({ priceFormat: { type: 'volume' }, priceScaleId: '' });
+      coverVolume.priceScale().applyOptions({ scaleMargins: { top: 0.82, bottom: 0 } });
+
+      coverEma12 = coverChart.addLineSeries({ color: '#4A89DC', lineWidth: 1.25 });
+      coverEma26 = coverChart.addLineSeries({ color: '#C89128', lineWidth: 1.25 });
+
+      coverFanUp = coverChart.addLineSeries({ color: 'rgba(161, 159, 153, 0.55)', lineWidth: 1, lineStyle: 2 });
+      coverFanExp = coverChart.addLineSeries({ color: '#C96A4B', lineWidth: 1.75, lineStyle: 2 });
+      coverFanLow = coverChart.addLineSeries({ color: 'rgba(161, 159, 153, 0.55)', lineWidth: 1, lineStyle: 2 });
+
+      coverRsiChart = LightweightCharts.createChart(cRsi, {
+        layout: { background: { type: 'solid', color: '#131722' }, textColor: '#787b86', fontSize: 10 },
+        grid: { vertLines: { color: '#1C1F2B' }, horzLines: { color: '#1C1F2B' } },
+        rightPriceScale: { borderColor: '#2A2E39', scaleMargins: { top: 0.12, bottom: 0.12 } },
+        timeScale: { borderColor: '#2A2E39', visible: false },
+      });
+      coverRsiSeries = coverRsiChart.addLineSeries({ color: '#A19F99', lineWidth: 1.25 });
+
+      coverChart.timeScale().subscribeVisibleLogicalRangeChange(r => {
+        if (r && coverRsiChart) coverRsiChart.timeScale().setVisibleLogicalRange(r);
+      });
+
+      coverChart.subscribeCrosshairMove(param => {
+        if (!param || !param.time || !param.seriesData) return;
+        const bar = param.seriesData.get(coverCandles);
+        if (bar && bar.open !== undefined) {
+          document.getElementById('c-hud-date').innerText = String(param.time);
+          document.getElementById('c-hud-o').innerText = bar.open.toFixed(2);
+          document.getElementById('c-hud-h').innerText = bar.high.toFixed(2);
+          document.getElementById('c-hud-l').innerText = bar.low.toFixed(2);
+          document.getElementById('c-hud-c').innerText = bar.close.toFixed(2);
+        }
+      });
+    }
+
+    function initCharts() {
+      const mainEl = document.getElementById('tv-main-chart');
+      const rsiEl = document.getElementById('tv-rsi-chart');
+
+      mainChart = LightweightCharts.createChart(mainEl, {
+        layout: { background: { type: 'solid', color: '#131722' }, textColor: '#d1d4dc', fontSize: 11 },
+        grid: { vertLines: { color: '#1e222d' }, horzLines: { color: '#1e222d' } },
+        rightPriceScale: { borderColor: '#2a2e39', scaleMargins: { top: 0.1, bottom: 0.2 } },
+        timeScale: { borderColor: '#2a2e39', timeVisible: true, rightOffset: 18 },
+      });
+
+      candleSeries = mainChart.addCandlestickSeries({
+        upColor: '#2E9B78', downColor: '#D65252',
+        borderUpColor: '#2E9B78', borderDownColor: '#D65252',
+        wickUpColor: '#2E9B78', wickDownColor: '#D65252',
+      });
+
+      volumeSeries = mainChart.addHistogramSeries({ priceFormat: { type: 'volume' }, priceScaleId: '' });
+      volumeSeries.priceScale().applyOptions({ scaleMargins: { top: 0.82, bottom: 0 } });
+
+      ema12Series = mainChart.addLineSeries({ color: '#4A89DC', lineWidth: 1.25 });
+      ema26Series = mainChart.addLineSeries({ color: '#C89128', lineWidth: 1.25 });
+
+      fanUpSeries = mainChart.addLineSeries({ color: 'rgba(161, 159, 153, 0.55)', lineWidth: 1, lineStyle: 2 });
+      fanExpSeries = mainChart.addLineSeries({ color: '#C96A4B', lineWidth: 1.75, lineStyle: 2 });
+      fanLowSeries = mainChart.addLineSeries({ color: 'rgba(161, 159, 153, 0.55)', lineWidth: 1, lineStyle: 2 });
+
+      rsiChart = LightweightCharts.createChart(rsiEl, {
+        layout: { background: { type: 'solid', color: '#131722' }, textColor: '#787b86', fontSize: 10 },
+        grid: { vertLines: { color: '#1e222d' }, horzLines: { color: '#1e222d' } },
+        rightPriceScale: { borderColor: '#2a2e39', scaleMargins: { top: 0.1, bottom: 0.1 } },
+        timeScale: { borderColor: '#2a2e39', visible: false },
+      });
+      rsiSeries = rsiChart.addLineSeries({ color: '#A19F99', lineWidth: 1.25 });
+
+      mainChart.timeScale().subscribeVisibleLogicalRangeChange(r => {
+        if (r) rsiChart.timeScale().setVisibleLogicalRange(r);
+      });
+
+      window.addEventListener('resize', () => {
+        resizeCoverCharts();
+        resizeCharts();
+      });
+    }
+
+    function resizeCoverCharts() {
+      const cMain = document.getElementById('cover-main-chart');
+      const cRsi = document.getElementById('cover-rsi-chart');
+      if (coverChart && cMain && cMain.clientWidth > 0) {
+        coverChart.applyOptions({ width: cMain.clientWidth, height: cMain.clientHeight });
+      }
+      if (coverRsiChart && cRsi && cRsi.clientWidth > 0) {
+        coverRsiChart.applyOptions({ width: cRsi.clientWidth, height: cRsi.clientHeight });
+      }
+    }
+
+    function resizeCharts() {
+      const mainEl = document.getElementById('tv-main-chart');
+      const rsiEl = document.getElementById('tv-rsi-chart');
+      if (mainChart && mainEl && mainEl.clientWidth > 0) {
+        mainChart.applyOptions({ width: mainEl.clientWidth, height: mainEl.clientHeight });
+      }
+      if (rsiChart && rsiEl && rsiEl.clientWidth > 0) {
+        rsiChart.applyOptions({ width: rsiEl.clientWidth, height: rsiEl.clientHeight });
+      }
+    }
+
+    async function bootApp() {
+      initCoverCharts();
+      initCharts();
+
       window.addEventListener('keydown', (e) => {
-        if (e.key === 'Enter' && document.getElementById('view-cover').style.display !== 'none') {
-          // If not typing in an input
-          if (document.activeElement.tagName !== 'INPUT' && document.activeElement.tagName !== 'TEXTAREA') {
-            enterResearchWorkspace();
+        const cover = document.getElementById('view-cover');
+        if (e.key === 'Enter' && cover && !cover.classList.contains('hidden')) {
+          const tag = (document.activeElement && document.activeElement.tagName) || '';
+          if (tag !== 'INPUT' && tag !== 'TEXTAREA' && tag !== 'BUTTON') {
+            e.preventDefault();
+            enterWorkspace();
           }
         }
       });
@@ -1312,163 +1815,20 @@
           SNAPSHOT = await snapRes.json();
           applySignals(SNAPSHOT.signals);
           if (SNAPSHOT.charts && SNAPSHOT.charts[CURRENT_SYMBOL]) {
-            renderChartData(CURRENT_SYMBOL, SNAPSHOT.charts[CURRENT_SYMBOL]);
+            renderArtifactChart(CURRENT_SYMBOL, SNAPSHOT.charts[CURRENT_SYMBOL]);
           }
         }
       } catch (e) {}
 
+      setTimeout(resizeCoverCharts, 60);
       await syncWithRender();
-    });
-
-    /* ================= AMBIENT CANVAS ================= */
-    function initAmbientCanvas() {
-      const canvas = document.getElementById('ambient-canvas');
-      const ctx = canvas.getContext('2d');
-      let w = (canvas.width = window.innerWidth);
-      let h = (canvas.height = window.innerHeight);
-
-      window.addEventListener('resize', () => {
-        w = canvas.width = window.innerWidth;
-        h = canvas.height = window.innerHeight;
-      });
-
-      const particles = [];
-      const count = Math.min(50, Math.floor(w / 25));
-      for (let i = 0; i < count; i++) {
-        particles.push({
-          x: Math.random() * w,
-          y: Math.random() * h,
-          vx: (Math.random() - 0.5) * 0.4,
-          vy: (Math.random() - 0.5) * 0.4,
-          r: Math.random() * 2 + 1,
-          color: Math.random() > 0.4 ? 'rgba(0, 212, 255, 0.4)' : 'rgba(41, 98, 255, 0.35)'
-        });
-      }
-
-      function render() {
-        ctx.clearRect(0, 0, w, h);
-
-        // Draw connections
-        for (let i = 0; i < count; i++) {
-          for (let j = i + 1; j < count; j++) {
-            const dx = particles[i].x - particles[j].x;
-            const dy = particles[i].y - particles[j].y;
-            const dist = Math.sqrt(dx * dx + dy * dy);
-            if (dist < 130) {
-              ctx.strokeStyle = `rgba(41, 98, 255, ${0.18 * (1 - dist / 130)})`;
-              ctx.lineWidth = 1;
-              ctx.beginPath();
-              ctx.moveTo(particles[i].x, particles[i].y);
-              ctx.lineTo(particles[j].x, particles[j].y);
-              ctx.stroke();
-            }
-          }
-        }
-
-        // Draw nodes
-        particles.forEach(p => {
-          p.x += p.vx;
-          p.y += p.vy;
-          if (p.x < 0 || p.x > w) p.vx *= -1;
-          if (p.y < 0 || p.y > h) p.vy *= -1;
-
-          ctx.fillStyle = p.color;
-          ctx.beginPath();
-          ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
-          ctx.fill();
-        });
-
-        requestAnimationFrame(render);
-      }
-      render();
     }
 
-    /* ================= TRANSITIONS: ENTER / RETURN ================= */
-    function enterResearchWorkspace() {
-      const cover = document.getElementById('view-cover');
-      const research = document.getElementById('view-research');
-
-      cover.style.opacity = '0';
-      cover.style.transform = 'scale(0.98)';
-
-      setTimeout(() => {
-        cover.style.display = 'none';
-        research.style.display = 'flex';
-        research.style.opacity = '1';
-        research.style.transform = 'scale(1)';
-        setTimeout(resizeResearchCharts, 60);
-      }, 250);
-    }
-
-    function returnToCover() {
-      const cover = document.getElementById('view-cover');
-      const research = document.getElementById('view-research');
-
-      research.style.opacity = '0';
-      setTimeout(() => {
-        research.style.display = 'none';
-        cover.style.display = 'flex';
-        setTimeout(() => {
-          cover.style.opacity = '1';
-          cover.style.transform = 'scale(1)';
-        }, 30);
-      }, 200);
-    }
-
-    function launchWithQuery(q) {
-      enterResearchWorkspace();
-      setTimeout(() => askBrain(q), 350);
-    }
-
-    /* ================= RESEARCH CHARTS ================= */
-    function initResearchCharts() {
-      const mainEl = document.getElementById('art-main-chart');
-      const rsiEl = document.getElementById('art-rsi-chart');
-
-      artChart = LightweightCharts.createChart(mainEl, {
-        layout: { background: { type: 'solid', color: '#131722' }, textColor: '#d1d4dc', fontSize: 11 },
-        grid: { vertLines: { color: '#1e222d' }, horzLines: { color: '#1e222d' } },
-        rightPriceScale: { borderColor: '#2a2e39', scaleMargins: { top: 0.1, bottom: 0.2 } },
-        timeScale: { borderColor: '#2a2e39', timeVisible: true, rightOffset: 16 },
-      });
-
-      artCandles = artChart.addCandlestickSeries({
-        upColor: '#2E9B78', downColor: '#D65252',
-        borderUpColor: '#2E9B78', borderDownColor: '#D65252',
-        wickUpColor: '#2E9B78', wickDownColor: '#D65252',
-      });
-      artVolume = artChart.addHistogramSeries({ priceFormat: { type: 'volume' }, priceScaleId: '' });
-      artVolume.priceScale().applyOptions({ scaleMargins: { top: 0.82, bottom: 0 } });
-      artEma12 = artChart.addLineSeries({ color: '#4A89DC', lineWidth: 1.25 });
-      artEma26 = artChart.addLineSeries({ color: '#C89128', lineWidth: 1.25 });
-      artFanUp = artChart.addLineSeries({ color: 'rgba(161, 159, 153, 0.55)', lineWidth: 1, lineStyle: 2 });
-      artFanExp = artChart.addLineSeries({ color: '#C96A4B', lineWidth: 1.75, lineStyle: 2 });
-      artFanLow = artChart.addLineSeries({ color: 'rgba(161, 159, 153, 0.55)', lineWidth: 1, lineStyle: 2 });
-
-      artRsiChart = LightweightCharts.createChart(rsiEl, {
-        layout: { background: { type: 'solid', color: '#131722' }, textColor: '#787b86', fontSize: 10 },
-        grid: { vertLines: { color: '#1e222d' }, horzLines: { color: '#1e222d' } },
-        rightPriceScale: { borderColor: '#2a2e39', scaleMargins: { top: 0.1, bottom: 0.1 } },
-        timeScale: { borderColor: '#2a2e39', visible: false },
-      });
-      artRsiSeries = artRsiChart.addLineSeries({ color: '#A19F99', lineWidth: 1.25 });
-
-      window.addEventListener('resize', resizeResearchCharts);
-    }
-
-    function resizeResearchCharts() {
-      const m = document.getElementById('art-main-chart');
-      const r = document.getElementById('art-rsi-chart');
-      if (artChart && m && m.clientWidth > 0) artChart.applyOptions({ width: m.clientWidth, height: m.clientHeight });
-      if (artRsiChart && r && r.clientWidth > 0) artRsiChart.applyOptions({ width: r.clientWidth, height: r.clientHeight });
-    }
-
-    /* ================= SYNC & SIGNALS ================= */
     async function syncWithRender() {
       const dot = document.getElementById('api-dot');
       const lbl = document.getElementById('api-label');
-      if (dot) dot.className = 'status-indicator sync';
-      if (lbl) lbl.innerText = 'Syncing Render Backend...';
+      dot.className = 'status-indicator sync';
+      lbl.innerText = 'Syncing Render Backend...';
 
       try {
         const res = await fetch(`${API_BASE}/api/signals`, { mode: 'cors' });
@@ -1476,11 +1836,11 @@
         const data = await res.json();
         applySignals(data);
         await loadChartForSymbol(CURRENT_SYMBOL);
-        if (dot) dot.className = 'status-indicator';
-        if (lbl) lbl.innerText = 'Render Engine Connected';
+        dot.className = 'status-indicator';
+        lbl.innerText = 'Render Engine Connected';
       } catch (e) {
-        if (dot) dot.className = 'status-indicator sync';
-        if (lbl) lbl.innerText = 'Local Snapshot Active';
+        dot.className = 'status-indicator sync';
+        lbl.innerText = 'Local Snapshot Active';
       }
     }
 
@@ -1491,102 +1851,245 @@
 
       const isCash = payload.regime === 'CASH_PRESERVATION';
       const pill = document.getElementById('header-regime-pill');
-      if (pill) {
-        document.getElementById('regime-title').innerText = isCash ? 'REGIME: CASH PRESERVATION' : 'REGIME: RISK-ON';
-        document.getElementById('regime-sub').innerText = `| Drift: ${payload.market_expected_drift_pct >= 0 ? '+' : ''}${payload.market_expected_drift_pct}% | P_breach: ${(payload.market_average_crash_probability * 100).toFixed(1)}%`;
+      pill.className = 'regime-tag ' + (isCash ? 'cash' : 'riskon');
+      document.getElementById('regime-title').innerText = isCash ? 'REGIME: CASH PRESERVATION' : 'REGIME: RISK-ON';
+      document.getElementById('regime-sub').innerText = `| Drift: ${payload.market_expected_drift_pct >= 0 ? '+' : ''}${payload.market_expected_drift_pct}% | P_breach: ${(payload.market_average_crash_probability * 100).toFixed(1)}%`;
+
+      const coverBadge = document.getElementById('cover-regime-badge');
+      if (coverBadge) {
+        coverBadge.className = 'regime-tag mono ' + (isCash ? 'cash' : 'riskon');
+        coverBadge.innerText = isCash
+          ? `REGIME: CASH PRESERVATION (${(payload.market_average_crash_probability * 100).toFixed(1)}% P_b)`
+          : `REGIME: RISK-ON (${payload.market_expected_drift_pct >= 0 ? '+' : ''}${payload.market_expected_drift_pct}%)`;
+      }
+
+      const tape = document.getElementById('cover-tape');
+      if (tape && SIGNALS.length) {
+        tape.innerHTML = SIGNALS.slice(0, 6).map(s => {
+          const col = s.change_1d_pct >= 0 ? 'var(--positive)' : 'var(--negative)';
+          return `<span class="tape-quote" onclick="selectCoverSymbol('${s.symbol}')"><b>${s.symbol}</b> ₹${s.close_price.toFixed(2)} <span style="color:${col};">${s.change_1d_pct >= 0 ? '+' : ''}${s.change_1d_pct.toFixed(2)}%</span></span>`;
+        }).join('');
       }
 
       renderSidebarWatchlist();
-      renderCoverRibbon();
-    }
-
-    function renderCoverRibbon() {
-      const track = document.getElementById('cover-ticker-content');
-      if (!track || !SIGNALS.length) return;
-      const html = SIGNALS.map(s => {
-        const up = s.change_1d_pct >= 0;
-        return `<span class="ticker-item"><span class="ticker-sym">NSE:${s.symbol}</span> <span class="ticker-px">₹${s.close_price.toFixed(2)}</span> <span class="${up ? 'ticker-up' : 'ticker-dn'}">${up ? '+' : ''}${s.change_1d_pct.toFixed(2)}%</span></span>`;
-      }).join('');
-      track.innerHTML = html + html; // loop
     }
 
     function renderSidebarWatchlist() {
-      const sbox = document.getElementById('sidebar-watchlist');
-      if (!sbox) return;
-      sbox.innerHTML = '';
+      const box = document.getElementById('sidebar-watchlist');
+      box.innerHTML = '';
       SIGNALS.forEach(s => {
         const div = document.createElement('div');
         div.className = 'nav-item' + (s.symbol === CURRENT_SYMBOL ? ' active' : '');
         const col = s.predicted_return_pct >= 0 ? 'var(--positive)' : 'var(--negative)';
         div.onclick = () => askBrain(`Analyze ${s.symbol}.NS live with my ML brain`);
         div.innerHTML = `
-          <span style="font-weight:600; color:var(--text-primary);">${s.symbol}</span>
+          <span style="font-weight:500; color:var(--text-primary);">${s.symbol}</span>
           <span class="mono" style="font-size:11px;">
             ₹${s.close_price.toFixed(1)}
             <span style="color:${col}; margin-left:4px;">${s.predicted_return_pct >= 0 ? '+' : ''}${s.predicted_return_pct.toFixed(1)}%</span>
           </span>
         `;
-        sbox.appendChild(div);
+        box.appendChild(div);
       });
     }
 
     async function loadChartForSymbol(sym) {
       CURRENT_SYMBOL = sym;
       renderSidebarWatchlist();
+      document.querySelectorAll('.wb-sym-btn').forEach(btn => {
+        btn.classList.toggle('active', btn.innerText.trim() === sym);
+      });
       if (SNAPSHOT && SNAPSHOT.charts && SNAPSHOT.charts[sym]) {
-        renderChartData(sym, SNAPSHOT.charts[sym]);
+        renderArtifactChart(sym, SNAPSHOT.charts[sym]);
       }
       try {
         const r = await fetch(`${API_BASE}/api/chart/${sym}`, { mode: 'cors' });
         if (r.ok) {
           const d = await r.json();
           if (SNAPSHOT && SNAPSHOT.charts) SNAPSHOT.charts[sym] = d;
-          renderChartData(sym, d);
+          renderArtifactChart(sym, d);
         }
       } catch (e) {}
     }
 
-    function renderChartData(sym, payload) {
-      if (!payload || !payload.candles || !payload.candles.length) return;
-      const candles = payload.candles;
+    function renderArtifactChart(sym, chartPayload) {
+      if (!chartPayload || !chartPayload.candles) return;
+      const candles = chartPayload.candles;
+      const mappedCandles = candles.map(c => ({ time: c.time, open: c.open, high: c.high, low: c.low, close: c.close }));
+      const mappedVol = candles.map(c => ({
+        time: c.time, value: c.volume,
+        color: c.close >= c.open ? 'rgba(46, 155, 120, 0.3)' : 'rgba(214, 82, 82, 0.3)'
+      }));
+      const mappedEma12 = candles.map(c => ({ time: c.time, value: c.ema12 }));
+      const mappedEma26 = candles.map(c => ({ time: c.time, value: c.ema26 }));
+      const mappedRsi = candles.map(c => ({ time: c.time, value: c.rsi14 }));
 
-      if (artCandles) {
-        artCandles.setData(candles.map(c => ({ time: c.time, open: c.open, high: c.high, low: c.low, close: c.close })));
-        artVolume.setData(candles.map(c => ({
-          time: c.time, value: c.volume,
-          color: c.close >= c.open ? 'rgba(46, 155, 120, 0.3)' : 'rgba(214, 82, 82, 0.3)'
-        })));
-        artEma12.setData(candles.map(c => ({ time: c.time, value: c.ema12 })));
-        artEma26.setData(candles.map(c => ({ time: c.time, value: c.ema26 })));
-        artRsiSeries.setData(candles.map(c => ({ time: c.time, value: c.rsi14 })));
+      // Populate Research Inspector Chart
+      candleSeries.setData(mappedCandles);
+      volumeSeries.setData(mappedVol);
+      ema12Series.setData(mappedEma12);
+      ema26Series.setData(mappedEma26);
+      rsiSeries.setData(mappedRsi);
 
-        if (payload.forecast_fan && payload.forecast_fan.length) {
-          const lastC = candles[candles.length - 1];
-          const anchor = { time: lastC.time, value: lastC.close };
-          artFanExp.setData([anchor, ...payload.forecast_fan.map(f => ({ time: f.time, value: f.expected }))]);
-          artFanUp.setData([anchor, ...payload.forecast_fan.map(f => ({ time: f.time, value: f.upper_90 }))]);
-          artFanLow.setData([anchor, ...payload.forecast_fan.map(f => ({ time: f.time, value: f.lower_90 }))]);
+      // Populate Cover Workbench Chart
+      if (coverCandles) {
+        coverCandles.setData(mappedCandles);
+        coverVolume.setData(mappedVol);
+        coverEma12.setData(mappedEma12);
+        coverEma26.setData(mappedEma26);
+        coverRsiSeries.setData(mappedRsi);
+      }
+
+      if (chartPayload.forecast_fan && chartPayload.forecast_fan.length) {
+        const lastC = candles[candles.length - 1];
+        const anchor = { time: lastC.time, value: lastC.close };
+        const expData = [anchor, ...chartPayload.forecast_fan.map(f => ({ time: f.time, value: f.expected }))];
+        const upData = [anchor, ...chartPayload.forecast_fan.map(f => ({ time: f.time, value: f.upper_90 }))];
+        const lowData = [anchor, ...chartPayload.forecast_fan.map(f => ({ time: f.time, value: f.lower_90 }))];
+
+        fanExpSeries.setData(expData);
+        fanUpSeries.setData(upData);
+        fanLowSeries.setData(lowData);
+
+        if (coverFanExp) {
+          coverFanExp.setData(expData);
+          coverFanUp.setData(upData);
+          coverFanLow.setData(lowData);
         }
-        artChart.timeScale().fitContent();
       }
 
       const last = candles[candles.length - 1];
-      const sig = payload.signal || SIGNALS.find(s => s.symbol === sym) || {};
+      const sig = chartPayload.signal || SIGNALS.find(s => s.symbol === sym) || {};
+      const sector = chartPayload.sector || sig.sector || 'Equity';
+
+      document.getElementById('art-title').innerText = `NSE:${sym} — ${sector}`;
+      document.getElementById('art-subtitle').innerText = `120D OHLCV & 20D Conformal Forecast (q̂=1.3644)`;
+
       const chg = sig.change_1d_pct !== undefined ? sig.change_1d_pct : 0;
-      document.getElementById('art-title').innerText = `NSE:${sym} — ${payload.sector || sig.sector || 'Large Cap'}`;
-      document.getElementById('art-px').innerText = `₹${last.close.toFixed(2)} (${chg >= 0 ? '+' : ''}${chg.toFixed(2)}%)`;
+      const chgCol = chg >= 0 ? 'var(--positive)' : 'var(--negative)';
+      document.getElementById('art-px').innerHTML = `₹${last.close.toFixed(2)} <span style="font-size:11.5px; color:${chgCol};">${chg >= 0 ? '+' : ''}${chg.toFixed(2)}%</span>`;
+
+      // Cover Workbench stats
+      document.getElementById('cover-wb-sector').innerText = `NSE:${sym} · ${sector}`;
+      document.getElementById('c-stat-px').innerHTML = `₹${last.close.toFixed(2)} <span style="font-size:11px; color:${chgCol};">${chg >= 0 ? '+' : ''}${chg.toFixed(2)}%</span>`;
+      document.getElementById('c-hud-date').innerText = last.time;
+      document.getElementById('c-hud-o').innerText = last.open.toFixed(2);
+      document.getElementById('c-hud-h').innerText = last.high.toFixed(2);
+      document.getElementById('c-hud-l').innerText = last.low.toFixed(2);
+      document.getElementById('c-hud-c').innerText = last.close.toFixed(2);
+      const openBtn = document.getElementById('cover-open-sym-btn');
+      if (openBtn) {
+        openBtn.onclick = () => enterWithSymbol(sym);
+        openBtn.innerHTML = `<span>Open NSE:${sym} in Research Workspace →</span>`;
+      }
+
       if (sig.predicted_return_pct !== undefined) {
-        document.getElementById('art-gamma').innerText = `${sig.predicted_return_pct >= 0 ? '+' : ''}${sig.predicted_return_pct.toFixed(2)}%`;
+        const gCol = sig.predicted_return_pct >= 0 ? 'var(--positive)' : 'var(--negative)';
+        const gTxt = `${sig.predicted_return_pct >= 0 ? '+' : ''}${sig.predicted_return_pct.toFixed(2)}%`;
+        document.getElementById('art-gamma').innerText = gTxt;
+        document.getElementById('art-gamma').style.color = gCol;
+        document.getElementById('art-unc').innerText = `${sig.aleatoric_vol_pct.toFixed(2)}% / ${sig.epistemic_uncertainty.toFixed(4)}`;
+        document.getElementById('art-pb').innerText = `${(sig.drawdown_crash_prob * 100).toFixed(1)}%`;
+
+        document.getElementById('c-stat-gamma').innerText = gTxt;
+        document.getElementById('c-stat-gamma').style.color = gCol;
+        document.getElementById('c-stat-unc').innerText = `${sig.aleatoric_vol_pct.toFixed(2)}% / ${sig.epistemic_uncertainty.toFixed(4)}`;
+        document.getElementById('c-stat-pb').innerText = `${(sig.drawdown_crash_prob * 100).toFixed(1)}%`;
+        document.getElementById('c-stat-gate').innerText = sig.signal_badge === 'CASH_GATE' ? 'CASH GATE' : 'QUALIFIED';
+      }
+
+      mainChart.timeScale().fitContent();
+      if (coverChart) coverChart.timeScale().fitContent();
+    }
+
+    function updateTelemetryArtifact(sym, tele) {
+      document.getElementById('brain-sym-lbl').innerText = sym;
+      const headBody = document.getElementById('ensemble-heads-tbody');
+      const members = (tele && tele.ensemble_members) || [];
+      if (members.length > 0) {
+        headBody.innerHTML = members.map(m => {
+          const col = m.predicted_20d_return_pct >= 0 ? 'var(--positive)' : 'var(--negative)';
+          return `<tr>
+            <td style="font-weight:500;">${m.member_id}</td>
+            <td style="color:${col}; font-weight:600;">${m.predicted_20d_return_pct >= 0 ? '+' : ''}${m.predicted_20d_return_pct.toFixed(2)}%</td>
+            <td>${m.aleatoric_sigma_pct.toFixed(2)}%</td>
+            <td>${m.epistemic_var.toFixed(5)}</td>
+            <td>${m.tail_breach_prob_pct.toFixed(1)}%</td>
+          </tr>`;
+        }).join('');
+      }
+
+      const f = (tele && tele.causal_features_20d) || {};
+      if (Object.keys(f).length > 0) {
+        const featBody = document.getElementById('features-tbody');
+        featBody.innerHTML = Object.entries(f).map(([k, v]) => `
+          <tr><td>${k}</td><td>${Number(v).toFixed(4)}</td></tr>
+        `).join('');
       }
     }
 
-    /* ================= CONVERSATIONAL CHAT ================= */
+    function updateLedgerArtifact(sim) {
+      if (!sim) return;
+      const fmt = v => '₹' + Number(v || 0).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+      const l = sim.ledger || {};
+      document.getElementById('led-settled').innerText = fmt(l.W_settled);
+
+      const receipt = document.getElementById('led-receipt');
+      const tbody = document.getElementById('alloc-tbody');
+
+      if (sim.mode === 'PORTFOLIO') {
+        document.getElementById('led-taxes').innerText = fmt(sim.total_statutory_charges_inr || 0);
+        receipt.innerHTML = `<span class="mono" style="font-weight:600;">[${sim.gate_status}]</span> ${sim.message}`;
+        if (sim.allocations && sim.allocations.length) {
+          tbody.innerHTML = sim.allocations.map(a => `
+            <tr>
+              <td style="font-weight:500;">${a.symbol}</td>
+              <td>${a.shares}</td>
+              <td>₹${a.price_inr.toFixed(1)}</td>
+              <td>${fmt(a.notional_inr)}</td>
+              <td style="color:var(--negative);">₹${a.statutory_tax_inr.toFixed(1)}</td>
+            </tr>
+          `).join('');
+        } else {
+          tbody.innerHTML = `<tr><td colspan="5" style="text-align:center; color:var(--text-muted); padding:14px;">100% Settled Cash Preserved</td></tr>`;
+        }
+      } else if (sim.order) {
+        const o = sim.order;
+        document.getElementById('led-taxes').innerText = fmt(o.statutory_charges_inr || 0);
+        const sig = (sim.cryptographic_proof && sim.cryptographic_proof.ed25519_signature) || '';
+        receipt.innerHTML = `
+          <div><span class="mono" style="font-weight:600;">[${sim.gate_status}]</span> ${o.side} ${o.quantity} × ${o.symbol}.NS @ ₹${o.limit_price.toFixed(2)}</div>
+          <div class="mono" style="font-size:10.5px; color:var(--text-muted); margin-top:4px;">Ed25519: ${sig ? sig.slice(0, 40) + '...' : 'VETOED'}</div>
+        `;
+        tbody.innerHTML = `
+          <tr>
+            <td style="font-weight:500;">${o.symbol}</td>
+            <td>${o.quantity}</td>
+            <td>₹${o.limit_price.toFixed(1)}</td>
+            <td>${fmt(o.notional_value_inr)}</td>
+            <td style="color:var(--negative);">₹${o.statutory_charges_inr.toFixed(1)}</td>
+          </tr>
+        `;
+      }
+    }
+
+    function cleanFormatMarkdown(md) {
+      if (!md) return '';
+      const stripped = md.replace(/[\u{1F300}-\u{1FAFF}\u{2600}-\u{27BF}\u{FE0F}]/gu, '');
+      return stripped
+        .replace(/^###\s*(.*)$/gm, '<h3>$1</h3>')
+        .replace(/^####\s*(.*)$/gm, '<h4>$1</h4>')
+        .replace(/\*\*([^*]+)\*\*/g, '<b>$1</b>')
+        .replace(/`([^`]+)`/g, '<code>$1</code>')
+        .replace(/\n/g, '<br/>');
+    }
+
     function resetConversation() {
       const container = document.getElementById('chat-container');
       container.innerHTML = `
         <div class="hero-block" id="hero-welcome">
           <h1 class="serif">Institutional Equity Research &amp; Execution</h1>
-          <p>Enter any query below to evaluate an NSE security, compare relative drift, or construct an integer-sized portfolio against live market data, our 3-member Evidential Deep Ensemble, Split-Conformal bounds (q̂ = 1.3644), and the Finance Act 2026 safety kernel.</p>
+          <p>Enter a query below to evaluate any NSE security or construct an integer-sized portfolio against live market data, our 3-member Evidential Deep Ensemble, Split-Conformal bounds (q̂ = 1.3644), and the Finance Act 2026 safety kernel.</p>
         </div>
         <div class="prompt-grid" id="starter-grid">
           <div class="prompt-card" onclick="askBrain('Should I buy RELIANCE right now with ₹1,00,000?')">
@@ -1670,16 +2173,18 @@
         const elapsed = ((performance.now() - t0) / 1000).toFixed(2);
 
         document.getElementById(traceId).innerHTML = `
-          <span>Feed: ${data.data_source} · Intent: ${data.intent}</span>
+          <span>Feed: ${data.data_source} · Pipeline: ${data.intent}</span>
           <span>${elapsed}s</span>
         `;
 
         const sym = data.focus_symbol || CURRENT_SYMBOL;
         document.getElementById(proseId).innerHTML = cleanFormatMarkdown(data.reply_markdown) + `
-          <div style="margin-top:10px;">
-            <button class="text-btn" onclick="document.getElementById('artifact-panel').classList.remove('closed'); switchArtifactTab('chart'); resizeResearchCharts();">
-              Inspect NSE:${sym} Chart &amp; 20 Causal Features →
-            </button>
+          <div class="sheet-link-card" onclick="document.getElementById('artifact-panel').classList.remove('closed'); switchArtifactTab('chart'); resizeCharts();">
+            <div>
+              <div style="font-weight:600; font-size:12.5px;">NSE:${sym} — Chart, Ensemble Heads &amp; 20 Causal Features</div>
+              <div class="mono" style="font-size:11px; color:var(--text-muted);">Open right-hand inspector panel</div>
+            </div>
+            <span class="mono" style="font-size:11px; color:var(--text-secondary);">View →</span>
           </div>
         `;
 
@@ -1689,12 +2194,16 @@
         }
         if (sym) {
           await loadChartForSymbol(sym);
+          updateTelemetryArtifact(sym, data.brain_telemetry);
+        }
+        if (data.simulation) {
+          updateLedgerArtifact(data.simulation);
         }
       } catch (err) {
         const focus = SIGNALS.find(s => queryText.toUpperCase().includes(s.symbol)) || SIGNALS[0];
         document.getElementById(traceId).innerHTML = `
           <span>Feed: SNAPSHOT_FALLBACK · Symbol: ${focus.symbol}</span>
-          <span>Local Engine</span>
+          <span>Local</span>
         `;
         document.getElementById(proseId).innerHTML = `
           <h3>AlphaNiti v25.0 — ${focus.symbol}.NS</h3>
@@ -1705,30 +2214,7 @@
       scrollEl.scrollTop = scrollEl.scrollHeight;
     }
 
-    function cleanFormatMarkdown(md) {
-      if (!md) return '';
-      const stripped = md.replace(/[\u{1F300}-\u{1FAFF}\u{2600}-\u{27BF}\u{FE0F}]/gu, '');
-      return stripped
-        .replace(/^###\s*(.*)$/gm, '<h3>$1</h3>')
-        .replace(/^####\s*(.*)$/gm, '<h4>$1</h4>')
-        .replace(/\*\*([^*]+)\*\*/g, '<b>$1</b>')
-        .replace(/`([^`]+)`/g, '<code>$1</code>')
-        .replace(/\n/g, '<br/>');
-    }
-
-    function toggleArtifactPanel() {
-      const panel = document.getElementById('artifact-panel');
-      panel.classList.toggle('closed');
-      setTimeout(resizeResearchCharts, 220);
-    }
-
-    function switchArtifactTab(tab) {
-      ['chart', 'brain', 'ledger', 'audit'].forEach(t => {
-        document.getElementById('atab-' + t).style.display = (t === tab) ? 'flex' : 'none';
-        document.getElementById('atab-btn-' + t).classList.toggle('active', t === tab);
-      });
-      if (tab === 'chart') setTimeout(resizeResearchCharts, 50);
-    }
+    window.addEventListener('DOMContentLoaded', bootApp);
   </script>
 </body>
 </html>
