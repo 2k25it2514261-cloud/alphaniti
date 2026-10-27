@@ -157,7 +157,45 @@ $$
 
 ---
 
-## 5. Academic Literature & References
+## 5. Formal Prediction Target & Purged Validation Protocol
+
+To eliminate lookahead bias and execution-timing ambiguity, the predictive modeling targets and cross-validation boundaries are defined with strict mathematical precision:
+
+### 5.1 Continuous Excess Return Target Formulation
+For asset $i$ on trading day $t$, the continuous prediction target $r _ {i, t}^{(H)}$ over investment horizons $H \in \{20, 60\}$ trading days is defined as:
+
+$$
+r _ {i, t}^{(H)} \equiv \ln\left(\frac{P _ {i, t+1+H}^{\text{open}}}{P _ {i, t+1}^{\text{open}}}\right) - \ln\left(\frac{P _ {\text{bench}, t+1+H}^{\text{open}}}{P _ {\text{bench}, t+1}^{\text{open}}}\right) - \mathcal{C} _ {\text{statutory}}
+$$
+
+where:
+1. **Conditioning Filtration**: The forecast is conditioned strictly on information $\mathcal{F} _ t$ available at Day $t$ market close (15:30 IST).
+2. **Execution Timing**: Trade entry is simulated at Day $t+1$ Market Open (09:15 IST) auction prices, and trade exit at Day $t+1+H$ Market Open (09:15 IST) auction prices, completely eliminating Day $t$ close execution bias and post-close fill assumptions.
+3. **Statutory Friction**: Two-way statutory friction $\mathcal{C} _ {\text{statutory}}$ (Securities Transaction Tax, Stamp Duty, GST, exchange and regulatory turnover charges loaded dynamically from `config/statutory_rates_2026.json`) is subtracted directly to ensure net realizable returns.
+4. **Benchmark**: $P _ {\text{bench}}$ represents the Nifty 50 or Nifty 500 Total Return Index (TRI).
+
+### 5.2 Binary Downside Tail-Risk Target
+In addition to the continuous return target, each observation carries a binary downside breach indicator:
+
+$$
+y _ {i, t}^{\text{breach}} \equiv \mathbb{I}\left( \min _ {\tau \in [1, H]} \left\{ \frac{P _ {i, t+\tau}^{\text{low}}}{P _ {i, t+1}^{\text{open}}} - 1 \right\} \le -0.05 \right)
+$$
+
+flagging any asset that suffers an intraday drawdown exceeding 5.0% during the forward holding window.
+
+### 5.3 Overlapping Label Purging & Embargo Protocol
+Because forward return windows $[t+1, t+1+H]$ overlap by $H-1$ trading days across consecutive sessions, standard randomized cross-validation induces massive informational leakage.
+1. **Purging Window**: When evaluating a test fold spanning $[\tau _ {\text{start}}, \tau _ {\text{end}}]$, any training sample whose forward return evaluation window $[t+1, t+1+H]$ overlaps with $[\tau _ {\text{start}}, \tau _ {\text{end}}]$ is strictly purged:
+
+$$
+\text{Purge if } [t+1, \; t+1+H] \cap [\tau _ {\text{start}}, \; \tau _ {\text{end}}] \ne \emptyset
+$$
+
+2. **Embargo Window**: An embargo buffer of $h _ {\text{embargo}} = 10$ trading days is enforced immediately following $\tau _ {\text{end}}$ before subsequent training data can begin, eliminating autoregressive memory leakage from lagged feature components (such as 20-day historical volatilities and EMAs).
+
+---
+
+## 6. Academic Literature & References
 
 1. **Asness, C., Frazzini, A., Israel, R., & Moskowitz, T. (2014)**. *Fact, Fiction, and Value Investing*. The Journal of Portfolio Management, 40(1), 74-92. [DOI: 10.3905/jpm.2014.40.1.074]  
    *Establishes the empirical necessity of strict point-in-time financial statement alignment to eliminate restatement and disclosure lag bias.*

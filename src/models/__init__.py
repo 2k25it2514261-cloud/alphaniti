@@ -8,6 +8,9 @@ from src.models.evidential_nn import (
     EvidentialLoss,
     EvidentialEnsemble,
     SplitConformalCalibrator,
+    GaussianHead,
+    GaussianGRUModel,
+    PlainDeepEnsemble,
 )
 
 from src.models.trainer import (
@@ -21,6 +24,9 @@ __all__ = [
     "EvidentialLoss",
     "EvidentialEnsemble",
     "SplitConformalCalibrator",
+    "GaussianHead",
+    "GaussianGRUModel",
+    "PlainDeepEnsemble",
     "EvidentialTrainer",
     "train_evidential_ensemble",
 ]

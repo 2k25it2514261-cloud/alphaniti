@@ -1,6 +1,6 @@
 # AlphaNiti v25.0 — Quantitative Research, Distributionally Robust Optimization & Execution Architecture
 
-**Point-in-Time Causal Data Engine, Evidential Uncertainty Decomposition, Factor-Space Wasserstein DRO, Discrete Branch-and-Bound Sizing & Conserved Double-Entry Ledger**  
+**Point-in-Time Causal Data Engine, Evidential Uncertainty Decomposition, Factor-Space Wasserstein DRO, Discrete Branch-and-Bound Sizing & Conserved Double-Entry Ledger & NAV Accounting Identity**  
 *Formal Mathematical Specifications, TLA+ Safety Invariants, and Falsifiable Empirical Validation Protocols for Indian Equities (NSE / BSE)*
 
 [![License: Apache 2.0](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
@@ -56,7 +56,7 @@ In accordance with institutional research governance ([`RESEARCH_ROADMAP.md`](RE
 | **5. Exchange Protocol** | HMAC `ClOrdID`, duplicate reject (Tag 104), 2PC WAL recovery | [`docs/05_EXECUTION_ENGINE_AND_EXCHANGE_PROTOCOLS.md`](docs/05_EXECUTION_ENGINE_AND_EXCHANGE_PROTOCOLS.md) | **Protocol Specification (NSE FIX 4.2)** | Zero duplicate order re-transmission prior to `OrderStatusRequest (35=H)` reconciliation |
 | **6. Double-Entry Ledger** | 5-bucket state machine & pre-trade limit-price collar guard | [`docs/06_ACCOUNTING_NAV_AND_DOUBLE_ENTRY_LEDGER.md`](docs/06_ACCOUNTING_NAV_AND_DOUBLE_ENTRY_LEDGER.md) | **Inductive Mathematical Proof** | $\Delta W _ k^{\text{NAV}} = \Delta \text{UnrealizedPnL} _ k + \text{RealizedPnL} _ k - \text{Charges} _ k$; $W _ k^{\text{settled}} \ge 0$ |
 | **7. Econometric Validation** | Purged Walk-Forward, CPCV, Hill tail router, StepM / SPA / DSR | [`docs/07_MONITORING_VALIDATION_AND_CALIBRATION_TESTING.md`](docs/07_MONITORING_VALIDATION_AND_CALIBRATION_TESTING.md) | **Empirical Falsification Protocol** | Simultaneously pass $p _ {\text{StepM}} < 0.05$, $p _ {\text{SPA}}^c < 0.01$, and $\text{DSR} \ge 0.99$ on untouched holdouts |
-| **8. Isolated Safety Kernel** | Hardware/OS memory locking, syscall filtering & TLA+ model | [`docs/08_PLATFORM_SECURITY_AND_ISOLATED_SAFETY_KERNEL.md`](docs/08_PLATFORM_SECURITY_AND_ISOLATED_SAFETY_KERNEL.md)<br/>[`formal_specs/AlphaNitiSafetyKernel.tla`](formal_specs/AlphaNitiSafetyKernel.tla) | **Formal State-Machine Specification** | TLC invariant verification of `TypeOK`, `SolvencyInvariant`, and `NonNegativeBalancesInvariant` |
+| **8. Isolated Safety Kernel** | OS process memory locking and isolation, syscall filtering & TLA+ model | [`docs/08_PLATFORM_SECURITY_AND_ISOLATED_SAFETY_KERNEL.md`](docs/08_PLATFORM_SECURITY_AND_ISOLATED_SAFETY_KERNEL.md)<br/>[`formal_specs/AlphaNitiSafetyKernel.tla`](formal_specs/AlphaNitiSafetyKernel.tla) | **Formal State-Machine Specification** | TLC invariant verification of `TypeOK`, `SolvencyInvariant`, and `NonNegativeBalancesInvariant` |
 | **9. Tax & Regulatory Audit** | Finance Act 2026 statutory matrix & SEBI OTR throttle | [`docs/09_RISK_REPORTING_AND_REGULATORY_AUDIT.md`](docs/09_RISK_REPORTING_AND_REGULATORY_AUDIT.md) | **Statutory & Regulatory Schedule** | Exact match against NSE/SEBI circular fee formulas and Finance Act 2026 STT rates |
 
 ---
@@ -189,10 +189,20 @@ flowchart TD
     Check -->|"Tier 4: Macro Halt / Broker Down"| T4["Tier 4: Systemic Circuit Freeze<br/>Complete halt; preserve custody in depository"]
 ```
 
-1. **Tier 1 (Soft Uncertainty: $\gamma _ {\text{soft}} < \sigma _ {\text{epistemic}, i}^2 \le \gamma _ {\text{hard}}$)**: Halt new buy orders ($q _ i^{\text{buy}} = 0$) and cancel working buy orders for asset $i$. Existing settled custody positions are held untouched, incurring zero liquidation spread cost.
-2. **Tier 2 (Elevated Uncertainty: $\gamma _ {\text{hard}} < \sigma _ {\text{epistemic}, i}^2 \le \gamma _ {\text{crit}}$)**: Cancel open buy orders and de-gross exposure by 25%–50% using passive limit orders pegged to the National Best Bid (NBB), capped at $5\%$ of 20-day Average Daily Volume ($\text{ADV} _ {20\text{d}}$).
-3. **Tier 3 (Extreme Breakdown: $\sigma _ {\text{epistemic}, i}^2 > \gamma _ {\text{crit}}$)**: Execute an orderly passive TWAP exit exclusively for asset $i$; all unrelated portfolio holdings remain unaffected.
-4. **Tier 4 (Systemic Market Circuit / Broker Partition)**: Immediate execution freeze; all working orders are cancelled and custody assets remain segregated in NSDL/CDSL depository accounts.
+AlphaNiti unifies the system state into **4 Canonical Operating Tiers (Tiers 0–3)** calibrated from out-of-sample validation quantiles (`config/uncertainty_thresholds.json`):
+
+1. **Tier 0 (Normal Execution: $u _ t < \theta _ {\text{soft}}$)**: Standard systematic allocation, full position sizing, standard investment horizon ($H \in \{20, 60\}\text{d}$).
+2. **Tier 1 (Soft Buy-Freeze: $\theta _ {\text{soft}} \le u _ t < \theta _ {\text{elevated}}$)**: Halt new buy orders ($q _ i^{\text{buy}} = 0$) and cancel working buy orders for asset $i$. Shorten forward evaluation horizon to 5 days. Existing settled custody positions are held untouched, incurring zero liquidation spread cost.
+3. **Tier 2 (De-Grossing: $\theta _ {\text{elevated}} \le u _ t < \theta _ {\text{extreme}}$)**: Cancel open buy orders and de-gross exposure by 25%–50% using passive limit orders pegged to the National Best Bid (NBB), capped at $5\%$ of 20-day Average Daily Volume ($\text{ADV} _ {20\text{d}}$).
+4. **Tier 3 (Systemic Freeze: $u _ t \ge \theta _ {\text{extreme}}$ OR Exchange Circuit Halt / Structural Breach)**: Immediate execution freeze; all working orders are cancelled and custody assets remain safely segregated in NSDL/CDSL depository accounts or liquidated to sovereign cash/TREPS.
+
+#### Threshold Calibration & Hysteresis State Machine
+- **Quantiles**: $\theta _ {\text{soft}} = Q _ {0.75}(\sigma _ {\text{epistemic}}^2) = 0.00185$, $\theta _ {\text{elevated}} = Q _ {0.90}(\sigma _ {\text{epistemic}}^2) = 0.00342$, $\theta _ {\text{extreme}} = Q _ {0.99}(\sigma _ {\text{epistemic}}^2) = 0.00780$.
+- **Hysteresis**: To prevent day-to-day oscillation between tiers, the engine requires:
+  $$\text{Enter Tier } k: \; u _ t \ge \theta _ k; \qquad \text{Exit Tier } k \to k-1: \; u _ t \le \theta _ k(1 - \delta _ {\text{hys}}) \quad \text{for } \tau \ge 3 \text{ consecutive sessions} (\delta _ {\text{hys}} = 0.15)$$
+
+#### The Meinert et al. (2023) Critique & Deep Ensemble Benchmark
+In accordance with Meinert, Gawlikowski & Lavin (2023, *"The Unreasonable Effectiveness of Deep Evidential Regression"*), the analytical evidential variance $\frac{\beta}{\nu(\alpha-1)}$ often behaves as an empirical heuristic rather than truthful epistemic uncertainty. AlphaNiti runs a **Plain Deep Ensemble (Lakshminarayanan et al., 2017)** side-by-side to test whether empirical ensemble variance $\frac{1}{M}\sum (\mu _ m - \bar{\mu})^2$ predicts out-of-sample error in unseen regimes.
 
 ### 4.3 Permitted Risk-Free Cash Instruments (Indian Jurisdiction)
 
@@ -281,7 +291,7 @@ $$
 Given reference prices $P _ i^{\text{eval}}$, the discrete optimizer searches directly over integer share quantities $\mathbf{q} \in \mathbb{Z} _ {\ge 0}^N$ to minimize the total risk-adjusted, transaction-cost-aware objective:
 
 $$
-J(\mathbf{q}) \equiv \text{CVaR} _ \alpha(\mathbf{q}) - \sum _ {i=1}^N \mu _ i q _ i P _ i^{\text{eval}} + \sum _ {i=1}^N \text{Cost} _ i(q _ i)
+J _ {\text{DRO}}(\mathbf{q}) \equiv \lambda _ {\text{risk}} \cdot \text{CVaR} _ \alpha^{\mathcal{P} _ \epsilon}(\mathbf{q}) + \lambda _ {\text{DRO}} \epsilon _ f \sum _ {i=1}^N P _ i^{\text{eval}} q _ i - \sum _ {i=1}^N \mu _ i q _ i P _ i^{\text{eval}} + \sum _ {i=1}^N \text{Cost} _ i(q _ i)
 $$
 
 Because real-world execution schedules $\text{Cost} _ i(q _ i)$ contain fixed minimum brokerage floors and tiered fee slabs (making them non-convex at $q _ i \to 0^+$), each Branch-and-Bound tree node $\mathcal{N}$ with box bounds $\mathbf{l} \le \mathbf{q} \le \mathbf{u}$ replaces $\text{Cost} _ i(q _ i)$ with its **Lower Convex Envelope** $\text{Cost} _ i^{\text{cvx}}(q _ i) \le \text{Cost} _ i(q _ i)$:
@@ -347,8 +357,8 @@ flowchart TD
         E["Custody Equity Positions: sum(q_i * P_i_eval)"]
     end
     
-    A1 & A2 & A3 --> Assets["Total Cash Assets = W_settled + W_escrow + W_recv"]
-    L1 & L2 --> Liab["Total Liabilities = W_lien + W_payable"]
+    A1 & A2 & A3 & L1 --> Assets["Total Assets = W_settled + W_escrow + W_lien + W_recv"]
+    L2 --> Liab["Total Liabilities = W_payable"]
     Assets & Liab & E --> NAV["W_NAV = Assets - Liabilities + EquityValuation"]
     A1 & L1 & L2 --> BP["Buying Power BP = W_settled - W_lien - W_payable"]
 ```
@@ -358,11 +368,11 @@ flowchart TD
 At discrete event step $k$, total Net Asset Value ($W _ k^{\text{NAV}}$) and immediate Buying Power ($\text{BP} _ k$) are decoupled:
 
 $$
-W _ k^{\text{NAV}} \equiv \left( W _ k^{\text{settled}} + W _ k^{\text{escrow}} + W _ k^{\text{recv}} \right) - \left( W _ k^{\text{lien}} + W _ k^{\text{payable}} \right) + \sum _ {i=1}^N q _ {i, k} P _ {i, k}^{\text{eval}}
+W _ k^{\text{NAV}} \equiv \left( W _ k^{\text{settled}} + W _ k^{\text{escrow}} + W _ k^{\text{lien}} + W _ k^{\text{recv}} \right) - W _ k^{\text{payable}} + \sum _ {i=1}^N q _ {i, k} P _ {i, k}^{\text{eval}}
 $$
 
 $$
-\text{BP} _ k \equiv W _ k^{\text{settled}} - W _ k^{\text{lien}} - W _ k^{\text{payable}}
+\text{BP} _ k \equiv W _ k^{\text{settled}} - W _ k^{\text{payable}}
 $$
 
 When a buy order is dispatched, capital moves from $W^{\text{settled}}$ into $W^{\text{escrow}}$. This reduces $\text{BP} _ k$ immediately (preventing double-spending of cash across concurrent orders) while keeping $W _ k^{\text{NAV}}$ unchanged ($\Delta W _ k^{\text{NAV}} = 0$). Across every legal transition $k \to k+1$, mathematical induction proves:

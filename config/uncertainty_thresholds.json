@@ -1,0 +1,51 @@
+{
+  "calibration_methodology": "Out-of-sample purged validation quantiles on epistemic variance",
+  "base_metric": "sigma_squared_epistemic",
+  "benchmarking": {
+    "primary_baseline": "DeepEnsemble_5x_Lakshminarayanan2017",
+    "evidential_model": "DeepEvidentialRegression_Amini2020",
+    "critique_reference": "Meinert, Gawlikowski & Lavin (2023) - The Unreasonable Effectiveness of Deep Evidential Regression"
+  },
+  "quantiles": {
+    "theta_soft": 0.00185,
+    "theta_elevated": 0.00342,
+    "theta_extreme": 0.00780
+  },
+  "quantile_definitions": {
+    "theta_soft": "Q_0.75: 75th percentile of cross-validated epistemic variance (Triggers Tier 1 Soft Buy-Freeze)",
+    "theta_elevated": "Q_0.90: 90th percentile of cross-validated epistemic variance (Triggers Tier 2 De-Grossing)",
+    "theta_extreme": "Q_0.99: 99th percentile of cross-validated epistemic variance (Triggers Tier 3 Systemic Freeze)"
+  },
+  "hysteresis": {
+    "delta_hysteresis": 0.15,
+    "persistence_sessions_required": 3,
+    "exit_multipliers": {
+      "tier1_exit": 0.85,
+      "tier2_exit": 0.85,
+      "tier3_exit": 0.85
+    },
+    "description": "To transition up to Tier k, u_t >= theta_k. To de-escalate down to Tier k-1, u_t <= theta_k * (1 - delta_hysteresis) for at least 3 consecutive trading sessions."
+  },
+  "operating_tiers": {
+    "tier_0": {
+      "name": "Normal Execution",
+      "condition": "u_t < theta_soft",
+      "portfolio_action": "Full model allocation, standard horizon (20d/60d), complete turnover budget"
+    },
+    "tier_1": {
+      "name": "Soft Buy-Freeze",
+      "condition": "theta_soft <= u_t < theta_elevated",
+      "portfolio_action": "Zero new long initiations, horizon shortening to 5d, hold existing positions with tight trailing collars"
+    },
+    "tier_2": {
+      "name": "De-Grossing",
+      "condition": "theta_elevated <= u_t < theta_extreme",
+      "portfolio_action": "Systematic 50% linear gross de-leveraging, liquidation prioritized by high asset-level uncertainty"
+    },
+    "tier_3": {
+      "name": "Systemic Freeze",
+      "condition": "u_t >= theta_extreme OR Exchange Circuit Halt OR Structural Breach",
+      "portfolio_action": "100% immediate liquidation to risk-free cash/T-bills, complete cancellation of all pending broker order slices"
+    }
+  }
+}

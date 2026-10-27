@@ -157,7 +157,61 @@ $$
 
 ---
 
-## 5. Academic Literature & References
+---
+
+## 5. The Meinert et al. (2023) Critique & Deep Ensemble Benchmarking
+
+### 5.1 The Evidential Degeneracy Critique
+Recent research (**Meinert, Gawlikowski & Lavin, 2023**, *"The Unreasonable Effectiveness of Deep Evidential Regression"*) demonstrated that in Deep Evidential Regression (Amini et al., 2020), the theoretical decomposition between aleatoric and epistemic uncertainty often fails to behave as claimed under real-world domain shift. Specifically:
+1. The analytical epistemic variance $\sigma _ {\text{epistemic}}^2 = \frac{\beta}{\nu(\alpha - 1)}$ can act largely as an empirical regularizer rather than a truthful measure of posterior parameter ignorance.
+2. During gradient descent, networks can minimize the evidence loss by inflating $\alpha$ or suppressing $\nu$ across the entire dataset, causing the epistemic signal to degenerate into a non-monotonic heuristic that correlates poorly with true out-of-distribution errors.
+
+### 5.2 Dual Engine Architecture: Plain Deep Ensemble Baseline
+To audit and safeguard against evidential degeneracy, AlphaNiti implements a **Dual Predictive Architecture**:
+1. **Evidential Ensemble**: Evaluates the Normal-Inverse-Gamma conjugate updates and analytical dispersion.
+2. **Plain Deep Ensemble (Lakshminarayanan et al., 2017)**: Operates a parallel baseline of $M=5$ independently initialized models trained with Gaussian NLL. The empirical epistemic variance is computed directly from inter-model disagreement:
+
+$$
+\sigma _ {\text{epistemic, ens}}^2 = \frac{1}{M}\sum _ {m=1}^M (\mu _ m - \bar{\mu})^2
+$$
+
+The runtime monitoring engine continuously tests whether the analytical evidential uncertainty $\sigma _ {\text{epistemic}}^2$ or the empirical ensemble disagreement $\sigma _ {\text{epistemic, ens}}^2$ better predicts empirical forecast errors in unseen market regimes.
+
+---
+
+## 6. Canonical Operating Tiers & Hysteresis Calibration
+
+To eliminate ambiguity across system documentation, AlphaNiti enforces a single canonical hierarchy of **4 Operating Tiers (Tiers 0–3)** across the 9 pipeline modules:
+
+| Operating Tier | Uncertainty Gate Condition | Portfolio Execution Action |
+| :--- | :--- | :--- |
+| **Tier 0: Normal Execution** | $u _ t < \theta _ {\text{soft}}$ | Standard systematic allocation, full position sizing, standard horizon ($H \in \{20, 60\}\text{d}$). |
+| **Tier 1: Soft Buy-Freeze** | $\theta _ {\text{soft}} \le u _ t < \theta _ {\text{elevated}}$ | Freeze new buy orders ($q _ i^{\text{buy}} = 0$); shorten horizon to 5d; existing custody positions held untouched. |
+| **Tier 2: De-Grossing** | $\theta _ {\text{elevated}} \le u _ t < \theta _ {\text{extreme}}$ | Passive 25%–50% linear gross de-leveraging via passive limit orders pegged to NBB; turnover capped at $\le 0.05 \cdot \text{ADV} _ {20\text{d}}$. |
+| **Tier 3: Systemic Freeze** | $u _ t \ge \theta _ {\text{extreme}}$ OR Exchange Circuit Halt | 100% liquidation to sovereign risk-free cash/TREPS; immediate cancellation of all open broker orders. |
+
+### 6.1 Threshold Calibration from Validation Quantiles
+Threshold values are calibrated objectively from out-of-sample purged validation quantiles (stored in `config/uncertainty_thresholds.json`):
+- $\theta _ {\text{soft}} = Q _ {0.75}(\sigma _ {\text{epistemic}}^2) = 0.00185$ (75th percentile of validation epistemic variance)
+- $\theta _ {\text{elevated}} = Q _ {0.90}(\sigma _ {\text{epistemic}}^2) = 0.00342$ (90th percentile)
+- $\theta _ {\text{extreme}} = Q _ {0.99}(\sigma _ {\text{epistemic}}^2) = 0.00780$ (99th percentile)
+
+### 6.2 Dual-Threshold Hysteresis State Machine
+To prevent daily flip-flopping between tiers during noisy market transitions, a dual-threshold hysteresis filter with a persistence requirement is enforced:
+
+$$
+\text{Enter Tier } k: \quad u _ t \ge \theta _ k
+$$
+
+$$
+\text{De-escalate to Tier } k-1: \quad u _ t \le \theta _ k \cdot (1 - \delta _ {\text{hys}}) \quad \text{for } \tau \ge k _ {\text{persist}} = 3 \text{ consecutive sessions}
+$$
+
+where $\delta _ {\text{hys}} = 0.15$ (15% deadband below the entry threshold).
+
+---
+
+## 7. Academic Literature & References
 
 1. **Amini, A., Schwarting, W., Soleimany, A., & Rus, D. (2020)**. *Deep Evidential Regression*. Advances in Neural Information Processing Systems (NeurIPS 2020), 33, 14927-14937.  
    *Derives the exact Normal-Inverse-Gamma evidential objective for deterministic neural uncertainty decomposition.*
@@ -173,3 +227,6 @@ $$
 
 5. **Kendall, A., & Gal, Y. (2017)**. *What Uncertainties Do We Need in Bayesian Deep Learning for Computer Vision?*. Advances in Neural Information Processing Systems (NeurIPS 2017), 30, 5574-5584.  
    *Establishes the foundational distinction between heteroscedastic aleatoric risk and epistemic parameter uncertainty.*
+
+6. **Meinert, N., Gawlikowski, J., & Lavin, A. (2023)**. *The Unreasonable Effectiveness of Deep Evidential Regression*. ICML Workshop on Uncertainty and Robustness in Deep Learning, arXiv:2205.10060.  
+   *Demonstrates the empirical failure modes of evidential uncertainty splitting and motivates ensemble-based empirical validation.*

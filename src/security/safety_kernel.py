@@ -1,7 +1,7 @@
 """
 AlphaNiti v25.0 Institutional Security & Safety Kernel
-Pipeline Module 8 - Isolated Formal Safety Kernel & Hardware Enclave Ed25519 Signing Path
-Reference: docs/08_PLATFORM_SECURITY_AND_ISOLATED_SAFETY_KERNEL.md (Callout 7)
+Pipeline Module 8 - Isolated Safety Kernel & Memory-Locked Ed25519 Signing Path
+Reference: docs/08_PLATFORM_SECURITY_AND_ISOLATED_SAFETY_KERNEL.md (Model-Checked on Bounded Model via TLC)
 """
 
 from typing import Dict, Any, Optional, Tuple, List
@@ -18,12 +18,13 @@ class SafetyKernelVetoException(Exception):
 
 class FormalSafetyKernel:
     """
-    Isolated Formal Safety Kernel maintaining unilateral veto authority over outbound orders.
+    Isolated Safety Kernel maintaining unilateral veto authority over outbound orders.
+    Model-checked on a bounded model via TLC specification (AlphaNitiSafetyKernel.tla).
     Enforces three formal gates:
-        Gate 1: Cleared Solvency (W_settled - Liens - Payables >= Outlay)
+        Gate 1: Cleared Solvency (W_settled - Payables >= Outlay)
         Gate 2: Exact Discrete CVaR Risk Ceiling (CVaR_alpha(q) <= Omega_cap)
         Gate 3: Pre-Trade Limit Collar Guard (P_limit <= (Escrow - C_max) / q)
-    Affixes hardware enclave Ed25519 cryptographic signatures to approved orders.
+    Affixes memory-locked Ed25519 cryptographic signatures to approved orders.
     """
 
     def __init__(
@@ -32,7 +33,7 @@ class FormalSafetyKernel:
         enclave_private_key: Optional[ed25519.Ed25519PrivateKey] = None,
     ):
         self.cvar_ceiling_fraction = cvar_ceiling_fraction
-        # Hardware Enclave Ed25519 Keypair (locked in RAM)
+        # Memory-Locked Ed25519 Signing Keypair (isolated in process memory space)
         self._private_key = enclave_private_key or ed25519.Ed25519PrivateKey.generate()
         self.public_key = self._private_key.public_key()
 

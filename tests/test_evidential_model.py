@@ -118,6 +118,33 @@ class TestEvidentialModel(unittest.TestCase):
         self.assertFalse(np.isnan(val_m["loss"]))
         self.assertGreater(train_m["loss"], -50.0)
 
+    def test_06_meinert_critique_and_plain_ensemble(self):
+        """Verifies Plain Deep Ensemble baseline and Meinert et al. (2023) epistemic decomposition."""
+        from src.models.evidential_nn import GaussianGRUModel, PlainDeepEnsemble
+
+        # 1. Plain Deep Ensemble test
+        m1 = GaussianGRUModel(in_features=self.D, hidden_dim=16, num_layers=1)
+        m2 = GaussianGRUModel(in_features=self.D, hidden_dim=16, num_layers=1)
+        plain_ens = PlainDeepEnsemble([m1, m2])
+
+        mu_bar, s_aleatoric, s_epistemic, p_bar = plain_ens.predict(self.X_dummy)
+        self.assertEqual(mu_bar.shape, (self.B, 1))
+        self.assertEqual(s_aleatoric.shape, (self.B, 1))
+        self.assertEqual(s_epistemic.shape, (self.B, 1))
+        self.assertTrue((s_epistemic >= 0).all(), "Ensemble epistemic uncertainty must be non-negative")
+
+        # 2. Meinert split evaluation on EvidentialEnsemble
+        em1 = EvidentialGRUModel(in_features=self.D, hidden_dim=16, num_layers=1)
+        em2 = EvidentialGRUModel(in_features=self.D, hidden_dim=16, num_layers=1)
+        ev_ens = EvidentialEnsemble([em1, em2])
+        split_dict = ev_ens.evaluate_meinert_split(self.X_dummy)
+
+        self.assertIn("analytical_epistemic_var", split_dict)
+        self.assertIn("ensemble_epistemic_var", split_dict)
+        self.assertIn("total_epistemic_var", split_dict)
+        self.assertTrue((split_dict["analytical_epistemic_var"] > 0).all())
+        self.assertTrue((split_dict["ensemble_epistemic_var"] >= 0).all())
+
 
 if __name__ == "__main__":
     unittest.main()

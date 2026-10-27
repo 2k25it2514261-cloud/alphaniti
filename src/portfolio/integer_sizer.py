@@ -27,8 +27,9 @@ class LatticeNode:
 class LatticeBranchAndBoundSolver:
     """
     Branch-and-Bound Integer Sizer solving the Total-Objective Discrete Portfolio Program:
-        min_{q in Z^N_>=0} CVaR_alpha(q) - mu^T (q * P) + sum(Cost_i(q_i))
-    with exact provable lower convex envelopes and cryptographic optimality certificates.
+        min_{q in Z^N_>=0} J_DRO(q) = lambda_risk * CVaR_alpha(q) + lambda_dro * eps_f * ||q * P||_1 - mu^T (q * P) + sum(Cost_i(q_i))
+    incorporating the Factor-Space Wasserstein Ambiguity Radius (eps_f),
+    provable lower convex envelope relaxations, and cryptographic optimality certificates.
     """
 
     def __init__(
@@ -36,6 +37,8 @@ class LatticeBranchAndBoundSolver:
         cost_model: Optional[IndianStatutoryCostModel] = None,
         alpha_cvar: float = 0.95,
         risk_aversion: float = 0.1,
+        wasserstein_radius: float = 0.0195,
+        lambda_dro: float = 0.05,
         max_asset_weight: float = 0.25,
         max_nodes: int = 2000,
         time_limit_sec: float = 30.0,
@@ -43,6 +46,8 @@ class LatticeBranchAndBoundSolver:
         self.cost_model = cost_model or IndianStatutoryCostModel()
         self.alpha = alpha_cvar
         self.risk_aversion = risk_aversion
+        self.wasserstein_radius = wasserstein_radius
+        self.lambda_dro = lambda_dro
         self.max_weight = max_asset_weight
         self.max_nodes = max_nodes
         self.time_limit = time_limit_sec
@@ -55,8 +60,8 @@ class LatticeBranchAndBoundSolver:
         scenarios: np.ndarray,
     ) -> float:
         """
-        Evaluate exact total objective J(q):
-            J(q) = lambda_risk * CVaR_alpha(q) - mu^T (q * P) + sum(Cost_i(q_i))
+        Evaluate exact total distributionally robust objective J_DRO(q):
+            J_DRO(q) = lambda_risk * CVaR_alpha(q) + lambda_dro * eps_f * ||q * P||_1 - mu^T (q * P) + sum(Cost_i(q_i))
         """
         q = np.array(q_integer, dtype=float)
         alloc_value = q * prices
@@ -72,13 +77,16 @@ class LatticeBranchAndBoundSolver:
         tail = sorted_losses[var_idx:]
         cvar = float(np.mean(tail)) if len(tail) > 0 else float(sorted_losses[var_idx])
 
+        # Wasserstein DRO worst-case penalty under Fournier-Guillin radius
+        dro_penalty = float(self.lambda_dro * self.wasserstein_radius * np.sum(alloc_value))
+
         # Execution and statutory costs
         total_cost = sum(
             self.cost_model.compute_cost(shares=q[i], price=prices[i])
             for i in range(len(q))
         )
 
-        return float(self.risk_aversion * cvar - total_exp_ret + total_cost)
+        return float(self.risk_aversion * cvar + dro_penalty - total_exp_ret + total_cost)
 
     def _solve_node_relaxation(
         self,
@@ -91,7 +99,8 @@ class LatticeBranchAndBoundSolver:
         nav: float,
     ) -> Tuple[Optional[float], Optional[np.ndarray]]:
         """
-        Solve continuous LP relaxation z_LP(N) at node N with lower convex envelope costs.
+        Solve continuous LP relaxation z_LP(N) at node N with lower convex envelope costs
+        and explicit Wasserstein DRO radius penalty.
         """
         N = len(prices)
         S = scenarios.shape[0]
@@ -100,8 +109,9 @@ class LatticeBranchAndBoundSolver:
         # Variables: x = [q_1...q_N, gamma, s_1...s_S] in R^(N + 1 + S)
         n_vars = N + 1 + S
         c = np.zeros(n_vars)
-        # - mu_i * P_i + c_i^cvx
-        c[:N] = -expected_returns * prices + convex_cost_slopes
+        # - mu_i * P_i + c_i^cvx + lambda_dro * eps_f * P_i
+        dro_marginal = self.lambda_dro * self.wasserstein_radius * prices
+        c[:N] = -expected_returns * prices + convex_cost_slopes + dro_marginal
         c[N] = self.risk_aversion  # lambda_risk * gamma
         c[N + 1 :] = self.risk_aversion / (one_minus_alpha * S)  # lambda_risk * sum(s_s) / ((1 - alpha)*S)
 
@@ -284,6 +294,8 @@ class LatticeBranchAndBoundSolver:
                 "nodes_explored": nodes_explored,
                 "nodes_pruned": nodes_pruned,
                 "solve_time_ms": float(round(elapsed_ms, 2)),
+                "wasserstein_radius": float(self.wasserstein_radius),
+                "lambda_dro": float(self.lambda_dro),
             },
             "constraints_certified": {
                 "cleared_cash_solvency_verified": bool(float(np.sum(incumbent_q * prices)) <= cash_budget + 1e-4),

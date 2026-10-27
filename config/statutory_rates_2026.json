@@ -1,0 +1,25 @@
+{
+  "effective_date": "2026-04-01",
+  "regulatory_regime": "Finance Act 2026",
+  "jurisdiction": "IN_NSE_BSE",
+  "rates": {
+    "stt_rate": 0.001,
+    "stamp_duty_rate": 0.00015,
+    "nse_turnover_rate": 0.0000325,
+    "sebi_turnover_rate": 0.000001,
+    "brokerage_rate": 0.0003,
+    "brokerage_min_inr": 20.0,
+    "gst_rate": 0.18,
+    "impact_eta": 0.1
+  },
+  "descriptions": {
+    "stt_rate": "Securities Transaction Tax: 0.10% on delivery equity purchase and sale turnover",
+    "stamp_duty_rate": "Indian Stamp Act: 0.015% (15 bps per crore) on equity delivery purchase turnover only",
+    "nse_turnover_rate": "NSE Cash Segment Transaction Charges: 0.00325% of turnover",
+    "sebi_turnover_rate": "SEBI Regulatory Turnover Fee: Rs 10 per crore (0.0001%)",
+    "brokerage_rate": "Institutional Execution Brokerage: 3 bps (0.03%) with non-convex minimum per order",
+    "brokerage_min_inr": "Minimum statutory execution ticket fee: Rs 20.00 per executed order",
+    "gst_rate": "Goods and Services Tax: 18% levied on brokerage, exchange turnover, and SEBI charges",
+    "impact_eta": "Almgren-Chriss square-root market impact coefficient"
+  }
+}

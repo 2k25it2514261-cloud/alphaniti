@@ -1,4 +1,4 @@
- Pipeline Module 8: Platform Security, Enclave Architecture & Formal Safety Kernel
+ Pipeline Module 8: Platform Security, Process Isolation, Memory-Locked Safety Kernel & Model Checking
 **Process Isolation, VBS Trustlets, Linux seccomp-bpf Whitelisting, Frama-C ACSL Proofs & TLA+ Invariants**  
 *AlphaNiti v25.0 Institutional Architecture — Part 8 (Revised per Architectural Callout 7)*
 
@@ -38,7 +38,7 @@ flowchart TD
         Gate2 -- Fail --> Veto
         Gate2 -- Pass --> Gate3{"Gate 3: Pre-Trade Limit Collar<br/>LimitPrice <= Escrow / q*"}
         Gate3 -- Fail --> Veto
-        Gate3 -- Pass --> Signer["Hardware Enclave Ed25519 Signing Path<br/>(Private Keys Locked in RAM, Never Paged)"]
+        Gate3 -- Pass --> Signer["Memory-Locked Ed25519 Signing Path (Isolated Process Space)<br/>(Private Keys Locked in RAM, Never Paged)"]
     end
 
     subgraph NetworkGateway ["4. Network Dispatch Layer"]

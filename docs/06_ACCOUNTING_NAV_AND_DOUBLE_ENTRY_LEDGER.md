@@ -1,5 +1,5 @@
  Pipeline Module 6: Accounting, NAV & Double-Entry Ledger State Machine
-**Inductive Balance Sheet Conservation, Disjoint Five-Bucket Ledger, Restricted Funds Treatment & Available Buying Power**  
+**Inductive Balance Sheet Accounting Identity, Disjoint Five-Bucket Ledger, Restricted Funds Treatment & Available Buying Power**  
 *AlphaNiti v25.0 Institutional Architecture — Part 6 (Revised per Architectural Callout 3)*
 
 ---
@@ -56,8 +56,8 @@ In compliance with **Callout 3**, restricted funds ($W _ k^{\text{escrow}}$) rem
 
 $$
 \begin{aligned}
-\text{Total Asset Value (TAV)} _ k &\equiv W _ k^{\text{settled}} + W _ k^{\text{escrow}} + W _ k^{\text{recv}} + \sum _ {i=1}^N q _ {i, k} P _ {i, k}^{\text{eval}} \\
-\text{Total Liabilities} _ k &\equiv W _ k^{\text{lien}} + W _ k^{\text{payable}}
+\text{Total Asset Value (TAV)} _ k &\equiv W _ k^{\text{settled}} + W _ k^{\text{escrow}} + W _ k^{\text{lien}} + W _ k^{\text{recv}} + \sum _ {i=1}^N q _ {i, k} P _ {i, k}^{\text{eval}} \\
+\text{Total Liabilities} _ k &\equiv W _ k^{\text{payable}}
 \end{aligned}
 $$
 
@@ -66,14 +66,14 @@ $$
 $$
 
 $$
-\text{NAV} _ k = \left( W _ k^{\text{settled}} + W _ k^{\text{escrow}} + W _ k^{\text{recv}} \right) - \left( W _ k^{\text{lien}} + W _ k^{\text{payable}} \right) + \sum _ {i=1}^N q _ {i, k} P _ {i, k}^{\text{eval}}
+\text{NAV} _ k = \left( W _ k^{\text{settled}} + W _ k^{\text{escrow}} + W _ k^{\text{lien}} + W _ k^{\text{recv}} \right) - W _ k^{\text{payable}} + \sum _ {i=1}^N q _ {i, k} P _ {i, k}^{\text{eval}}
 $$
 
 ### 2.3 Decoupled Available Buying Power Formulation
 To preclude bankruptcy without distorting NAV, **Available Buying Power** is computed separately:
 
 $$
-\text{BuyingPower} _ k \equiv W _ k^{\text{settled}} - W _ k^{\text{lien}} - W _ k^{\text{payable}}
+\text{BuyingPower} _ k \equiv W _ k^{\text{settled}} - W _ k^{\text{payable}}
 $$
 
 - Restricted funds ($W _ k^{\text{escrow}}$) are excluded from Buying Power because they are already committed to in-flight buy orders.
@@ -84,7 +84,7 @@ $$
 
 ## 3. Transition-by-Transition Mathematical Induction Proof
 
-**Theorem (NAV Conservation Invariant)**:  
+**Theorem (NAV Accounting Identity Invariant)**:  
 Across all legal transactional state transitions $k \to k+1$ in the execution lifecycle:
 
 $$

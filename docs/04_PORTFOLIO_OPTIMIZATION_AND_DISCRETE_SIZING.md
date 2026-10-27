@@ -49,7 +49,7 @@ flowchart TD
 Let $q _ i \in \mathbb{Z} _ {\ge 0}$ denote the integer share quantity allocated to asset $i \in \lbrace 1, \dots, N\rbrace$ with current reference price $P _ i^{\text{eval}}$. The total objective $J(\mathbf{q})$ to be minimized is:
 
 $$
-J(\mathbf{q}) \equiv \underbrace{\text{CVaR} _ \alpha(\mathbf{q})} _ {\text{Portfolio Tail Risk}} - \underbrace{\sum _ {i=1}^N \mu _ i q _ i P _ i^{\text{eval}}} _ {\text{Expected Portfolio Return}} + \underbrace{\sum _ {i=1}^N \text{Cost} _ i(q _ i)} _ {\text{Execution & Statutory Costs}}
+J _ {\text{DRO}}(\mathbf{q}) \equiv \underbrace{\lambda _ {\text{risk}} \cdot \text{CVaR} _ \alpha^{\mathcal{P} _ \epsilon}(\mathbf{q})} _ {\text{Wasserstein Worst-Case CVaR}} + \underbrace{\lambda _ {\text{DRO}} \epsilon _ f \sum _ {i=1}^N P _ i^{\text{eval}} q _ i} _ {\text{Factor Wasserstein Penalty}} - \underbrace{\sum _ {i=1}^N \mu _ i q _ i P _ i^{\text{eval}}} _ {\text{Expected Portfolio Return}} + \underbrace{\sum _ {i=1}^N \text{Cost} _ i(q _ i)} _ {\text{Execution & Statutory Costs}}
 $$
 
 where the portfolio loss under scenario $s \in \lbrace 1, \dots, S\rbrace$ is:
@@ -100,9 +100,9 @@ The lower bound at search node $\mathcal{N}$ is computed via the continuous conv
 
 $$
 \begin{aligned}
-z _ {\text{LP}}(\mathcal{N}) \equiv \min _ {\mathbf{q} \in [\mathbf{l}, \mathbf{u}], \; \gamma \in \mathbb{R}, \; \mathbf{s} \in \mathbb{R} _ {\ge 0}^S} \quad & \gamma + \frac{1}{(1-\alpha)S}\sum _ {s=1}^S s _ s - \sum _ {i=1}^N \mu _ i q _ i P _ i^{\text{eval}} + \sum _ {i=1}^N \text{Cost} _ i^{\text{cvx}}(q _ i) \\
+z _ {\text{LP}}(\mathcal{N}) \equiv \min _ {\mathbf{q} \in [\mathbf{l}, \mathbf{u}], \; \gamma \in \mathbb{R}, \; \mathbf{s} \in \mathbb{R} _ {\ge 0}^S} \quad & \gamma + \frac{1}{(1-\alpha)S}\sum _ {s=1}^S s _ s + \lambda _ {\text{DRO}} \epsilon _ f \sum _ {i=1}^N P _ i^{\text{eval}} q _ i - \sum _ {i=1}^N \mu _ i q _ i P _ i^{\text{eval}} + \sum _ {i=1}^N \text{Cost} _ i^{\text{cvx}}(q _ i) \\
 \text{subject to:} \quad & s _ s \ge -\sum _ {i=1}^N q _ i r _ {i, s} P _ i^{\text{eval}} - \gamma, \quad \forall s \in \lbrace 1, \dots, S\rbrace  \\
-& \sum _ {i=1}^N q _ i P _ i^{\text{eval}} \le W^{\text{settled}} - W^{\text{lien}} - W^{\text{payable}} \\
+& \sum _ {i=1}^N q _ i P _ i^{\text{eval}} \le W^{\text{settled}} - W^{\text{payable}} \\
 & q _ i P _ i^{\text{eval}} \le w _ {\max} \cdot \text{NAV}, \quad \forall i \in \lbrace 1, \dots, N\rbrace
 \end{aligned}
 $$

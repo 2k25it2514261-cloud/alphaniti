@@ -23,10 +23,10 @@ class FiveBucketBalanceSheet:
         Assets:
             - W_settled: Cleared, unencumbered INR cash
             - W_escrow: Quarantined cash backing open buy orders (Restricted Funds, part of NAV)
+            - W_lien: Segregated margin and exchange clearing collateral (beneficial fund asset)
             - W_recv: Unsettled T+1 sales receivables
             - Securities: Custody shares q_i valued at market price P_i
         Liabilities:
-            - W_lien: Margin and regulatory clearing liens
             - W_payable: Trade and statutory payables owed to third parties
     """
 
@@ -57,28 +57,81 @@ class FiveBucketBalanceSheet:
         return total
 
     def get_tav(self, prices: Dict[str, float]) -> float:
-        """Total Asset Value (TAV) = W_settled + W_escrow + W_recv + EquityValuation."""
-        return self.W_settled + self.W_escrow + self.W_recv + self.get_equity_valuation(prices)
+        """
+        Total Asset Value (TAV) under double-entry accounting:
+            TAV = W_settled + W_escrow + W_lien + W_recv + EquityValuation
+        Margin liens (W_lien) are segregated collateral assets (beneficial property of the fund).
+        """
+        return self.W_settled + self.W_escrow + self.W_lien + self.W_recv + self.get_equity_valuation(prices)
 
     def get_liabilities(self) -> float:
-        """Total Liabilities = W_lien + W_payable."""
-        return self.W_lien + self.W_payable
+        """
+        Total Liabilities = W_payable.
+        Represents external obligations (e.g. unpaid statutory taxes or trade settlement debt).
+        """
+        return self.W_payable
 
     def get_nav(self, prices: Dict[str, float]) -> float:
         """
-        True Net Asset Value (Callout 3 Resolution):
+        NAV Accounting Identity:
             NAV = TAV - Liabilities
-        Note: Restricted funds (W_escrow) remain fund assets and are NOT deducted!
+                = (W_settled + W_escrow + W_lien + W_recv + EquityValuation) - W_payable
+        Note: Neither escrow nor margin liens reduce NAV; they are segregated fund assets.
         """
         return self.get_tav(prices) - self.get_liabilities()
 
     def get_buying_power(self) -> float:
         """
-        Decoupled Available Buying Power (Callout 3):
-            BuyingPower = W_settled - W_lien - W_payable
-        Guarantees that no order can be authorized without immediately available cleared cash.
+        Available Cleared Buying Power:
+            BuyingPower = W_settled - W_payable
+        Ensures unencumbered cleared cash is strictly available before new order authorization.
         """
-        return max(0.0, self.W_settled - self.W_lien - self.W_payable)
+        return max(0.0, self.W_settled - self.W_payable)
+
+    def post_margin_lien(self, amount: float) -> Dict[str, Any]:
+        """
+        Segregates settled cash into clearing margin collateral:
+            W_settled -= amount, W_lien += amount.
+        NAV Accounting Identity: Delta NAV = 0.
+        Buying power decreases by amount.
+        """
+        if amount <= 0:
+            raise ValueError(f"Margin amount must be positive, got {amount}")
+        if amount > self.get_buying_power():
+            raise DoubleEntryLedgerViolation(
+                f"Insufficient buying power ({self.get_buying_power():,.2f}) to post margin lien ({amount:,.2f})"
+            )
+        self.W_settled -= amount
+        self.W_lien += amount
+        entry = {
+            "action": "POST_MARGIN_LIEN",
+            "amount": amount,
+            "timestamp": time.time(),
+        }
+        self.transaction_history.append(entry)
+        return entry
+
+    def release_margin_lien(self, amount: float) -> Dict[str, Any]:
+        """
+        Releases segregated margin collateral back into unencumbered settled cash:
+            W_lien -= amount, W_settled += amount.
+        NAV Accounting Identity: Delta NAV = 0.
+        """
+        if amount <= 0:
+            raise ValueError(f"Release amount must be positive, got {amount}")
+        if amount > self.W_lien:
+            raise DoubleEntryLedgerViolation(
+                f"Cannot release {amount:,.2f} from lien; active lien balance is {self.W_lien:,.2f}"
+            )
+        self.W_lien -= amount
+        self.W_settled += amount
+        entry = {
+            "action": "RELEASE_MARGIN_LIEN",
+            "amount": amount,
+            "timestamp": time.time(),
+        }
+        self.transaction_history.append(entry)
+        return entry
 
     def dispatch_buy_order(
         self,

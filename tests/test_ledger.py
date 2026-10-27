@@ -135,6 +135,33 @@ class TestDoubleEntryLedger(unittest.TestCase):
         # Delta NAV must be exactly 0
         self.assertAlmostEqual(nav_before, nav_after, places=4)
 
+    def test_case_6_margin_lien_accounting_identity(self):
+        """Case 6: Margin liens are segregated fund assets; posting/releasing preserves exact NAV."""
+        nav_initial = self.ledger.get_nav(self.prices)
+        bp_initial = self.ledger.get_buying_power()
+        margin_amt = 150_000.0
+
+        # 1. Post margin lien
+        self.ledger.post_margin_lien(margin_amt)
+        self.assertEqual(self.ledger.W_lien, margin_amt)
+        self.assertAlmostEqual(self.ledger.W_settled, self.initial_capital - margin_amt, places=4)
+
+        # Invariant: NAV is fully preserved (Delta NAV = 0)
+        nav_post_lien = self.ledger.get_nav(self.prices)
+        self.assertAlmostEqual(nav_post_lien, nav_initial, places=4)
+
+        # Buying power is restricted by the posted collateral
+        bp_post_lien = self.ledger.get_buying_power()
+        self.assertAlmostEqual(bp_initial - bp_post_lien, margin_amt, places=4)
+
+        # 2. Release margin lien
+        self.ledger.release_margin_lien(margin_amt)
+        self.assertEqual(self.ledger.W_lien, 0.0)
+        self.assertAlmostEqual(self.ledger.W_settled, self.initial_capital, places=4)
+        nav_post_release = self.ledger.get_nav(self.prices)
+        self.assertAlmostEqual(nav_post_release, nav_initial, places=4)
+        self.assertAlmostEqual(self.ledger.get_buying_power(), bp_initial, places=4)
+
     def test_solvency_and_short_sale_guards(self):
         """Verify pre-trade solvency gate and short-sale rejection."""
         # 1. Attempt buy order exceeding buying power

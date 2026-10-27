@@ -4,7 +4,10 @@ Pipeline Module 4 - Indian Statutory Costs & Non-Convex Fee Relaxations
 Reference: docs/04_PORTFOLIO_OPTIMIZATION_AND_DISCRETE_SIZING.md & Finance Act 2026
 """
 
-from typing import Dict, Any, Tuple
+import json
+import os
+from pathlib import Path
+from typing import Dict, Any, Tuple, Optional
 import numpy as np
 
 
@@ -33,6 +36,29 @@ class IndianStatutoryCostModel:
         self.brokerage_min_inr = brokerage_min_inr
         self.gst_rate = gst_rate
         self.impact_eta = impact_eta
+
+    @classmethod
+    def from_config(cls, config_path: Optional[str] = None) -> "IndianStatutoryCostModel":
+        """Load statutory tax and fee parameters dynamically from configuration file."""
+        if config_path is None:
+            candidate = Path(__file__).resolve().parent.parent.parent / "config" / "statutory_rates_2026.json"
+            if candidate.exists():
+                config_path = str(candidate)
+        if config_path and os.path.exists(config_path):
+            with open(config_path, "r", encoding="utf-8") as f:
+                data = json.load(f)
+            rates = data.get("rates", {})
+            return cls(
+                stt_rate=rates.get("stt_rate", 0.001),
+                stamp_duty_rate=rates.get("stamp_duty_rate", 0.00015),
+                nse_turnover_rate=rates.get("nse_turnover_rate", 0.0000325),
+                sebi_turnover_rate=rates.get("sebi_turnover_rate", 0.000001),
+                brokerage_rate=rates.get("brokerage_rate", 0.0003),
+                brokerage_min_inr=rates.get("brokerage_min_inr", 20.0),
+                gst_rate=rates.get("gst_rate", 0.18),
+                impact_eta=rates.get("impact_eta", 0.1),
+            )
+        return cls()
 
     def compute_cost(
         self,
