@@ -2219,8 +2219,24 @@
 
     function cleanFormatMarkdown(md) {
       if (!md) return '';
-      const stripped = md.replace(/[\u{1F300}-\u{1FAFF}\u{2600}-\u{27BF}\u{FE0F}]/gu, '');
-      return stripped
+      let s = md.replace(/[\u{1F300}-\u{1FAFF}\u{2600}-\u{27BF}\u{FE0F}]/gu, '');
+
+      // Sanitize LaTeX math markers to clean Unicode typography
+      s = s.replace(/\$\\sigma_{{\\text{{alea}}}}\$|\$\\sigma_{\\text{alea}}\$|\\sigma_{{\\text{{alea}}}}|\\sigma_{\\text{alea}}/g, 'σ_alea')
+           .replace(/\$\\sigma\^2_{{\\text{{epis}}}}\$|\$\\sigma\^2_{\\text{epis}}\$|\\sigma\^2_{{\\text{{epis}}}}|\\sigma\^2_{\\text{epis}}/g, 'σ²_epis')
+           .replace(/\$\\sigma\$|\\sigma/g, 'σ')
+           .replace(/\$\\mu\s*=\s*\$|\\mu\s*=\s*/g, 'μ = ')
+           .replace(/\$\\mu\$|\\mu/g, 'μ')
+           .replace(/\$\\gamma_{{\\text{{market}}}}\$|\$\\gamma_{\\text{market}}\$|\\gamma_{{\\text{{market}}}}|\\gamma_{\\text{market}}/g, 'γ_market')
+           .replace(/\$\\gamma\$|\\gamma/g, 'γ')
+           .replace(/\$\\hat{{q}}\$|\$\\hat{q}\$|\\hat{{q}}|\\hat{q}/g, 'q̂')
+           .replace(/\\%/g, '%')
+           .replace(/\$(S_[a-zA-Z0-9_]+)\$/g, '$1')
+           .replace(/\$([a-zA-Z0-9_\\^]+)\$/g, '$1')
+           .replace(/\\text\{([^}]+)\}/g, '$1')
+           .replace(/\\text\{\{([^}]+)\}\}/g, '$1');
+
+      return s
         .replace(/^###\s*(.*)$/gm, '<h3>$1</h3>')
         .replace(/^####\s*(.*)$/gm, '<h4>$1</h4>')
         .replace(/\*\*([^*]+)\*\*/g, '<b>$1</b>')

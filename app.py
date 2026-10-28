@@ -1119,10 +1119,10 @@ def ask_ml_brain(req: AskBrainRequest):
             f"#### 1. Live Evidential Ensemble Telemetry ({', '.join(s['symbol'] for s in resolved_signals)})\n"
             + "\n".join(comp_lines) + "\n\n"
             f"#### 2. Macro Regime Gate Check\n"
-            f"• **Cross-Sectional Market Drift ($\\gamma_{{\\text{{market}}}}$):** `{mkt_drift_pct:+.2f}%` | **Market Crash Probability ($p_{{\\text{{breach}}}}$):** `{mkt_crash_pct:.1f}%` (Threshold `{req.crash_threshold*100:.1f}%`)\n"
+            f"• **Cross-Sectional Market Drift (γ_market):** `{mkt_drift_pct:+.2f}%` | **Market Crash Probability (P_breach):** `{mkt_crash_pct:.1f}%` (Threshold `{req.crash_threshold*100:.1f}%`)\n"
             f"• **Regime Verdict:** **{regime}** — "
             + (
-                f"Because market crash risk (`{mkt_crash_pct:.1f}%`) exceeds `{req.crash_threshold*100:.1f}%`, the **Cash-Preservation Rule** holds **100% in settled cash ($W_{{\\text{{settled}}}} = ₹{cap_inr:,.0f}$)** unless you enable Risk-On Override."
+                f"Because market crash risk (`{mkt_crash_pct:.1f}%`) exceeds `{req.crash_threshold*100:.1f}%`, the **Cash-Preservation Rule** holds **100% in settled cash (W_settled = ₹{cap_inr:,.0f})** unless you enable Risk-On Override."
                 if is_cash_gate and not req.force_risk_on
                 else f"Equity deployment is active."
             )
@@ -1171,11 +1171,11 @@ def ask_ml_brain(req: AskBrainRequest):
             f"### AlphaNiti v25.0 — Macro Regime & Portfolio Synthesis\n"
             f"**Live Feed:** `{STATE['data_source']}` | **Capital Analyzed:** `₹{cap_inr:,.2f}`\n\n"
             f"#### 1. Live Cross-Sectional Market Regime (`12 NSE Large-Caps`)\n"
-            f"• **Market Expected 20D Drift ($\\gamma_{{\\text{{market}}}}$):** `{mkt_drift_pct:+.2f}%`\n"
-            f"• **Market Average Crash Probability ($p_{{\\text{{breach}}}}$):** `{mkt_crash_pct:.1f}%` (Gate Threshold: `{req.crash_threshold*100:.1f}%`)\n"
+            f"• **Market Expected 20D Drift (γ_market):** `{mkt_drift_pct:+.2f}%`\n"
+            f"• **Market Average Crash Probability (P_breach):** `{mkt_crash_pct:.1f}%` (Gate Threshold: `{req.crash_threshold*100:.1f}%`)\n"
             f"• **Regime Switch Rule Verdict:** **{regime}** — "
             + (
-                f"Elevated tail crash risk (`{mkt_crash_pct:.1f}% > {req.crash_threshold*100:.1f}%`). Default institutional policy parks **100% in Risk-Free Settled Cash ($W_{{\\text{{settled}}}}$)** to protect against drawdown."
+                f"Elevated tail crash risk (`{mkt_crash_pct:.1f}% > {req.crash_threshold*100:.1f}%`). Default institutional policy parks **100% in Risk-Free Settled Cash (W_settled)** to protect against drawdown."
                 if is_cash_gate
                 else "Bullish/Neutral risk regime confirmed; full Branch-and-Bound equity allocation enabled."
             )
@@ -1183,7 +1183,7 @@ def ask_ml_brain(req: AskBrainRequest):
             + "\n".join(top_lines)
             + f"\n\n#### 3. Branch-and-Bound Integer Portfolio Allocation (`₹{cap_inr:,.0f}`)\n"
             + ("\n".join(alloc_lines) if alloc_lines else "• `0 shares allocated` (100% Settled Cash Preservation active).")
-            + f"\n• **Total Deployed:** `₹{port_res.get('total_allocated_inr', 0.0):,.2f}` | **Finance Act 2026 Taxes:** `₹{port_res.get('total_statutory_charges_inr', 0.0):,.2f}` | **Remaining Settled Cash ($W_{{\\text{{settled}}}}$):** `₹{port_res['ledger']['W_settled']:,.2f}`"
+            + f"\n• **Total Deployed:** `₹{port_res.get('total_allocated_inr', 0.0):,.2f}` | **Finance Act 2026 Taxes:** `₹{port_res.get('total_statutory_charges_inr', 0.0):,.2f}` | **Remaining Settled Cash (W_settled):** `₹{port_res['ledger']['W_settled']:,.2f}`"
         )
 
         return {
@@ -1227,7 +1227,7 @@ def ask_ml_brain(req: AskBrainRequest):
     for m in telemetry.get("ensemble_members", []):
         mem_lines.append(
             f"• **{m['member_id']}:** Expected 20D Return `{m['predicted_20d_return_pct']:+.2f}%` | "
-            f"Aleatoric $\\sigma$ `{m['aleatoric_sigma_pct']:.2f}%` | Epistemic `{m['epistemic_var']:.5f}` | "
+            f"Aleatoric σ `{m['aleatoric_sigma_pct']:.2f}%` | Epistemic `{m['epistemic_var']:.5f}` | "
             f"Breach Prob `{m['tail_breach_prob_pct']:.1f}%`"
         )
 
@@ -1258,20 +1258,20 @@ def ask_ml_brain(req: AskBrainRequest):
         f"### AlphaNiti v25.0 — **{focus_sym}.NS** ({sig['sector']})\n"
         f"{verdict_banner}\n\n"
         f"#### 1. Unified Synthesis Score Breakdown ({comp_score:.1f}/100)\n"
-        f"• **Alpha Edge ($S_{{\\text{{alpha}}}}$):** `{sig.get('score_alpha', 0.0):.1f}/40 pts` (Drift `{sig['predicted_return_pct']:+.2f}%` vs Noise `{sig['aleatoric_vol_pct']:.2f}%`)\n"
-        f"• **Model Confidence ($S_{{\\text{{confidence}}}}$):** `{sig.get('score_confidence', 0.0):.1f}/25 pts` (Epistemic `{sig['epistemic_uncertainty']:.4f}`)\n"
-        f"• **Tail Safety ($S_{{\\text{{tail}}}}$):** `{sig.get('score_tail', 0.0):.1f}/25 pts` (Barrier Breach `{sig['drawdown_crash_prob']*100:.1f}%`)\n"
-        f"• **Friction Buffer ($S_{{\\text{{friction}}}}$):** `{sig.get('score_friction', 0.0):.1f}/10 pts` | **Gate Multiplier:** `{sig.get('gate_multiplier', 1.0):.2f}x` (Tier {sig.get('gate_tier', 0)})\n\n"
+        f"• **Alpha Edge (S_alpha):** `{sig.get('score_alpha', 0.0):.1f}/40 pts` (Drift `{sig['predicted_return_pct']:+.2f}%` vs Noise `{sig['aleatoric_vol_pct']:.2f}%`)\n"
+        f"• **Model Confidence (S_confidence):** `{sig.get('score_confidence', 0.0):.1f}/25 pts` (Epistemic `{sig['epistemic_uncertainty']:.4f}`)\n"
+        f"• **Tail Safety (S_tail):** `{sig.get('score_tail', 0.0):.1f}/25 pts` (Barrier Breach `{sig['drawdown_crash_prob']*100:.1f}%`)\n"
+        f"• **Friction Buffer (S_friction):** `{sig.get('score_friction', 0.0):.1f}/10 pts` | **Gate Multiplier:** `{sig.get('gate_multiplier', 1.0):.2f}x` (Tier {sig.get('gate_tier', 0)})\n\n"
         f"#### 2. Live NSE Market & 20-Feature Causal Tensor (`as of {sig['date']}`)\n"
         f"• **Live Spot Price:** `₹{sig['close_price']:,.2f}` (`{sig['change_1d_pct']:+.2f}%` 1D | `{sig['change_20d_pct']:+.2f}%` 20D) | **Volume:** `{sig['volume']:,}`\n"
         f"• **Causal Technicals:** RSI-14 `{sig['rsi_14']}` | Parkinson Vol `{sig['parkinson_vol_pct']:.2f}%` | EMA Trend Ratio `{feats.get('trend_ema_ratio', 0.0):+.4f}` | Vol Squeeze `{feats.get('vol_squeeze_ratio', 1.0):.3f}` | 20D Rel Momentum vs Market `{feats.get('market_rel_mom_20d', 0.0):+.4f}`\n\n"
         f"#### 3. 3-Member Evidential Deep Ensemble (`DualStateEvidentialNet`) Output\n"
         + "\n".join(mem_lines)
-        + f"\n• **Combined NIG Posterior:** Expected 20D Return $\\mu = $ **{sig['predicted_return_pct']:+.2f}%** | Aleatoric $\\sigma_{{\\text{{alea}}}} = {sig['aleatoric_vol_pct']:.2f}\\%$ | Epistemic $\\sigma^2_{{\\text{{epis}}}} = {sig['epistemic_uncertainty']:.4f}$ | **Conformal 90% Lower Bound ($\\hat{{q}}={q_hat}$):** `{conf_floor:+.2f}%`\n\n"
+        + f"\n• **Combined NIG Posterior:** Expected 20D Return μ = **{sig['predicted_return_pct']:+.2f}%** | Aleatoric σ_alea = `{sig['aleatoric_vol_pct']:.2f}%` | Epistemic σ²_epis = `{sig['epistemic_uncertainty']:.4f}` | **Conformal 90% Lower Bound (q̂ = {q_hat}):** `{conf_floor:+.2f}%`\n\n"
         f"#### 4. 3-Gate Formal Safety Kernel & Finance Act 2026 Order Simulation (`{qty} Shares`)\n"
         f"• **Simulated Order:** `BUY {qty} × {focus_sym}.NS @ ₹{px:,.2f}` = Notional `₹{ord_info['notional_value_inr']:,.2f}`\n"
         f"• **Finance Act 2026 Statutory Taxes:** Total `₹{ord_info['statutory_charges_inr']:,.2f}` (STT 0.1%: `₹{fees.get('stt', 0):,.2f}`, Stamp 0.015%: `₹{fees.get('stamp_duty', 0):,.2f}`, Exchange+SEBI+GST: `₹{round(ord_info['statutory_charges_inr'] - fees.get('stt', 0) - fees.get('stamp_duty', 0), 2):,.2f}`)\n"
-        f"• **Safety Kernel Status:** **{order_res['gate_status']}** | **Post-Trade Settled Cash ($W_{{\\text{{settled}}}}$):** `₹{order_res['ledger']['W_settled']:,.2f}`\n"
+        f"• **Safety Kernel Status:** **{order_res['gate_status']}** | **Post-Trade Settled Cash (W_settled):** `₹{order_res['ledger']['W_settled']:,.2f}`\n"
         + (
             f"• **Ed25519 Enclave Signature:** `{order_res['cryptographic_proof']['ed25519_signature'][:48]}...`"
             if order_res["cryptographic_proof"].get("ed25519_signature")
