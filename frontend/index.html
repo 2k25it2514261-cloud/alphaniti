@@ -373,7 +373,7 @@
 
     .workbench-telemetry-strip {
       display: grid;
-      grid-template-columns: repeat(5, 1fr);
+      grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
       border-bottom: 1px solid var(--border-subtle);
       background: var(--bg-main);
     }
@@ -457,6 +457,63 @@
     .wb-inspect-link:hover {
       color: var(--accent);
     }
+
+    .cover-rationale-box {
+      margin: 12px 18px 0;
+      padding: 10px 14px;
+      background: var(--bg-surface);
+      border: 1px solid var(--border-subtle);
+      border-radius: 6px;
+    }
+    .rationale-header {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 6px;
+    }
+    .rationale-badge {
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 0.06em;
+      color: #C96A4B;
+      background: rgba(201, 106, 75, 0.12);
+      padding: 2px 7px;
+      border-radius: 4px;
+    }
+    .rationale-sub {
+      font-size: 11px;
+      color: var(--text-muted);
+    }
+    .rationale-bullets {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+    .rat-bullet {
+      font-size: 11.5px;
+      color: var(--text-secondary);
+      line-height: 1.45;
+    }
+    .rat-bullet strong {
+      color: var(--text-primary);
+    }
+
+    .subscore-strip {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 6px;
+      margin-top: 10px;
+    }
+    .subscore-box {
+      background: var(--bg-surface);
+      border: 1px solid var(--border-subtle);
+      border-radius: 5px;
+      padding: 6px 8px;
+    }
+    .subscore-lbl { font-size: 9.5px; color: var(--text-muted); text-transform: uppercase; font-weight: 600; }
+    .subscore-val { font-size: 12px; font-weight: 700; color: var(--text-primary); margin-top: 2px; }
+    .subscore-bar-bg { height: 3px; background: rgba(255,255,255,0.08); border-radius: 2px; margin-top: 4px; overflow: hidden; }
+    .subscore-bar-fill { height: 100%; border-radius: 2px; }
 
     /* Architectural Specification Band (4 Columns) */
     .cover-spec-band {
@@ -1216,16 +1273,20 @@
               <div class="wb-stat-val" id="c-stat-gamma" style="color:var(--positive);">+3.24%</div>
             </div>
             <div class="wb-stat">
-              <div class="wb-stat-lbl">Aleatoric / Epistemic</div>
-              <div class="wb-stat-val" id="c-stat-unc" style="font-size:12px;">22.86% / 0.0617</div>
+              <div class="wb-stat-lbl">Decision Score (S)</div>
+              <div class="wb-stat-val" id="c-stat-score" style="color:var(--positive); font-weight:700;">--/100</div>
+            </div>
+            <div class="wb-stat">
+              <div class="wb-stat-lbl">Action Verdict</div>
+              <div class="wb-stat-val" id="c-stat-verdict" style="font-size:11.5px; color:var(--warning);">CASH GATE</div>
             </div>
             <div class="wb-stat">
               <div class="wb-stat-lbl">Tail Breach (P_b)</div>
               <div class="wb-stat-val" id="c-stat-pb">31.6%</div>
             </div>
             <div class="wb-stat">
-              <div class="wb-stat-lbl">Hysteresis Gate</div>
-              <div class="wb-stat-val" id="c-stat-gate" style="font-size:12px; color:var(--warning);">CASH GATE</div>
+              <div class="wb-stat-lbl">Gate Multiplier</div>
+              <div class="wb-stat-val" id="c-stat-gate" style="font-size:11.5px; color:var(--warning);">Tier 3 (0.00x)</div>
             </div>
           </div>
 
@@ -1240,6 +1301,18 @@
             </div>
             <div id="cover-main-chart"></div>
             <div id="cover-rsi-chart"></div>
+          </div>
+
+          <div class="cover-rationale-box mono" id="cover-rationale-container">
+            <div class="rationale-header">
+              <span class="rationale-badge">INSTITUTIONAL 3-BULLET RATIONALE</span>
+              <span class="rationale-sub">Drift, Noise, Epistemic Uncertainty &amp; Tail Safety Decomposition</span>
+            </div>
+            <div class="rationale-bullets" id="cover-rationale-bullets">
+              <div class="rat-bullet">• Return &amp; Noise: Evaluating 20D drift vs aleatoric volatility floor...</div>
+              <div class="rat-bullet">• Model Trust &amp; Tail: Epistemic uncertainty validated under Meinert-Gawlikowski diagnostics...</div>
+              <div class="rat-bullet">• Gate &amp; Friction: Statutory STT &amp; 4-Tier Hysteresis state machine verified...</div>
+            </div>
           </div>
 
           <div class="workbench-footer">
@@ -1482,8 +1555,16 @@
             <div class="kpi-val mono" id="art-gamma">+3.24%</div>
           </div>
           <div class="kpi-card">
+            <div class="kpi-lbl">Decision Score (S)</div>
+            <div class="kpi-val mono" id="art-score" style="font-weight:700; color:var(--positive);">--/100</div>
+          </div>
+          <div class="kpi-card">
+            <div class="kpi-lbl">Action Verdict</div>
+            <div class="kpi-val mono" id="art-verdict" style="font-size:11.5px; color:var(--warning);">CASH GATE</div>
+          </div>
+          <div class="kpi-card">
             <div class="kpi-lbl">Uncertainty (σ_a / σ²_e)</div>
-            <div class="kpi-val mono" id="art-unc" style="font-size:12.5px;">22.86% / 0.0617</div>
+            <div class="kpi-val mono" id="art-unc" style="font-size:12px;">22.86% / 0.0617</div>
           </div>
           <div class="kpi-card">
             <div class="kpi-lbl">Tail Breach Prob (P_b)</div>
@@ -1494,8 +1575,16 @@
         <div class="chart-frame" id="tv-main-chart"></div>
         <div class="rsi-frame" id="tv-rsi-chart"></div>
 
-        <div style="font-size:11.5px; color:var(--text-secondary); background:var(--bg-elevated); padding:9px 12px; border-radius:6px; border:1px solid var(--border-subtle);">
-          Dashed projection indicates the 20-trading-day forward evidential drift (γ) bounded by 90% split-conformal intervals (q̂ = 1.3644).
+        <div class="cover-rationale-box mono" style="margin: 8px 0;">
+          <div class="rationale-header">
+            <span class="rationale-badge">UNIFIED DECISION RATIONALE</span>
+            <span class="rationale-sub" id="art-rat-sub">Decomposition</span>
+          </div>
+          <div class="rationale-bullets" id="art-rationale-bullets">
+            <div class="rat-bullet">• Return &amp; Noise: Evaluating 20D drift vs aleatoric volatility...</div>
+            <div class="rat-bullet">• Model Trust &amp; Tail: Epistemic uncertainty validated...</div>
+            <div class="rat-bullet">• Gate Multiplier: Hysteresis state active...</div>
+          </div>
         </div>
       </div>
 
@@ -1884,12 +1973,17 @@
         const div = document.createElement('div');
         div.className = 'nav-item' + (s.symbol === CURRENT_SYMBOL ? ' active' : '');
         const col = s.predicted_return_pct >= 0 ? 'var(--positive)' : 'var(--negative)';
+        const compScore = s.composite_score !== undefined ? s.composite_score.toFixed(1) : (s.sharpe_score ? (s.sharpe_score*100).toFixed(0) : '0.0');
+        const scoreCol = s.signal_badge === 'CASH_GATE' ? 'var(--warning)' : (s.composite_score >= 70 ? 'var(--positive)' : (s.composite_score >= 45 ? '#D4A373' : 'var(--text-muted)'));
         div.onclick = () => askBrain(`Analyze ${s.symbol}.NS live with my ML brain`);
         div.innerHTML = `
-          <span style="font-weight:500; color:var(--text-primary);">${s.symbol}</span>
-          <span class="mono" style="font-size:11px;">
+          <div style="display:flex; flex-direction:column; gap:2px;">
+            <span style="font-weight:600; color:var(--text-primary); font-size:12px;">${s.symbol}</span>
+            <span class="mono" style="font-size:10px; color:${scoreCol};">Score: ${compScore}/100</span>
+          </div>
+          <span class="mono" style="font-size:11px; text-align:right;">
             ₹${s.close_price.toFixed(1)}
-            <span style="color:${col}; margin-left:4px;">${s.predicted_return_pct >= 0 ? '+' : ''}${s.predicted_return_pct.toFixed(1)}%</span>
+            <div style="color:${col}; font-size:10.5px;">${s.predicted_return_pct >= 0 ? '+' : ''}${s.predicted_return_pct.toFixed(1)}%</div>
           </span>
         `;
         box.appendChild(div);
@@ -1996,9 +2090,56 @@
 
         document.getElementById('c-stat-gamma').innerText = gTxt;
         document.getElementById('c-stat-gamma').style.color = gCol;
-        document.getElementById('c-stat-unc').innerText = `${sig.aleatoric_vol_pct.toFixed(2)}% / ${sig.epistemic_uncertainty.toFixed(4)}`;
         document.getElementById('c-stat-pb').innerText = `${(sig.drawdown_crash_prob * 100).toFixed(1)}%`;
-        document.getElementById('c-stat-gate').innerText = sig.signal_badge === 'CASH_GATE' ? 'CASH GATE' : 'QUALIFIED';
+
+        // Decision Score & Verdict Telemetry
+        const compScore = sig.composite_score !== undefined ? sig.composite_score : (sig.decision_score ? sig.decision_score.final_score : 0.0);
+        const rawScore = sig.raw_decision_score !== undefined ? sig.raw_decision_score : compScore;
+        const verdict = sig.recommended_action || (sig.signal_badge === 'CASH_GATE' ? 'CASH GATE' : 'QUALIFIED');
+        const scoreCol = compScore >= 70 ? 'var(--positive)' : (compScore >= 45 ? '#D4A373' : (sig.signal_badge === 'CASH_GATE' ? 'var(--warning)' : 'var(--negative)'));
+
+        const elArtScore = document.getElementById('art-score');
+        if (elArtScore) {
+          elArtScore.innerText = `${compScore.toFixed(1)}/100`;
+          elArtScore.style.color = scoreCol;
+        }
+        const elArtVerdict = document.getElementById('art-verdict');
+        if (elArtVerdict) {
+          elArtVerdict.innerText = verdict;
+          elArtVerdict.style.color = scoreCol;
+        }
+
+        const elCScore = document.getElementById('c-stat-score');
+        if (elCScore) {
+          elCScore.innerText = `${compScore.toFixed(1)}/100`;
+          elCScore.style.color = scoreCol;
+        }
+        const elCVerdict = document.getElementById('c-stat-verdict');
+        if (elCVerdict) {
+          elCVerdict.innerText = verdict;
+          elCVerdict.style.color = scoreCol;
+        }
+        const elCGate = document.getElementById('c-stat-gate');
+        if (elCGate) {
+          const mult = sig.gate_multiplier !== undefined ? `${sig.gate_multiplier.toFixed(2)}x` : '0.00x';
+          const tier = sig.gate_tier !== undefined ? `Tier ${sig.gate_tier}` : (sig.signal_badge === 'CASH_GATE' ? 'Tier 3' : 'Tier 0');
+          elCGate.innerText = `${tier} (${mult})`;
+        }
+
+        // 3-Bullet Rationale Population
+        const bullets = sig.rationale || [
+          `Return & Noise: 20D drift ${gTxt} vs aleatoric volatility ${sig.aleatoric_vol_pct.toFixed(2)}%`,
+          `Model Trust & Tail: Epistemic uncertainty ${sig.epistemic_uncertainty.toFixed(4)} with ${(sig.drawdown_crash_prob * 100).toFixed(1)}% breach likelihood`,
+          `Gate & Macro: Status ${sig.signal_badge === 'CASH_GATE' ? 'CASH PRESERVATION active' : 'execution enabled'}`
+        ];
+        const ratBulletsEl = document.getElementById('cover-rationale-bullets');
+        if (ratBulletsEl) {
+          ratBulletsEl.innerHTML = bullets.map(b => `<div class="rat-bullet">• ${b}</div>`).join('');
+        }
+        const artRatBulletsEl = document.getElementById('art-rationale-bullets');
+        if (artRatBulletsEl) {
+          artRatBulletsEl.innerHTML = bullets.map(b => `<div class="rat-bullet">• ${b}</div>`).join('');
+        }
       }
 
       mainChart.timeScale().fitContent();
