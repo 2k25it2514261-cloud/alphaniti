@@ -37,6 +37,7 @@ from src.portfolio.statutory_costs import IndianStatutoryCostModel
 from src.portfolio.integer_sizer import LatticeBranchAndBoundSolver
 from src.accounting.ledger import FiveBucketBalanceSheet
 from src.security.safety_kernel import FormalSafetyKernel, SafetyKernelVetoException
+from src.risk.decision_score import compute_composite_decision_score, DecisionScoreResult
 
 app = FastAPI(
     title="AlphaNiti v25.0 Institutional Execution API",
@@ -278,28 +279,46 @@ def refresh_live_signals(force_live: bool = True):
 
     mkt_drift = float(np.mean([s["predicted_return_pct"] for s in signals])) / 100.0 if signals else 0.0
     mkt_crash_risk = float(np.mean([s["drawdown_crash_prob"] for s in signals])) if signals else 0.0
-    regime = "CASH_PRESERVATION" if (mkt_drift < 0.0 or mkt_crash_risk > 0.35) else "RISK_ON"
+    
+    # Resolve 4-Tier Hysteresis Gate state
+    if mkt_drift < 0.0 or mkt_crash_risk >= 0.35:
+        gate_tier = 3
+        regime = "CASH_PRESERVATION"
+    elif mkt_crash_risk >= 0.28:
+        gate_tier = 2
+        regime = "DE_GROSSING"
+    elif mkt_crash_risk >= 0.22:
+        gate_tier = 1
+        regime = "SOFT_BUY_FREEZE"
+    else:
+        gate_tier = 0
+        regime = "RISK_ON"
 
-    med_epi = float(np.median([s["epistemic_uncertainty"] for s in signals])) if signals else 0.01
     for s in signals:
-        is_alpha_candidate = (
-            s["drawdown_crash_prob"] < 0.38
-            and s["epistemic_uncertainty"] <= med_epi * 1.25
-            and s["predicted_return_pct"] > 0.0
+        score_res = compute_composite_decision_score(
+            ticker=s["symbol"],
+            gamma_bar_horizon=s["predicted_return_pct"] / 100.0,
+            sigma_alea_horizon=s["aleatoric_vol_pct"] / 100.0,
+            sigma_epis=s["epistemic_uncertainty"],
+            p_breach=s["drawdown_crash_prob"],
+            gate_tier=gate_tier,
         )
-        s["alpha_qualified"] = bool(is_alpha_candidate)
-        if regime == "CASH_PRESERVATION":
-            s["recommended_action"] = "HOLD CASH (Regime Gate)"
-            s["signal_badge"] = "CASH_GATE"
-        elif is_alpha_candidate:
-            s["recommended_action"] = "BUY / ALLOCATE (Alpha)"
-            s["signal_badge"] = "STRONG_BUY"
-        else:
-            s["recommended_action"] = "AVOID (Elevated Risk)"
-            s["signal_badge"] = "VETOED"
+        s["decision_score"] = score_res.to_dict()
+        s["composite_score"] = score_res.final_score
+        s["raw_decision_score"] = score_res.raw_score
+        s["score_alpha"] = score_res.s_alpha
+        s["score_confidence"] = score_res.s_confidence
+        s["score_tail"] = score_res.s_tail
+        s["score_friction"] = score_res.s_friction
+        s["gate_multiplier"] = score_res.gate_multiplier
+        s["gate_tier"] = score_res.gate_tier
+        s["recommended_action"] = score_res.verdict
+        s["signal_badge"] = score_res.verdict_badge
+        s["rationale"] = score_res.rationale
+        s["alpha_qualified"] = bool("BUY" in score_res.verdict or "ACCUMULATE" in score_res.verdict)
 
-    # Sort signals by sharpe_score descending
-    signals.sort(key=lambda x: x["sharpe_score"], reverse=True)
+    # Sort signals by composite_score descending, tie-breaking by sharpe_score
+    signals.sort(key=lambda x: (x.get("composite_score", 0.0), x["sharpe_score"]), reverse=True)
 
     STATE["signals"] = signals
     STATE["df_scaled"] = df_scaled
@@ -813,6 +832,17 @@ def _fetch_and_infer_custom_symbol(sym: str) -> Optional[Dict[str, Any]]:
         is_alpha = (pb < 0.38 and epi_var <= med_epi * 1.25 and pred_ret > 0.0)
         regime = STATE["regime"]
 
+        # Compute Composite Decision Score for dynamic symbol
+        gate_tier = 3 if regime == "CASH_PRESERVATION" else 0
+        dyn_score = compute_composite_decision_score(
+            ticker=sym,
+            gamma_bar_horizon=pred_ret,
+            sigma_alea_horizon=float(np.sqrt(ale_var)),
+            sigma_epis=epi_var,
+            p_breach=pb,
+            gate_tier=gate_tier,
+        )
+
         sig_dict = {
             "symbol": sym,
             "exchange": "NSE",
@@ -832,15 +862,19 @@ def _fetch_and_infer_custom_symbol(sym: str) -> Optional[Dict[str, Any]]:
             "epistemic_uncertainty": round(epi_var, 4),
             "drawdown_crash_prob": round(pb, 4),
             "sharpe_score": round(sharpe_proxy, 3),
-            "alpha_qualified": bool(is_alpha),
-            "recommended_action": (
-                "HOLD CASH (Regime Gate)" if regime == "CASH_PRESERVATION"
-                else ("BUY / ALLOCATE (Alpha)" if is_alpha else "AVOID (Elevated Risk)")
-            ),
-            "signal_badge": (
-                "CASH_GATE" if regime == "CASH_PRESERVATION"
-                else ("STRONG_BUY" if is_alpha else "VETOED")
-            ),
+            "decision_score": dyn_score.to_dict(),
+            "composite_score": dyn_score.final_score,
+            "raw_decision_score": dyn_score.raw_score,
+            "score_alpha": dyn_score.s_alpha,
+            "score_confidence": dyn_score.s_confidence,
+            "score_tail": dyn_score.s_tail,
+            "score_friction": dyn_score.s_friction,
+            "gate_multiplier": dyn_score.gate_multiplier,
+            "gate_tier": dyn_score.gate_tier,
+            "alpha_qualified": bool("BUY" in dyn_score.verdict or "ACCUMULATE" in dyn_score.verdict),
+            "recommended_action": dyn_score.verdict,
+            "signal_badge": dyn_score.verdict_badge,
+            "rationale": dyn_score.rationale,
         }
 
         # Cache into STATE so chart endpoint also works for this dynamic symbol
@@ -1136,14 +1170,18 @@ def ask_ml_brain(req: AskBrainRequest):
         2,
     )
 
+    comp_score = sig.get("composite_score", 0.0)
+    rec_act = sig.get("recommended_action", "HOLD")
+    rationale_bullets = sig.get("rationale", [
+        f"20D Return {sig['predicted_return_pct']:+.2f}% vs Vol {sig['aleatoric_vol_pct']:.2f}%",
+        f"Epistemic Uncertainty {sig['epistemic_uncertainty']:.4f} | Crash Risk {sig['drawdown_crash_prob']*100:.1f}%",
+        f"Macro Regime Gate status: {regime}"
+    ])
+    rationale_text = "\n".join(f"  • {b}" for b in rationale_bullets)
+
     verdict_banner = (
-        f"**RECOMMENDATION: BUY / ACCUMULATE {focus_sym}.NS** — Positive Evidential Drift (`{sig['predicted_return_pct']:+.2f}%`) & Controlled Tail Risk (`{sig['drawdown_crash_prob']*100:.1f}%`)."
-        if sig["predicted_return_pct"] > 0 and sig["drawdown_crash_prob"] < 0.38 and not is_cash_gate
-        else (
-            f"**RECOMMENDATION: HOLD SETTLED CASH ON {focus_sym}.NS** — Stock 20D drift is `{sig['predicted_return_pct']:+.2f}%` (Crash prob `{sig['drawdown_crash_prob']*100:.1f}%`), while the Macro Regime Gate is in **CASH_PRESERVATION** (`p_breach = {mkt_crash_pct:.1f}% > {req.crash_threshold*100:.1f}%`)."
-            if is_cash_gate
-            else f"**RECOMMENDATION: AVOID / HOLD CASH ON {focus_sym}.NS** — Evidential 20D Drift is `{sig['predicted_return_pct']:+.2f}%` with `{sig['drawdown_crash_prob']*100:.1f}%` tail crash risk."
-        )
+        f"**RECOMMENDATION: {rec_act}** — Composite Decision Score: **{comp_score:.1f}/100**\n"
+        f"{rationale_text}"
     )
 
     ord_info = order_res["order"]
@@ -1152,13 +1190,18 @@ def ask_ml_brain(req: AskBrainRequest):
     reply_md = (
         f"### AlphaNiti v25.0 — **{focus_sym}.NS** ({sig['sector']})\n"
         f"{verdict_banner}\n\n"
-        f"#### 1. Live NSE Market & 20-Feature Causal Tensor (`as of {sig['date']}`)\n"
+        f"#### 1. Unified Synthesis Score Breakdown ({comp_score:.1f}/100)\n"
+        f"• **Alpha Edge ($S_{{\\text{{alpha}}}}$):** `{sig.get('score_alpha', 0.0):.1f}/40 pts` (Drift `{sig['predicted_return_pct']:+.2f}%` vs Noise `{sig['aleatoric_vol_pct']:.2f}%`)\n"
+        f"• **Model Confidence ($S_{{\\text{{confidence}}}}$):** `{sig.get('score_confidence', 0.0):.1f}/25 pts` (Epistemic `{sig['epistemic_uncertainty']:.4f}`)\n"
+        f"• **Tail Safety ($S_{{\\text{{tail}}}}$):** `{sig.get('score_tail', 0.0):.1f}/25 pts` (Barrier Breach `{sig['drawdown_crash_prob']*100:.1f}%`)\n"
+        f"• **Friction Buffer ($S_{{\\text{{friction}}}}$):** `{sig.get('score_friction', 0.0):.1f}/10 pts` | **Gate Multiplier:** `{sig.get('gate_multiplier', 1.0):.2f}x` (Tier {sig.get('gate_tier', 0)})\n\n"
+        f"#### 2. Live NSE Market & 20-Feature Causal Tensor (`as of {sig['date']}`)\n"
         f"• **Live Spot Price:** `₹{sig['close_price']:,.2f}` (`{sig['change_1d_pct']:+.2f}%` 1D | `{sig['change_20d_pct']:+.2f}%` 20D) | **Volume:** `{sig['volume']:,}`\n"
         f"• **Causal Technicals:** RSI-14 `{sig['rsi_14']}` | Parkinson Vol `{sig['parkinson_vol_pct']:.2f}%` | EMA Trend Ratio `{feats.get('trend_ema_ratio', 0.0):+.4f}` | Vol Squeeze `{feats.get('vol_squeeze_ratio', 1.0):.3f}` | 20D Rel Momentum vs Market `{feats.get('market_rel_mom_20d', 0.0):+.4f}`\n\n"
-        f"#### 2. 3-Member Evidential Deep Ensemble (`DualStateEvidentialNet`) Output\n"
+        f"#### 3. 3-Member Evidential Deep Ensemble (`DualStateEvidentialNet`) Output\n"
         + "\n".join(mem_lines)
         + f"\n• **Combined NIG Posterior:** Expected 20D Return $\\mu = $ **{sig['predicted_return_pct']:+.2f}%** | Aleatoric $\\sigma_{{\\text{{alea}}}} = {sig['aleatoric_vol_pct']:.2f}\\%$ | Epistemic $\\sigma^2_{{\\text{{epis}}}} = {sig['epistemic_uncertainty']:.4f}$ | **Conformal 90% Lower Bound ($\\hat{{q}}={q_hat}$):** `{conf_floor:+.2f}%`\n\n"
-        f"#### 3. 3-Gate Formal Safety Kernel & Finance Act 2026 Order Simulation (`{qty} Shares`)\n"
+        f"#### 4. 3-Gate Formal Safety Kernel & Finance Act 2026 Order Simulation (`{qty} Shares`)\n"
         f"• **Simulated Order:** `BUY {qty} × {focus_sym}.NS @ ₹{px:,.2f}` = Notional `₹{ord_info['notional_value_inr']:,.2f}`\n"
         f"• **Finance Act 2026 Statutory Taxes:** Total `₹{ord_info['statutory_charges_inr']:,.2f}` (STT 0.1%: `₹{fees.get('stt', 0):,.2f}`, Stamp 0.015%: `₹{fees.get('stamp_duty', 0):,.2f}`, Exchange+SEBI+GST: `₹{round(ord_info['statutory_charges_inr'] - fees.get('stt', 0) - fees.get('stamp_duty', 0), 2):,.2f}`)\n"
         f"• **Safety Kernel Status:** **{order_res['gate_status']}** | **Post-Trade Settled Cash ($W_{{\\text{{settled}}}}$):** `₹{order_res['ledger']['W_settled']:,.2f}`\n"
