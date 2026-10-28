@@ -1174,6 +1174,137 @@
     ::-webkit-scrollbar { width: 5px; height: 5px; }
     ::-webkit-scrollbar-track { background: transparent; }
     ::-webkit-scrollbar-thumb { background: var(--border-strong); border-radius: 2px; }
+  
+    /* Nifty 50 Directory Section */
+    .cover-directory-section {
+      margin-top: 36px;
+      padding-top: 28px;
+      border-top: 1px solid var(--border-subtle);
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+    .directory-masthead {
+      display: flex;
+      align-items: flex-end;
+      justify-content: space-between;
+      gap: 16px;
+      flex-wrap: wrap;
+    }
+    .dir-search-input {
+      background: var(--bg-elevated);
+      border: 1px solid var(--border-strong);
+      color: var(--text-primary);
+      padding: 8px 14px;
+      border-radius: 6px;
+      font-size: 12px;
+      width: 320px;
+      outline: none;
+      transition: border-color 0.12s, box-shadow 0.12s;
+    }
+    .dir-search-input:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 2px rgba(201, 106, 75, 0.18);
+    }
+    .dir-sector-filters {
+      display: flex;
+      gap: 6px;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+    .dir-sec-chip {
+      background: var(--bg-elevated);
+      border: 1px solid var(--border-subtle);
+      color: var(--text-secondary);
+      font-family: inherit;
+      font-size: 11px;
+      font-weight: 500;
+      padding: 4px 10px;
+      border-radius: 4px;
+      cursor: pointer;
+      transition: all 0.12s;
+    }
+    .dir-sec-chip:hover {
+      background: var(--bg-hover);
+      color: var(--text-primary);
+      border-color: var(--border-strong);
+    }
+    .dir-sec-chip.active {
+      background: var(--text-primary);
+      color: var(--bg-main);
+      border-color: var(--text-primary);
+      font-weight: 600;
+    }
+    .dir-table-container {
+      width: 100%;
+      overflow-x: auto;
+      border: 1px solid var(--border-subtle);
+      border-radius: 6px;
+      background: var(--bg-elevated);
+      max-height: 560px;
+      overflow-y: auto;
+    }
+    .dir-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 11.5px;
+    }
+    .dir-table th {
+      position: sticky;
+      top: 0;
+      background: var(--bg-sidebar);
+      z-index: 10;
+      padding: 9px 12px;
+      font-weight: 600;
+      color: var(--text-muted);
+      border-bottom: 1px solid var(--border-subtle);
+      white-space: nowrap;
+      user-select: none;
+    }
+    .dir-table th:hover {
+      color: var(--text-primary);
+    }
+    .dir-table td {
+      padding: 8px 12px;
+      border-bottom: 1px solid var(--border-subtle);
+      white-space: nowrap;
+    }
+    .dir-table tr:hover td {
+      background: var(--bg-hover);
+    }
+    .dir-btn-inspect {
+      background: transparent;
+      border: 1px solid var(--border-subtle);
+      color: var(--accent);
+      font-family: inherit;
+      font-size: 10.5px;
+      font-weight: 600;
+      padding: 3px 8px;
+      border-radius: 3px;
+      cursor: pointer;
+      transition: background 0.1s, border-color 0.1s;
+    }
+    .dir-btn-inspect:hover {
+      background: var(--bg-hover);
+      border-color: var(--accent);
+    }
+    .dir-btn-ask {
+      background: var(--bg-hover);
+      border: 1px solid var(--border-strong);
+      color: var(--text-primary);
+      font-family: inherit;
+      font-size: 10.5px;
+      font-weight: 500;
+      padding: 3px 8px;
+      border-radius: 3px;
+      cursor: pointer;
+      transition: all 0.1s;
+    }
+    .dir-btn-ask:hover {
+      background: var(--text-primary);
+      color: var(--bg-main);
+    }
+
   </style>
 </head>
 <body>
@@ -1346,6 +1477,69 @@
           </div>
         </div>
       </div>
+
+      
+      <!-- NIFTY 50 DIRECTORY & LIVE SIGNAL SCREENER -->
+      <section class="cover-directory-section" id="cover-directory-section">
+        <div class="directory-masthead">
+          <div>
+            <div class="cover-kicker mono">
+              <span class="cover-kicker-rule"></span>
+              <span>LIVE CONSTITUENT DIRECTORY &amp; RISK AUDIT</span>
+            </div>
+            <h2 class="serif" style="font-size:26px; margin: 4px 0 6px 0; font-weight:400; color:var(--text-primary);">
+              All 50+ NIFTY Equities: Real-Time Evidential Screener
+            </h2>
+            <p style="font-size:12.5px; color:var(--text-secondary); margin:0;">
+              Click any constituent below to instantly load its 120-day OHLCV candlestick series and 20-day conformal forecast cone into the live workbench above.
+            </p>
+          </div>
+
+          <div class="directory-actions">
+            <input 
+              type="text" 
+              id="dir-search-box" 
+              class="dir-search-input mono" 
+              placeholder="Search ticker, company or sector (e.g. RELIANCE, Tata, Bank)..." 
+              oninput="onDirectorySearch(this.value)"
+            />
+          </div>
+        </div>
+
+        <div class="dir-sector-filters" id="dir-sector-filters">
+          <button class="dir-sec-chip active" onclick="filterDirectorySector('ALL')">All Constituents (<span id="dir-total-count">52</span>)</button>
+          <button class="dir-sec-chip" onclick="filterDirectorySector('Financial Services')">Banking &amp; NBFC</button>
+          <button class="dir-sec-chip" onclick="filterDirectorySector('Information Technology')">IT Services</button>
+          <button class="dir-sec-chip" onclick="filterDirectorySector('Automobile')">Automobile</button>
+          <button class="dir-sec-chip" onclick="filterDirectorySector('Oil, Gas')">Energy &amp; Oil</button>
+          <button class="dir-sec-chip" onclick="filterDirectorySector('Consumer')">FMCG &amp; Retail</button>
+          <button class="dir-sec-chip" onclick="filterDirectorySector('Healthcare')">Pharma &amp; Health</button>
+          <button class="dir-sec-chip" onclick="filterDirectorySector('Metals')">Metals &amp; Mining</button>
+        </div>
+
+        <div class="dir-table-container">
+          <table class="data-table dir-table mono">
+            <thead>
+              <tr>
+                <th style="text-align:left; cursor:pointer;" onclick="sortDirBy('symbol')">Ticker ⇅</th>
+                <th style="text-align:left; cursor:pointer;" onclick="sortDirBy('sector')">Sector ⇅</th>
+                <th style="cursor:pointer;" onclick="sortDirBy('close_price')">Spot Close (₹) ⇅</th>
+                <th style="cursor:pointer;" onclick="sortDirBy('change_1d_pct')">1D Change ⇅</th>
+                <th style="cursor:pointer;" onclick="sortDirBy('predicted_return_pct')">20D Pred (γ) ⇅</th>
+                <th style="cursor:pointer;" onclick="sortDirBy('aleatoric_vol_pct')">Vol (σ_alea) ⇅</th>
+                <th style="cursor:pointer;" onclick="sortDirBy('drawdown_crash_prob')">Crash (P_b) ⇅</th>
+                <th style="cursor:pointer;" onclick="sortDirBy('composite_score')">Score (S) ⇅</th>
+                <th style="text-align:center;">Action Verdict</th>
+                <th style="text-align:center;">Interactive Workbench</th>
+              </tr>
+            </thead>
+            <tbody id="dir-table-body">
+              <!-- Dynamically populated with all 52 equities -->
+            </tbody>
+          </table>
+        </div>
+      </section>
+
 
       <!-- ARCHITECTURAL SPECIFICATION BAND -->
       <div class="cover-spec-band">
@@ -1776,6 +1970,7 @@
       const selEl = document.getElementById('cover-nifty-select');
       if (selEl) selEl.value = sym;
       loadChartForSymbol(sym);
+      renderNiftyDirectoryTable();
     }
 
     function toggleArtifactPanel() {
@@ -1996,6 +2191,110 @@
       }
 
       renderSidebarWatchlist();
+      renderNiftyDirectoryTable();
+    }
+
+    
+    let dirSortCol = 'composite_score';
+    let dirSortAsc = false;
+    let dirFilterText = '';
+    let dirFilterSector = 'ALL';
+
+    function onDirectorySearch(val) {
+      dirFilterText = (val || '').trim().toLowerCase();
+      renderNiftyDirectoryTable();
+    }
+
+    function filterDirectorySector(sec) {
+      dirFilterSector = sec;
+      document.querySelectorAll('.dir-sec-chip').forEach(btn => {
+        btn.classList.toggle('active', btn.getAttribute('onclick').includes(`'${sec}'`));
+      });
+      renderNiftyDirectoryTable();
+    }
+
+    function sortDirBy(col) {
+      if (dirSortCol === col) {
+        dirSortAsc = !dirSortAsc;
+      } else {
+        dirSortCol = col;
+        dirSortAsc = false;
+      }
+      renderNiftyDirectoryTable();
+    }
+
+    function inspectFromDirectory(sym) {
+      selectCoverSymbol(sym);
+      const chartEl = document.getElementById('cover-main-chart');
+      if (chartEl) chartEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+
+    function askBrainForSymbol(sym) {
+      enterWithPrompt(`Analyze ${sym}.NS live with my ML brain`);
+    }
+
+    function renderNiftyDirectoryTable() {
+      const tbody = document.getElementById('dir-table-body');
+      if (!tbody || !SIGNALS || !SIGNALS.length) return;
+
+      let filtered = SIGNALS.filter(s => {
+        if (dirFilterSector !== 'ALL') {
+          const sec = s.sector || '';
+          if (!sec.toLowerCase().includes(dirFilterSector.toLowerCase())) return false;
+        }
+        if (dirFilterText) {
+          const sym = (s.symbol || '').toLowerCase();
+          const sec = (s.sector || '').toLowerCase();
+          if (!sym.includes(dirFilterText) && !sec.includes(dirFilterText)) return false;
+        }
+        return true;
+      });
+
+      filtered.sort((a, b) => {
+        let va = a[dirSortCol];
+        let vb = b[dirSortCol];
+        if (typeof va === 'string') {
+          return dirSortAsc ? va.localeCompare(vb) : vb.localeCompare(va);
+        }
+        va = va !== undefined ? va : 0;
+        vb = vb !== undefined ? vb : 0;
+        return dirSortAsc ? va - vb : vb - va;
+      });
+
+      const countEl = document.getElementById('dir-total-count');
+      if (countEl) countEl.innerText = `${filtered.length} / ${SIGNALS.length}`;
+
+      tbody.innerHTML = filtered.map(s => {
+        const isCur = s.symbol === CURRENT_SYMBOL;
+        const chg1d = s.change_1d_pct !== undefined ? s.change_1d_pct : 0;
+        const chgCol = chg1d >= 0 ? 'var(--positive)' : 'var(--negative)';
+        const predCol = s.predicted_return_pct >= 0 ? 'var(--positive)' : 'var(--negative)';
+        const compScore = s.composite_score !== undefined ? s.composite_score.toFixed(1) : '0.0';
+        const scoreCol = s.signal_badge === 'CASH_GATE' ? 'var(--warning)' : (s.composite_score >= 70 ? 'var(--positive)' : (s.composite_score >= 45 ? '#D4A373' : 'var(--text-muted)'));
+        const verdict = s.recommended_action || (s.signal_badge === 'CASH_GATE' ? 'CASH GATE' : 'QUALIFIED');
+        const badgeClass = s.signal_badge === 'CASH_GATE' ? 'warn' : (s.composite_score >= 50 ? 'pos' : 'neg');
+
+        return `
+          <tr style="${isCur ? 'background:rgba(201, 106, 75, 0.08); font-weight:600;' : ''}">
+            <td style="text-align:left;">
+              <b style="color:var(--text-primary); cursor:pointer;" onclick="inspectFromDirectory('${s.symbol}')">${s.symbol}</b>
+              ${isCur ? ' <span style="font-size:10px; color:var(--accent);">● ACTIVE</span>' : ''}
+            </td>
+            <td style="text-align:left; color:var(--text-secondary); font-size:11px;">${s.sector || 'Large Cap'}</td>
+            <td style="text-align:right;">₹${s.close_price.toFixed(2)}</td>
+            <td style="text-align:right; color:${chgCol};">${chg1d >= 0 ? '+' : ''}${chg1d.toFixed(2)}%</td>
+            <td style="text-align:right; color:${predCol}; font-weight:600;">${s.predicted_return_pct >= 0 ? '+' : ''}${s.predicted_return_pct.toFixed(2)}%</td>
+            <td style="text-align:right; color:var(--text-secondary);">${s.aleatoric_vol_pct.toFixed(2)}%</td>
+            <td style="text-align:right; color:${s.drawdown_crash_prob > 0.35 ? 'var(--warning)' : 'var(--text-secondary)'};">${(s.drawdown_crash_prob * 100).toFixed(1)}%</td>
+            <td style="text-align:right; color:${scoreCol}; font-weight:700;">${compScore}/100</td>
+            <td style="text-align:center;"><span class="status-pill ${badgeClass}">${verdict.split(' ')[0]}</span></td>
+            <td style="text-align:center;">
+              <button class="dir-btn-inspect" onclick="inspectFromDirectory('${s.symbol}')">Inspect Chart</button>
+              <button class="dir-btn-ask" onclick="askBrainForSymbol('${s.symbol}')" style="margin-left:4px;">Analyze →</button>
+            </td>
+          </tr>
+        `;
+      }).join('');
     }
 
     function renderSidebarWatchlist() {
