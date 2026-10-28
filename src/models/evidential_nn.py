@@ -13,7 +13,7 @@ Uncertainty Decomposition:
   sigma_epistemic^2 = beta / (nu * (alpha - 1)) + Ensemble_Variance
 """
 
-from typing import Tuple, List, Optional, Dict
+from typing import Tuple, List, Optional, Dict, Any
 import numpy as np
 import torch
 import torch.nn as nn
@@ -207,6 +207,67 @@ class EvidentialEnsemble:
         sigma_epistemic = np.sqrt(np.maximum(total_epistemic_var, 1e-8))
 
         return gamma_bar, sigma_aleatoric, sigma_epistemic, p_breach_bar
+
+    def predict_mixture_decomposition(self, x: torch.Tensor) -> Dict[str, Any]:
+        """
+        Computes formal mixture-variance uncertainty decomposition (v26.0 Law of Total Variance):
+          mu_bar = (1/M) sum mu_i
+          sigma_alea_pooled^2 = (1/M) sum sigma^2_{alea, i}
+          sigma_epis_within^2 = (1/M) sum sigma^2_{epis, i}
+          sigma_disagreement^2 = (1/M) sum (mu_i - mu_bar)^2
+          sigma_total_mixture^2 = (1/M) sum (sigma_i^2 + mu_i^2) - mu_bar^2
+                                = sigma_alea_pooled^2 + sigma_epis_within^2 + sigma_disagreement^2
+        """
+        for m in self.models:
+            m.eval()
+
+        gammas, nus, alphas, betas, breaches = [], [], [], [], []
+        with torch.no_grad():
+            for m in self.models:
+                g, n, a, b, pb = m(x)
+                gammas.append(g.cpu().numpy())
+                nus.append(n.cpu().numpy())
+                alphas.append(a.cpu().numpy())
+                betas.append(b.cpu().numpy())
+                breaches.append(pb.cpu().numpy())
+
+        G = np.array(gammas)   # [M, B, 1]
+        N = np.array(nus)      # [M, B, 1]
+        A = np.array(alphas)   # [M, B, 1]
+        B = np.array(betas)    # [M, B, 1]
+        PB = np.array(breaches)# [M, B, 1]
+
+        gamma_bar = np.mean(G, axis=0)
+        p_breach_bar = np.mean(PB, axis=0)
+
+        # Within-model variances per head
+        var_alea_i = B / (A - 1.0)
+        var_epis_i = B / (N * (A - 1.0))
+        var_within_i = var_alea_i + var_epis_i
+
+        # Pooled components
+        sigma2_alea_pooled = np.mean(var_alea_i, axis=0)
+        sigma2_epis_within = np.mean(var_epis_i, axis=0)
+        sigma2_disagreement = np.var(G, axis=0)
+
+        # Law of total variance mixture calculation:
+        # (1/M) sum (sigma_i^2 + mu_i^2) - mu_bar^2
+        sigma2_total_mixture = np.mean(var_within_i + G**2, axis=0) - (gamma_bar ** 2)
+
+        return {
+            "gamma_bar": gamma_bar,
+            "p_breach_bar": p_breach_bar,
+            "sigma_alea_pooled": np.sqrt(np.maximum(sigma2_alea_pooled, 1e-8)),
+            "sigma_epis_within": np.sqrt(np.maximum(sigma2_epis_within, 1e-8)),
+            "sigma_disagreement": np.sqrt(np.maximum(sigma2_disagreement, 1e-8)),
+            "sigma_total_mixture": np.sqrt(np.maximum(sigma2_total_mixture, 1e-8)),
+            "variance_decomposition": {
+                "aleatoric_var": sigma2_alea_pooled,
+                "within_epistemic_var": sigma2_epis_within,
+                "disagreement_var": sigma2_disagreement,
+                "total_mixture_var": sigma2_total_mixture,
+            },
+        }
 
     def evaluate_meinert_split(self, x: torch.Tensor) -> Dict[str, np.ndarray]:
         """

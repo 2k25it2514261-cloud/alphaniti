@@ -36,7 +36,7 @@ from src.models.evidential_nn import EvidentialGRUModel, EvidentialEnsemble
 from src.portfolio.statutory_costs import IndianStatutoryCostModel
 from src.portfolio.integer_sizer import LatticeBranchAndBoundSolver
 from src.accounting.ledger import FiveBucketBalanceSheet
-from src.security.safety_kernel import FormalSafetyKernel, SafetyKernelVetoException
+from src.security.safety_kernel import FormalSafetyKernel, SafetyKernelVetoException, GateStatus, ExecutionDecision, authorize_order
 from src.risk.decision_score import compute_composite_decision_score, DecisionScoreResult
 
 app = FastAPI(
@@ -554,32 +554,82 @@ def simulate_institutional_order(req: SimulateOrderRequest):
         max_fee = total_fee
         cvar_est = qty * px * max(0.02, sig["aleatoric_vol_pct"] / 100.0 * 0.25)
 
-        try:
-            signed_pkt = kernel.evaluate_and_sign_order(
-                ledger=ledger,
-                symbol=sym,
-                side=req.side.upper(),
-                quantity=qty,
-                limit_price=px,
-                estimated_charges=total_fee,
-                max_possible_charges=max_fee,
-                portfolio_cvar_estimate=cvar_est,
-                current_prices=current_prices,
-            )
-            if is_buy:
-                ord_id = f"SIM_{int(time.time())}_{sym}"
-                ledger.dispatch_buy_order(ord_id, sym, qty, px, total_fee)
-                ledger.fill_buy_order(ord_id, px, total_fee)
-            gate_status = "APPROVED_AND_SIGNED"
-            veto_msg = None
-            ed25519_sig = signed_pkt["ed25519_signature"]
-        except Exception as e:
+        # Formal Authoritative Safety Invariant (v26.0)
+        # Block execution if stock is AVOID, score < 50, or Tier 3 Cash Preservation is active
+        is_allowed_action = (sig.get("action") == "ALLOCATE")
+        if is_cash_regime and not req.force_risk_on:
+            effective_gate_status = GateStatus.BLOCK
+            gate_reason = f"Macro Cash Preservation (Tier 3) active (Crash risk: {mkt_crash*100:.1f}%)"
+            effective_tier = 3
+        elif not is_allowed_action:
+            effective_gate_status = GateStatus.BLOCK
+            gate_reason = f"Composite Decision Score ({sig.get('composite_decision_score', 0):.1f}) action is AVOID"
+            effective_tier = int(sig.get("tier", 2))
+        else:
+            effective_gate_status = GateStatus.ALLOW
+            gate_reason = "Passed composite decision score and tier hurdles"
+            effective_tier = int(sig.get("tier", 1))
+
+        decision_record = ExecutionDecision(
+            symbol=sym,
+            side=req.side.upper(),
+            quantity=qty,
+            score=float(sig.get("composite_decision_score", 0.0)),
+            breach_probability=float(sig.get("drawdown_crash_prob", sig.get("downside_breach_prob", 0.0))),
+            gate_status=effective_gate_status,
+            reason=gate_reason,
+            tier=effective_tier,
+        )
+
+        is_authorized, auth_reason = authorize_order(
+            decision=decision_record,
+            max_breach_probability=req.crash_threshold,
+            min_score=50.0,
+        )
+
+        if not is_authorized and is_buy:
             gate_status = "VETOED_BY_SAFETY_KERNEL"
-            veto_msg = str(e)
+            veto_msg = auth_reason
             ed25519_sig = None
+        else:
+            try:
+                signed_pkt = kernel.evaluate_and_sign_order(
+                    ledger=ledger,
+                    symbol=sym,
+                    side=req.side.upper(),
+                    quantity=qty,
+                    limit_price=px,
+                    estimated_charges=total_fee,
+                    max_possible_charges=max_fee,
+                    portfolio_cvar_estimate=cvar_est,
+                    current_prices=current_prices,
+                )
+                if is_buy:
+                    ord_id = f"SIM_{int(time.time())}_{sym}"
+                    ledger.dispatch_buy_order(ord_id, sym, qty, px, total_fee)
+                    ledger.fill_buy_order(ord_id, px, total_fee)
+                gate_status = "APPROVED_AND_SIGNED"
+                veto_msg = None
+                ed25519_sig = signed_pkt["ed25519_signature"]
+            except Exception as e:
+                gate_status = "VETOED_BY_SAFETY_KERNEL"
+                veto_msg = str(e)
+                ed25519_sig = None
 
         return {
             "mode": "SINGLE",
+            "simulation_mode": "DRY_RUN_SANDBOX",
+            "is_authorized": is_authorized if is_buy else True,
+            "decision_record": {
+                "symbol": decision_record.symbol,
+                "side": decision_record.side,
+                "quantity": decision_record.quantity,
+                "score": decision_record.score,
+                "breach_probability": decision_record.breach_probability,
+                "gate_status": decision_record.gate_status.value,
+                "tier": decision_record.tier,
+                "reason": decision_record.reason,
+            },
             "gate_status": gate_status,
             "veto_reason": veto_msg,
             "regime_state": "CASH_PRESERVATION" if is_cash_regime else "RISK_ON",

@@ -14,7 +14,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 sys.stdout.reconfigure(encoding="utf-8")
 
 from src.accounting.ledger import FiveBucketBalanceSheet
-from src.security.safety_kernel import FormalSafetyKernel, SafetyKernelVetoException
+from src.security.safety_kernel import FormalSafetyKernel, SafetyKernelVetoException, GateStatus, ExecutionDecision, authorize_order
 from src.governance.audit_ledger import SebiOtrSurveillanceMonitor, GovernanceAuditLedger
 
 
@@ -142,6 +142,88 @@ class TestSafetyKernelAndAudit(unittest.TestCase):
 
         self.assertEqual(b1.prev_block_hash, b0.block_hash)
         self.assertTrue(ledger.verify_chain_integrity())
+
+
+
+    def test_authorize_order_valid(self):
+        """Verify valid ALLOW decision with compliant score passes authorization."""
+        dec = ExecutionDecision(
+            symbol="INFY",
+            side="BUY",
+            quantity=25,
+            score=76.5,
+            breach_probability=0.18,
+            gate_status=GateStatus.ALLOW,
+            reason="Passed all hurdles",
+            tier=1,
+        )
+        is_auth, msg = authorize_order(dec, max_breach_probability=0.35, min_score=50.0)
+        self.assertTrue(is_auth)
+        self.assertIn("AUTHORIZATION_GRANTED", msg)
+
+    def test_authorize_order_blocked_gate(self):
+        """Verify GateStatus.BLOCK unconditionally vetoes order execution."""
+        dec = ExecutionDecision(
+            symbol="SBIN",
+            side="BUY",
+            quantity=50,
+            score=45.0,
+            breach_probability=0.28,
+            gate_status=GateStatus.BLOCK,
+            reason="Decision score is AVOID",
+            tier=2,
+        )
+        is_auth, msg = authorize_order(dec)
+        self.assertFalse(is_auth)
+        self.assertIn("AUTHORIZATION_DENIED: Gate status is BLOCK", msg)
+
+    def test_authorize_order_below_hurdle_score(self):
+        """Verify score below 50.0 hurdle is rejected even if gate_status was mistakenly ALLOW."""
+        dec = ExecutionDecision(
+            symbol="TCS",
+            side="BUY",
+            quantity=10,
+            score=48.2,
+            breach_probability=0.20,
+            gate_status=GateStatus.ALLOW,
+            reason="Mistakenly marked ALLOW",
+            tier=1,
+        )
+        is_auth, msg = authorize_order(dec, min_score=50.0)
+        self.assertFalse(is_auth)
+        self.assertIn("below minimum hurdle", msg)
+
+    def test_authorize_order_excessive_breach_probability(self):
+        """Verify breach probability > 35% is rejected."""
+        dec = ExecutionDecision(
+            symbol="TATAMOTORS",
+            side="BUY",
+            quantity=40,
+            score=65.0,
+            breach_probability=0.42,
+            gate_status=GateStatus.ALLOW,
+            reason="High score but high crash risk",
+            tier=1,
+        )
+        is_auth, msg = authorize_order(dec, max_breach_probability=0.35)
+        self.assertFalse(is_auth)
+        self.assertIn("exceeds tolerance", msg)
+
+    def test_authorize_order_tier_3_cash_preservation_veto(self):
+        """Verify Tier 3 Cash Preservation regime vetoes all equity purchases."""
+        dec = ExecutionDecision(
+            symbol="RELIANCE",
+            side="BUY",
+            quantity=20,
+            score=82.0,
+            breach_probability=0.15,
+            gate_status=GateStatus.ALLOW,
+            reason="High score",
+            tier=3,
+        )
+        is_auth, msg = authorize_order(dec)
+        self.assertFalse(is_auth)
+        self.assertIn("Macro Regime is Tier 3 (Cash Preservation Veto)", msg)
 
 
 if __name__ == "__main__":

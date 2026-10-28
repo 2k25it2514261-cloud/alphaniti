@@ -146,5 +146,32 @@ class TestEvidentialModel(unittest.TestCase):
         self.assertTrue((split_dict["ensemble_epistemic_var"] >= 0).all())
 
 
+
+    def test_07_mixture_variance_exact_decomposition(self):
+        """
+        Verifies exact numerical equivalence of Law of Total Variance decomposition:
+          sigma_total^2 = (1/M) sum (sigma_i^2 + mu_i^2) - mu_bar^2
+                        = sigma2_alea_pooled + sigma2_epis_within + sigma2_disagreement
+        """
+        m1 = EvidentialGRUModel(in_features=self.D, hidden_dim=16, num_layers=1)
+        m2 = EvidentialGRUModel(in_features=self.D, hidden_dim=16, num_layers=1)
+        m3 = EvidentialGRUModel(in_features=self.D, hidden_dim=16, num_layers=1)
+        ensemble = EvidentialEnsemble([m1, m2, m3])
+
+        decomp = ensemble.predict_mixture_decomposition(self.X_dummy)
+
+        self.assertIn("sigma_alea_pooled", decomp)
+        self.assertIn("sigma_epis_within", decomp)
+        self.assertIn("sigma_disagreement", decomp)
+        self.assertIn("sigma_total_mixture", decomp)
+
+        v_dec = decomp["variance_decomposition"]
+        analytical_sum = v_dec["aleatoric_var"] + v_dec["within_epistemic_var"] + v_dec["disagreement_var"]
+        mixture_formula = v_dec["total_mixture_var"]
+
+        # Confirm identity matches to numerical precision (< 1e-6)
+        np.testing.assert_allclose(analytical_sum, mixture_formula, rtol=1e-5, atol=1e-6)
+
+
 if __name__ == "__main__":
     unittest.main()

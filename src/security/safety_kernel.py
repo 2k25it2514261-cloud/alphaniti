@@ -7,8 +7,61 @@ Reference: docs/08_PLATFORM_SECURITY_AND_ISOLATED_SAFETY_KERNEL.md (Model-Checke
 from typing import Dict, Any, Optional, Tuple, List
 import json
 import time
+from dataclasses import dataclass
+from enum import Enum
 from cryptography.hazmat.primitives.asymmetric import ed25519
 from src.accounting.ledger import FiveBucketBalanceSheet
+
+
+class GateStatus(str, Enum):
+    ALLOW = "ALLOW"
+    BLOCK = "BLOCK"
+
+
+@dataclass(frozen=True)
+class ExecutionDecision:
+    """
+    Immutable Execution Decision record passed to the Formal Safety Kernel.
+    Guarantees no outbound order reaches a broker without authoritative verification.
+    """
+    symbol: str
+    side: str
+    quantity: int
+    score: float
+    breach_probability: float
+    gate_status: GateStatus
+    reason: str
+    tier: int = 1
+
+
+def authorize_order(
+    decision: ExecutionDecision,
+    max_breach_probability: float = 0.35,
+    min_score: float = 50.0,
+) -> Tuple[bool, str]:
+    """
+    Authoritative order execution gate (v26.0 Formal Invariant).
+    Mandatory invariant: if gate_status is BLOCK, quantity <= 0, side invalid,
+    score < min_score, breach_probability > max_breach_probability, or tier == 3,
+    the order CANNOT reach execution and cannot be cryptographically signed.
+    """
+    if decision.gate_status is not GateStatus.ALLOW:
+        return False, f"AUTHORIZATION_DENIED: Gate status is {decision.gate_status.value} ({decision.reason})"
+    if decision.quantity <= 0:
+        return False, "AUTHORIZATION_DENIED: Quantity must be strictly positive"
+    if decision.side.upper() not in {"BUY", "SELL"}:
+        return False, f"AUTHORIZATION_DENIED: Invalid side '{decision.side}'"
+    if not (0.0 <= decision.score <= 100.0):
+        return False, f"AUTHORIZATION_DENIED: Composite score {decision.score} out of valid [0, 100] bounds"
+    if not (0.0 <= decision.breach_probability <= 1.0):
+        return False, f"AUTHORIZATION_DENIED: Breach probability {decision.breach_probability} out of valid [0, 1] bounds"
+    if decision.score < min_score:
+        return False, f"AUTHORIZATION_DENIED: Composite score {decision.score:.1f} below minimum hurdle {min_score:.1f}"
+    if decision.breach_probability > max_breach_probability:
+        return False, f"AUTHORIZATION_DENIED: Breach probability {decision.breach_probability:.1%} exceeds tolerance {max_breach_probability:.1%}"
+    if decision.tier == 3:
+        return False, "AUTHORIZATION_DENIED: Macro Regime is Tier 3 (Cash Preservation Veto)"
+    return True, "AUTHORIZATION_GRANTED: All pre-execution invariants verified"
 
 
 class SafetyKernelVetoException(Exception):
