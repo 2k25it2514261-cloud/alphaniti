@@ -370,6 +370,23 @@
       color: var(--text-primary);
       border-color: var(--border-strong);
     }
+    .wb-sym-select {
+      background: var(--bg-main);
+      border: 1px solid var(--border-strong);
+      color: var(--text-primary);
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 11px;
+      font-weight: 600;
+      padding: 4px 10px;
+      border-radius: 4px;
+      cursor: pointer;
+      outline: none;
+      transition: border-color 0.12s, background 0.12s;
+    }
+    .wb-sym-select:hover, .wb-sym-select:focus {
+      border-color: var(--positive);
+      background: var(--bg-hover);
+    }
 
     .workbench-telemetry-strip {
       display: grid;
@@ -1259,6 +1276,12 @@
               <button class="wb-sym-btn" onclick="selectCoverSymbol('ICICIBANK')">ICICIBANK</button>
               <button class="wb-sym-btn" onclick="selectCoverSymbol('LT')">LT</button>
               <button class="wb-sym-btn" onclick="selectCoverSymbol('INFY')">INFY</button>
+              <button class="wb-sym-btn" onclick="selectCoverSymbol('M&M')">M&M</button>
+              <button class="wb-sym-btn" onclick="selectCoverSymbol('BHARTIARTL')">BHARTIARTL</button>
+              <button class="wb-sym-btn" onclick="selectCoverSymbol('TATAMOTORS')">TATAMOTORS</button>
+              <select id="cover-nifty-select" class="wb-sym-select" onchange="selectCoverSymbol(this.value)" title="Choose from all Nifty 50 constituents">
+                <option value="" disabled selected>All Nifty 50 (50+)...</option>
+              </select>
             </div>
             <span class="mono" style="font-size:11px; color:var(--text-muted);" id="cover-wb-sector">NSE:SBIN · PSU Banking</span>
           </div>
@@ -1432,7 +1455,7 @@
           <span>Macro Regime &amp; Cash Gate</span>
         </div>
 
-        <div class="section-label" style="padding-left:8px; margin-top:8px;">NSE Universe (<span id="sidebar-eq-count">12</span>)</div>
+        <div class="section-label" style="padding-left:8px; margin-top:8px;">NIFTY 50 UNIVERSE (<span id="sidebar-eq-count">52</span>)</div>
         <div id="sidebar-watchlist"></div>
       </div>
 
@@ -1750,6 +1773,8 @@
       document.querySelectorAll('.wb-sym-btn').forEach(btn => {
         btn.classList.toggle('active', btn.innerText.trim() === sym);
       });
+      const selEl = document.getElementById('cover-nifty-select');
+      if (selEl) selEl.value = sym;
       loadChartForSymbol(sym);
     }
 
@@ -1941,6 +1966,13 @@
       SIGNALS = payload.equities;
       document.getElementById('sidebar-eq-count').innerText = SIGNALS.length;
 
+      const selEl = document.getElementById('cover-nifty-select');
+      if (selEl && SIGNALS.length) {
+        const sorted = [...SIGNALS].sort((a,b) => a.symbol.localeCompare(b.symbol));
+        selEl.innerHTML = `<option value="" disabled>All Nifty 50 Stocks (${SIGNALS.length} Total)...</option>` +
+          sorted.map(s => `<option value="${s.symbol}" ${s.symbol === CURRENT_SYMBOL ? 'selected' : ''}>${s.symbol} — ₹${s.close_price.toFixed(1)} (${s.predicted_return_pct >= 0 ? '+' : ''}${s.predicted_return_pct.toFixed(1)}%)</option>`).join('');
+      }
+
       const isCash = payload.regime === 'CASH_PRESERVATION';
       const pill = document.getElementById('header-regime-pill');
       pill.className = 'regime-tag ' + (isCash ? 'cash' : 'riskon');
@@ -1957,7 +1989,7 @@
 
       const tape = document.getElementById('cover-tape');
       if (tape && SIGNALS.length) {
-        tape.innerHTML = SIGNALS.slice(0, 6).map(s => {
+        tape.innerHTML = SIGNALS.slice(0, 12).map(s => {
           const col = s.change_1d_pct >= 0 ? 'var(--positive)' : 'var(--negative)';
           return `<span class="tape-quote" onclick="selectCoverSymbol('${s.symbol}')"><b>${s.symbol}</b> ₹${s.close_price.toFixed(2)} <span style="color:${col};">${s.change_1d_pct >= 0 ? '+' : ''}${s.change_1d_pct.toFixed(2)}%</span></span>`;
         }).join('');

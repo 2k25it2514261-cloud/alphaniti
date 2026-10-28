@@ -23,21 +23,7 @@ from src.data.tensor_builder import AlphaNitiDataPipeline
 from src.models.evidential_nn import EvidentialGRUModel, EvidentialEnsemble
 from src.portfolio.statutory_costs import IndianStatutoryCostModel
 from src.accounting.ledger import FiveBucketBalanceSheet
-
-TICKERS_MAP = {
-    "RELIANCE.NS": "RELIANCE",
-    "TCS.NS": "TCS",
-    "HDFCBANK.NS": "HDFCBANK",
-    "INFY.NS": "INFY",
-    "ICICIBANK.NS": "ICICIBANK",
-    "SBIN.NS": "SBIN",
-    "BHARTIARTL.NS": "BHARTIARTL",
-    "ITC.NS": "ITC",
-    "LT.NS": "LT",
-    "KOTAKBANK.NS": "KOTAKBANK",
-    "HINDUNILVR.NS": "HINDUNILVR",
-    "AXISBANK.NS": "AXISBANK",
-}
+from app import TICKERS_MAP
 
 def main():
     print("=" * 80)
