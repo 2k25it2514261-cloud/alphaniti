@@ -107,21 +107,19 @@ def compute_composite_decision_score(
 
     # 2. Bounded & Protected Sub-Scores
     # S_alpha (0 to 40 pts)
-    # For a 20-day horizon, a return-to-volatility ratio (Sharpe proxy) of 0.8 to 1.0 is exceptional.
-    # We calibrate benchmark to 0.75 horizon information ratio:
+    # Target 20-day horizon Information Ratio benchmark = 1.00 (~ 2.8 annualized Sharpe)
     effective_vol = max(float(sigma_alea_horizon), 1e-6)
     sr_horizon = gamma_bar_horizon / effective_vol
-    sr_benchmark = 0.75  # Target horizon Sharpe
+    sr_benchmark = 1.00
     s_alpha = 40.0 * min(1.0, max(0.0, sr_horizon / sr_benchmark))
 
     # S_confidence (0 to 25 pts)
-    # If sigma_epis is variance vs std dev, handle cleanly:
+    # Scaled against theta_extreme (default 0.00780)
     clean_epis = max(0.0, float(sigma_epis))
-    # If clean_epis exceeds theta_extreme, s_confidence drops linearly to 0
     s_confidence = 25.0 * min(1.0, max(0.0, 1.0 - (clean_epis / theta_extreme)))
 
     # S_tail (0 to 25 pts)
-    # Calibrated against breach_ceiling (0.35)
+    # Scaled against breach_ceiling (default 0.35)
     clean_breach = max(0.0, float(p_breach))
     s_tail = 25.0 * min(1.0, max(0.0, 1.0 - (clean_breach / breach_ceiling)))
 
@@ -140,8 +138,8 @@ def compute_composite_decision_score(
             s_friction = 0.0
 
     # 3. Raw Score & Hysteresis Scaling
-    s_raw = s_alpha + s_confidence + s_tail + s_friction
-    final_score = min(100.0, max(0.0, s_raw * effective_multiplier))
+    s_raw = round(s_alpha + s_confidence + s_tail + s_friction, 1)
+    final_score = round(min(100.0, max(0.0, s_raw * effective_multiplier)), 1)
 
     # 4. Action Verdict Engine with Alpha Dominance Hurdle & Tier Policy
     # Rule 1: Tier 3 Systemic Freeze -> Strictly AVOID / CASH SHELTER

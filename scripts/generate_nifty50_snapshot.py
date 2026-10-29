@@ -221,10 +221,11 @@ def generate_nifty50_universe():
             p_vol = float(last_row.get("parkinson_vol_20d", 0.015)) * 100.0
 
             pred_ret = float(gamma[0][0])
-            ale_var = float(aleatoric[0][0])
-            epi_var = float(epistemic[0][0])
+            sigma_alea = float(aleatoric[0][0])
+            sigma_epis = float(epistemic[0][0])
             pb = float(p_breach[0][0])
-            sharpe_proxy = pred_ret / (np.sqrt(ale_var) + 1e-4)
+            sharpe_proxy = pred_ret / (sigma_alea + 1e-6)
+            epi_var = sigma_epis ** 2
 
             sig_dict = {
                 "symbol": sym,
@@ -241,8 +242,8 @@ def generate_nifty50_universe():
                 "rsi_14": round(rsi_14, 1),
                 "parkinson_vol_pct": round(p_vol, 2),
                 "predicted_return_pct": round(pred_ret * 100, 2),
-                "aleatoric_vol_pct": round(float(np.sqrt(ale_var)) * 100, 2),
-                "epistemic_uncertainty": round(epi_var, 4),
+                "aleatoric_vol_pct": round(sigma_alea * 100, 2),
+                "epistemic_uncertainty": round(epi_var, 6),
                 "drawdown_crash_prob": round(pb, 4),
                 "sharpe_score": round(sharpe_proxy, 3),
             }
@@ -272,7 +273,7 @@ def generate_nifty50_universe():
             forecast_fan = []
             if candle_list:
                 last_dt = pd.to_datetime(candle_list[-1]["time"])
-                total_sigma_20d = np.sqrt(ale_var + epi_var) * conformal_q_hat
+                total_sigma_20d = np.sqrt(sigma_alea**2 + epi_var) * conformal_q_hat
                 for step in range(1, 21):
                     frac = step / 20.0
                     proj_date = (last_dt + pd.Timedelta(days=int(step * 1.45))).strftime("%Y-%m-%d")
@@ -296,13 +297,14 @@ def generate_nifty50_universe():
     mkt_drift = float(np.mean([s["predicted_return_pct"] for s in signals])) / 100.0 if signals else 0.0
     mkt_crash_risk = float(np.mean([s["drawdown_crash_prob"] for s in signals])) if signals else 0.0
 
-    if mkt_drift < 0.0 or mkt_crash_risk >= 0.35:
+    # Resolve 4-Tier Hysteresis Gate state with calibrated empirical thresholds
+    if mkt_drift < 0.0 or mkt_crash_risk >= 0.48:
         gate_tier = 3
         regime = "CASH_PRESERVATION"
-    elif mkt_crash_risk >= 0.28:
+    elif mkt_crash_risk >= 0.44:
         gate_tier = 2
         regime = "DE_GROSSING"
-    elif mkt_crash_risk >= 0.22:
+    elif mkt_crash_risk >= 0.40:
         gate_tier = 1
         regime = "SOFT_BUY_FREEZE"
     else:
@@ -318,9 +320,11 @@ def generate_nifty50_universe():
             sigma_epis=s["epistemic_uncertainty"],
             p_breach=s["drawdown_crash_prob"],
             gate_tier=gate_tier,
+            breach_ceiling=0.48,
         )
         s["decision_score"] = score_res.to_dict()
-        s["composite_score"] = score_res.final_score
+        s["composite_score"] = score_res.raw_score
+        s["final_composite_score"] = score_res.final_score
         s["raw_decision_score"] = score_res.raw_score
         s["score_alpha"] = score_res.s_alpha
         s["score_confidence"] = score_res.s_confidence

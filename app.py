@@ -330,10 +330,11 @@ def refresh_live_signals(force_live: bool = True):
                 p_vol = float(last_row.get("parkinson_vol_20d", 0.015)) * 100.0
 
                 pred_ret = float(gamma[0][0])
-                ale_var = float(aleatoric[0][0])
-                epi_var = float(epistemic[0][0])
+                sigma_alea = float(aleatoric[0][0])
+                sigma_epis = float(epistemic[0][0])
                 pb = float(p_breach[0][0])
-                sharpe_proxy = pred_ret / (np.sqrt(ale_var) + 1e-4)
+                sharpe_proxy = pred_ret / (sigma_alea + 1e-6)
+                epi_var = sigma_epis ** 2
 
                 signals.append({
                     "symbol": sym,
@@ -350,8 +351,8 @@ def refresh_live_signals(force_live: bool = True):
                     "rsi_14": round(rsi_14, 1),
                     "parkinson_vol_pct": round(p_vol, 2),
                     "predicted_return_pct": round(pred_ret * 100, 2),
-                    "aleatoric_vol_pct": round(float(np.sqrt(ale_var)) * 100, 2),
-                    "epistemic_uncertainty": round(epi_var, 4),
+                    "aleatoric_vol_pct": round(sigma_alea * 100, 2),
+                    "epistemic_uncertainty": round(epi_var, 6),
                     "drawdown_crash_prob": round(pb, 4),
                     "sharpe_score": round(sharpe_proxy, 3),
                 })
@@ -359,14 +360,14 @@ def refresh_live_signals(force_live: bool = True):
     mkt_drift = float(np.mean([s["predicted_return_pct"] for s in signals])) / 100.0 if signals else 0.0
     mkt_crash_risk = float(np.mean([s["drawdown_crash_prob"] for s in signals])) if signals else 0.0
     
-    # Resolve 4-Tier Hysteresis Gate state
-    if mkt_drift < 0.0 or mkt_crash_risk >= 0.35:
+    # Resolve 4-Tier Hysteresis Gate state with calibrated empirical thresholds
+    if mkt_drift < 0.0 or mkt_crash_risk >= 0.48:
         gate_tier = 3
         regime = "CASH_PRESERVATION"
-    elif mkt_crash_risk >= 0.28:
+    elif mkt_crash_risk >= 0.44:
         gate_tier = 2
         regime = "DE_GROSSING"
-    elif mkt_crash_risk >= 0.22:
+    elif mkt_crash_risk >= 0.40:
         gate_tier = 1
         regime = "SOFT_BUY_FREEZE"
     else:
@@ -381,9 +382,11 @@ def refresh_live_signals(force_live: bool = True):
             sigma_epis=s["epistemic_uncertainty"],
             p_breach=s["drawdown_crash_prob"],
             gate_tier=gate_tier,
+            breach_ceiling=0.48,
         )
         s["decision_score"] = score_res.to_dict()
-        s["composite_score"] = score_res.final_score
+        s["composite_score"] = score_res.raw_score
+        s["final_composite_score"] = score_res.final_score
         s["raw_decision_score"] = score_res.raw_score
         s["score_alpha"] = score_res.s_alpha
         s["score_confidence"] = score_res.s_confidence
