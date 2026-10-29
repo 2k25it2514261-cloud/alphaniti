@@ -3235,93 +3235,209 @@
       ctx.fillText(`Risk State: ${isDangerous ? 'TOXIC (Exceeds Ceiling)' : (isElevated ? 'CAUTION (Elevated)' : 'SAFE / BOUNDED')}`, padL + 20, padT + 64);
     }
 
-    // 3. INSTITUTIONAL 4-PILLAR DECISION SCORE DECOMPOSITION
+    // 3. INSTITUTIONAL 4-PILLAR DECISION SCORE DECOMPOSITION — v2 premium render
     function renderScoreMathCanvas(sym) {
       const s = setupDpiCanvas('canvas-score');
       if (!s) return;
       const { ctx, width: W, height: H } = s;
       const sig = getSignalForSymbol(sym);
 
-      ctx.fillStyle = '#0E1118';
+      // ── background ──────────────────────────────────────────────────────────
+      ctx.fillStyle = '#080C14';
       ctx.fillRect(0, 0, W, H);
 
-      const sAlpha = sig.score_alpha !== undefined ? sig.score_alpha : 25.0;
-      const sConf = sig.score_confidence !== undefined ? sig.score_confidence : 14.0;
-      const sTail = sig.score_tail !== undefined ? sig.score_tail : 15.0;
-      const sFrict = sig.score_friction !== undefined ? sig.score_friction : 10.0;
-      const rawScore = sig.raw_decision_score !== undefined ? sig.raw_decision_score : (sAlpha + sConf + sTail + sFrict);
-      const mult = sig.gate_multiplier !== undefined ? sig.gate_multiplier : 0.75;
-      const finalScore = sig.composite_score !== undefined ? sig.composite_score : (rawScore * mult);
-      const verdict = sig.recommended_action || 'HOLD / DEFENSIVE TRAIL';
+      // subtle grid
+      ctx.strokeStyle = 'rgba(255,255,255,0.025)';
+      ctx.lineWidth = 1;
+      for (let x = 0; x < W; x += 40) { ctx.beginPath(); ctx.moveTo(x,0); ctx.lineTo(x,H); ctx.stroke(); }
+      for (let y = 0; y < H; y += 40) { ctx.beginPath(); ctx.moveTo(0,y); ctx.lineTo(W,y); ctx.stroke(); }
 
-      const padL = 160, padR = 80, padT = 30;
-      const barH = 22, barGap = 16;
-      const plotW = W - padL - padR;
+      // ── data ────────────────────────────────────────────────────────────────
+      const sAlpha = sig.score_alpha       !== undefined ? sig.score_alpha       : 25.0;
+      const sConf  = sig.score_confidence  !== undefined ? sig.score_confidence  : 14.0;
+      const sTail  = sig.score_tail        !== undefined ? sig.score_tail        : 15.0;
+      const sFrict = sig.score_friction    !== undefined ? sig.score_friction    : 10.0;
+      const rawScore   = sig.raw_decision_score !== undefined ? sig.raw_decision_score : (sAlpha+sConf+sTail+sFrict);
+      const mult       = sig.gate_multiplier    !== undefined ? sig.gate_multiplier    : 0.75;
+      const finalScore = sig.composite_score    !== undefined ? sig.composite_score    : (rawScore*mult);
+      const verdict    = sig.recommended_action || 'HOLD / DEFENSIVE TRAIL';
+      const tier       = sig.gate_tier          !== undefined ? sig.gate_tier          : 1;
 
       const pillars = [
-        { label: 'S_α (Alpha Edge)', val: sAlpha, max: 40.0, color: '#00E599', sub: 'Expected return net of vol' },
-        { label: 'S_conf (Reliability)', val: sConf, max: 25.0, color: '#7B61FF', sub: 'Evidential uncertainty audit' },
-        { label: 'S_tail (Crash Safety)', val: sTail, max: 25.0, color: '#F4A261', sub: 'Barrier breach safety floor' },
-        { label: 'S_frict (STT Buffer)', val: sFrict, max: 10.0, color: '#2EC4B6', sub: 'Statutory delivery tax drag' },
+        { key:'α', label:'Alpha Edge',   sub:'Risk-adjusted 20D expected return',  val:sAlpha, max:40, wt:'40 pts', color:'#00E599', glow:'rgba(0,229,153,0.35)'   },
+        { key:'c', label:'Reliability',  sub:'Evidential NIG uncertainty audit',   val:sConf,  max:25, wt:'25 pts', color:'#7B61FF', glow:'rgba(123,97,255,0.35)'  },
+        { key:'t', label:'Crash Safety', sub:'Barrier breach probability floor',   val:sTail,  max:25, wt:'25 pts', color:'#F4A261', glow:'rgba(244,162,97,0.35)'  },
+        { key:'f', label:'STT Buffer',   sub:'Statutory friction vs edge delta',   val:sFrict, max:10, wt:'10 pts', color:'#2EC4B6', glow:'rgba(46,196,182,0.35)'  },
       ];
 
-      pillars.forEach((p, idx) => {
-        const y = padT + idx * (barH + barGap);
+      // ── layout ──────────────────────────────────────────────────────────────
+      const RING_R  = Math.min(W * 0.17, 82);
+      const RING_CX = RING_R + 24;
+      const RING_CY = H * 0.36;
+      const barZoneX = RING_CX * 2 + 24;
+      const barZoneW = W - barZoneX - 14;
+      const barH    = 16;
+      const barGap  = 22;
+      const barTop  = 12;
 
-        // Label
-        ctx.fillStyle = '#E6E8ED';
-        ctx.font = 'bold 11px "JetBrains Mono", monospace';
-        ctx.textAlign = 'right';
-        ctx.fillText(p.label, padL - 14, y + 15);
+      // ── DIAL ────────────────────────────────────────────────────────────────
+      const scoreCol  = finalScore >= 70 ? '#00E599' : finalScore >= 45 ? '#D4A373' : '#FF453A';
+      const scoreGlow = finalScore >= 70 ? 'rgba(0,229,153,0.38)' : finalScore >= 45 ? 'rgba(212,163,115,0.38)' : 'rgba(255,69,58,0.38)';
 
-        // Background track
-        ctx.fillStyle = '#1B212D';
+      // outer ambient glow
+      const glowGrad = ctx.createRadialGradient(RING_CX,RING_CY,RING_R*0.55,RING_CX,RING_CY,RING_R+18);
+      glowGrad.addColorStop(0, scoreGlow); glowGrad.addColorStop(1,'transparent');
+      ctx.fillStyle = glowGrad;
+      ctx.beginPath(); ctx.arc(RING_CX,RING_CY,RING_R+18,0,Math.PI*2); ctx.fill();
+
+      // track
+      ctx.beginPath();
+      ctx.arc(RING_CX,RING_CY,RING_R,Math.PI*0.75,Math.PI*2.25);
+      ctx.strokeStyle = 'rgba(255,255,255,0.07)'; ctx.lineWidth = 9; ctx.lineCap = 'round'; ctx.stroke();
+
+      // value arc
+      const arcFrac = Math.max(0,Math.min(1,finalScore/100));
+      const arcStart = Math.PI*0.75;
+      if (arcFrac > 0) {
+        const arcGrad = ctx.createLinearGradient(RING_CX-RING_R,RING_CY,RING_CX+RING_R,RING_CY);
+        arcGrad.addColorStop(0, scoreCol); arcGrad.addColorStop(1,'#FFFFFF');
         ctx.beginPath();
-        ctx.roundRect(padL, y, plotW, barH, 4);
-        ctx.fill();
+        ctx.arc(RING_CX,RING_CY,RING_R,arcStart,arcStart+arcFrac*Math.PI*1.5);
+        ctx.strokeStyle = arcGrad; ctx.lineWidth = 9; ctx.lineCap = 'round'; ctx.stroke();
+      }
 
-        // Filled bar
-        const fillW = Math.max(0, Math.min(plotW, (p.val / p.max) * plotW));
-        if (fillW > 0) {
-          ctx.fillStyle = p.color;
-          ctx.beginPath();
-          ctx.roundRect(padL, y, fillW, barH, 4);
-          ctx.fill();
+      // tick marks
+      for (let v=0; v<=100; v+=10) {
+        const ang = arcStart+(v/100)*Math.PI*1.5;
+        const r0=RING_R-13, r1=RING_R-5;
+        ctx.beginPath();
+        ctx.moveTo(RING_CX+Math.cos(ang)*r0,RING_CY+Math.sin(ang)*r0);
+        ctx.lineTo(RING_CX+Math.cos(ang)*r1,RING_CY+Math.sin(ang)*r1);
+        ctx.strokeStyle = v%50===0?'rgba(255,255,255,0.3)':'rgba(255,255,255,0.09)';
+        ctx.lineWidth   = v%50===0?1.4:0.7; ctx.stroke();
+      }
+
+      // center number
+      ctx.textAlign = 'center';
+      ctx.font = `bold ${Math.round(RING_R*0.46)}px "JetBrains Mono",monospace`;
+      ctx.fillStyle = scoreCol; ctx.shadowColor = scoreCol; ctx.shadowBlur = 14;
+      ctx.fillText(finalScore.toFixed(1), RING_CX, RING_CY+8);
+      ctx.shadowBlur = 0;
+      ctx.font = `${Math.round(RING_R*0.22)}px "JetBrains Mono",monospace`;
+      ctx.fillStyle = '#7A8599';
+      ctx.fillText('/100', RING_CX, RING_CY+RING_R*0.38+8);
+
+      // verdict badge
+      const vBY = RING_CY+RING_R+20;
+      ctx.fillStyle='rgba(255,255,255,0.04)'; ctx.strokeStyle=scoreCol+'44'; ctx.lineWidth=1;
+      ctx.beginPath(); ctx.roundRect(2,vBY,RING_CX*2-4,19,4); ctx.fill(); ctx.stroke();
+      ctx.font='bold 7.5px "JetBrains Mono",monospace'; ctx.fillStyle=scoreCol; ctx.textAlign='center';
+      const vs = verdict.length>22?verdict.slice(0,21)+'…':verdict;
+      ctx.fillText(vs, RING_CX, vBY+13);
+
+      // tier chip
+      const tierLabels = ['FROZEN','TIER 1','TIER 2','TIER 3'];
+      const tierColors = ['#FF453A','#2EC4B6','#D4A373','#FF453A'];
+      const tl = tierLabels[Math.min(tier,3)]||'TIER 1';
+      const tc = tierColors[Math.min(tier,3)]||'#2EC4B6';
+      ctx.font='bold 7px "JetBrains Mono",monospace'; ctx.fillStyle=tc;
+      ctx.fillText(`⬤ ${tl} · ×${mult.toFixed(2)}`, RING_CX, vBY+32);
+
+      // ── PILLAR BARS ──────────────────────────────────────────────────────────
+      pillars.forEach((p,idx) => {
+        const y = barTop + idx*(barH+barGap);
+        const fillFrac = Math.max(0,Math.min(1,p.val/p.max));
+        const fillW = fillFrac*barZoneW;
+
+        // pillar key badge
+        ctx.textAlign='left'; ctx.font='bold 9px "JetBrains Mono",monospace'; ctx.fillStyle=p.color;
+        ctx.fillText(`S_${p.key}`, barZoneX, y+7);
+
+        // label
+        ctx.font='bold 11px "Inter",sans-serif'; ctx.fillStyle='#E6E8ED';
+        ctx.fillText(p.label, barZoneX+28, y+8);
+
+        // weight badge (top-right)
+        ctx.font='9px "JetBrains Mono",monospace';
+        const wbW = ctx.measureText(p.wt).width+10;
+        const wbX = W-14-wbW;
+        ctx.fillStyle=p.color+'1A'; ctx.strokeStyle=p.color+'55'; ctx.lineWidth=0.8;
+        ctx.beginPath(); ctx.roundRect(wbX,y,wbW,12,3); ctx.fill(); ctx.stroke();
+        ctx.fillStyle=p.color; ctx.textAlign='center';
+        ctx.fillText(p.wt, wbX+wbW/2, y+9);
+
+        // sub-description
+        ctx.textAlign='left'; ctx.font='9px "Inter",sans-serif'; ctx.fillStyle='#424D62';
+        ctx.fillText(p.sub, barZoneX, y+18);
+
+        // bar track
+        const bY = y+20;
+        ctx.fillStyle='#0F1520'; ctx.strokeStyle='rgba(255,255,255,0.05)'; ctx.lineWidth=0.5;
+        ctx.beginPath(); ctx.roundRect(barZoneX,bY,barZoneW,barH,4); ctx.fill(); ctx.stroke();
+
+        // gradient fill + glow
+        if (fillW>1) {
+          const bg = ctx.createLinearGradient(barZoneX,0,barZoneX+fillW,0);
+          bg.addColorStop(0,p.color+'AA'); bg.addColorStop(1,p.color);
+          ctx.fillStyle=bg; ctx.shadowColor=p.glow; ctx.shadowBlur=9;
+          ctx.beginPath(); ctx.roundRect(barZoneX,bY,fillW,barH,4); ctx.fill();
+          ctx.shadowBlur=0;
+          // shimmer
+          ctx.strokeStyle='rgba(255,255,255,0.15)'; ctx.lineWidth=1;
+          ctx.beginPath(); ctx.moveTo(barZoneX+2,bY+1.5); ctx.lineTo(barZoneX+fillW-2,bY+1.5); ctx.stroke();
         }
 
-        // Value text
-        ctx.fillStyle = '#FFFFFF';
-        ctx.font = 'bold 10.5px "JetBrains Mono", monospace';
-        ctx.textAlign = 'left';
-        ctx.fillText(`${p.val.toFixed(1)} / ${p.max.toFixed(0)} pts`, padL + plotW + 10, y + 15);
+        // value inside/beside bar
+        const valStr=`${p.val.toFixed(1)} / ${p.max}`;
+        ctx.font='bold 8.5px "JetBrains Mono",monospace';
+        if (fillFrac>0.55) {
+          ctx.fillStyle='rgba(255,255,255,0.88)'; ctx.textAlign='right';
+          ctx.fillText(valStr, barZoneX+fillW-5, bY+barH/2+3);
+        } else {
+          ctx.fillStyle=p.color; ctx.textAlign='left';
+          ctx.fillText(valStr, barZoneX+fillW+5, bY+barH/2+3);
+        }
+
+        // % label above right edge
+        ctx.textAlign='right'; ctx.font='8px "JetBrains Mono",monospace'; ctx.fillStyle='#2D3548';
+        ctx.fillText(`${Math.round(fillFrac*100)}%`, barZoneX+barZoneW-1, bY-2);
       });
 
-      // Bottom Banner: Raw -> Gate -> Final
-      const bannerY = padT + 4 * (barH + barGap) + 16;
-      ctx.fillStyle = '#131822';
-      ctx.strokeStyle = '#252B3A';
-      ctx.lineWidth = 1;
-      ctx.beginPath();
-      ctx.roundRect(20, bannerY, W - 40, 68, 6);
-      ctx.fill();
-      ctx.stroke();
+      // ── FORMULA FOOTER ───────────────────────────────────────────────────────
+      const fY = H - 40;
+      ctx.strokeStyle='rgba(255,255,255,0.05)'; ctx.lineWidth=1;
+      ctx.beginPath(); ctx.moveTo(10,fY-6); ctx.lineTo(W-10,fY-6); ctx.stroke();
 
-      const scoreCol = finalScore >= 70 ? '#00E599' : (finalScore >= 45 ? '#D4A373' : '#FF453A');
+      // colour-coded inline formula
+      const parts = [
+        {t:'S_raw',c:'#9AA6B8'},{t:' = ',c:'#3D4A5C'},
+        {t:'S_α',c:'#00E599'},{t:'(40)',c:'#2D3548'},
+        {t:' + ',c:'#3D4A5C'},
+        {t:'S_conf',c:'#7B61FF'},{t:'(25)',c:'#2D3548'},
+        {t:' + ',c:'#3D4A5C'},
+        {t:'S_tail',c:'#F4A261'},{t:'(25)',c:'#2D3548'},
+        {t:' + ',c:'#3D4A5C'},
+        {t:'S_frict',c:'#2EC4B6'},{t:'(10)',c:'#2D3548'},
+        {t:'   ·  Raw ',c:'#3D4A5C'},{t:rawScore.toFixed(1),c:'#E6E8ED'},
+        {t:`  ×${mult.toFixed(2)}`,c:'#9AA6B8'},
+        {t:'  =  ',c:'#3D4A5C'},
+        {t:`${finalScore.toFixed(1)} / 100`,c:scoreCol},
+      ];
+      ctx.font='10px "JetBrains Mono",monospace'; ctx.textAlign='left';
+      let fx=14;
+      parts.forEach(pt=>{ ctx.fillStyle=pt.c; ctx.fillText(pt.t,fx,fY+8); fx+=ctx.measureText(pt.t).width; });
 
-      ctx.fillStyle = '#9AA6B8';
-      ctx.font = '10px "JetBrains Mono", monospace';
-      ctx.textAlign = 'left';
-      ctx.fillText(`Raw Score: ${rawScore.toFixed(1)}/100`, 35, bannerY + 24);
-      ctx.fillText(`Gate Multiplier: ×${mult.toFixed(2)} (${sig.gate_tier !== undefined ? 'Tier ' + sig.gate_tier : 'Tier 1'})`, 35, bannerY + 42);
-
-      ctx.font = 'bold 14px "JetBrains Mono", monospace';
-      ctx.fillStyle = scoreCol;
-      ctx.textAlign = 'right';
-      ctx.fillText(`Final S = ${finalScore.toFixed(1)}/100`, W - 35, bannerY + 26);
-
-      ctx.font = 'bold 11px "JetBrains Mono", monospace';
-      ctx.fillStyle = scoreCol;
-      ctx.fillText(verdict, W - 35, bannerY + 46);
+      // ── WATERFALL STRIP ───────────────────────────────────────────────────────
+      const wfY=fY+16, wfH=5, wfW=W-28;
+      ctx.fillStyle='#0F1520'; ctx.beginPath(); ctx.roundRect(14,wfY,wfW,wfH,2); ctx.fill();
+      let wfX=14;
+      [[sAlpha,'#00E599'],[sConf,'#7B61FF'],[sTail,'#F4A261'],[sFrict,'#2EC4B6']].forEach(([v,c])=>{
+        const sw=(Math.max(0,v)/100)*wfW;
+        if(sw>0){
+          ctx.fillStyle=c; ctx.shadowColor=c+'99'; ctx.shadowBlur=4;
+          ctx.fillRect(wfX,wfY,sw,wfH); ctx.shadowBlur=0; wfX+=sw;
+        }
+      });
     }
 
     // Hash router for direct links (e.g. #math-charts)
